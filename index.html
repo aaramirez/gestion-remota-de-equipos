@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="es">
+<head>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-KX76XF8R');</script>
+<!-- End Google Tag Manager -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Gestión remota de equipos (ACS)</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Cómo un operador configura, actualiza y diagnostica a distancia los equipos que tiene en casa de sus clientes: TR-069 y TR-369 a fondo, el modelo de datos TR-181, el aprovisionamiento sin visita, los cambios masivos, el firmware, los diagnósticos, la seguridad y la escala de un ACS.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400;1,8..60,600&display=swap">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KX76XF8R"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+<div class="wrap" data-page="index">
+<header class="topbar"><a class="brand" href="index.html">Gestión <b>remota</b> de equipos</a><span class="eyebrow">Curso visual e interactivo · Industrias y finanzas</span><a class="al-sitio" href="https://aaramirez.github.io/">← Todos los cursos</a></header>
+<div class="layout">
+<nav class="toc" id="toc" aria-label="Ruta de aprendizaje"></nav>
+<main>
+
+<header class="hero">
+  <span class="eyebrow">Curso visual e interactivo · Industrias y finanzas</span>
+  <h1>Cien mil routers en cien mil casas, y nadie tiene que ir a ninguna</h1>
+  <p class="lede">Cada equipo que el operador instala en una casa necesita configurarse, actualizarse y revisarse cuando algo falla. Hacerlo con visitas no escala: por eso existe el servidor de autoconfiguración (ACS), que habla con cada equipo por la red y lo gestiona a distancia. Este curso muestra cómo conversan el equipo y el servidor, qué se puede cambiar, cómo se hace en miles de equipos a la vez sin romper ninguno y qué gana cada área del operador.</p>
+</header>
+
+<section>
+  <h2>Cómo usar este curso</h2>
+  <div class="prose">
+    <p><b>Estado.</b> El curso está en preparación. La <a href="temario.html">tabla de contenido</a> ya tiene los 16 capítulos con sus secciones y sus laboratorios, y está en revisión.</p>
+    <p><b>Para quién es.</b> Cualquier persona de un operador de telecomunicaciones: atención al cliente, ventas, finanzas, sistemas, NOC, campo o red. No hace falta formación técnica: cada idea empieza con una analogía y la sigla llega después, con su nombre en inglés y en español. Conviene haber leído el capítulo «Gestionar el equipo en casa del cliente» de «Cómo funciona un telco», que presenta OMCI, TR-069, TR-181 y TR-369 en una línea cada uno; aquí se explican a fondo.</p>
+    <p><b>Cómo está hecho.</b> Un operador FTTH ficticio de la región, con equipos de varias marcas en casa de sus clientes, recorre todo el curso: instala, cambia planes, atiende llamadas de soporte, actualiza firmware y sobrevive a un corte eléctrico que hace que todos los equipos llamen al mismo tiempo. Los laboratorios corren en la página: abres una sesión TR-069, navegas el árbol de parámetros, lanzas una campaña a un lote piloto o provocas una tormenta de conexiones y ves qué pasa. Las herramientas del mercado (GenieACS y las plataformas comerciales) aparecen solo como ejemplos, y las prácticas usan software libre en tu propia computadora.</p>
+  </div>
+</section>
+
+<details class="stage" id="temario" open><summary><h2><span class="pn">Empieza aquí</span> Tabla de contenido</h2></summary>
+  <div class="mods">
+    <a class="mod" href="temario.html"><span class="n">≡</span><b>Tabla de contenido</b><p>Cada capítulo con sus secciones y sus laboratorios.</p></a>
+  </div>
+</details>
+
+<details class="stage" id="parte-1" open><summary><h2><span class="pn">Parte 1</span> El mapa</h2><span class="cuenta" data-etapa-cuenta="1"></span></summary>
+  <div class="mods">
+    <div class="mod soon" data-id="que-es-la-gestion-remota"><span class="n">01</span><b>La visita que no se hizo: qué es la gestión remota de equipos</b><p>Por qué un operador necesita manejar a distancia el equipo que está en casa del cliente, y qué gana cada área cuando lo logra.</p></div>
+    <div class="mod soon" data-id="quien-configura-que"><span class="n">02</span><b>El ACS entre los demás sistemas: quién configura qué</b><p>La OLT, el ACS, el RADIUS, el NMS y los sistemas del negocio se reparten el trabajo; saber quién hace qué evita buscar el dato en el lugar equivocado.</p></div>
+  </div>
+</details>
+
+<details class="stage" id="parte-2" open><summary><h2><span class="pn">Parte 2</span> Cómo conversan el equipo y el ACS</h2><span class="cuenta" data-etapa-cuenta="2"></span></summary>
+  <div class="mods">
+    <div class="mod soon" data-id="la-sesion-tr-069"><span class="n">03</span><b>La sesión TR-069 paso a paso</b><p>El equipo siempre llama primero: se presenta con un Inform, recibe órdenes y cierra; y cuando el ACS lo necesita antes, lo despierta.</p></div>
+    <div class="mod soon" data-id="las-ordenes-del-acs"><span class="n">04</span><b>Las órdenes: leer, escribir, crear, descargar y reiniciar</b><p>El puñado de métodos (RPC) con los que el ACS hace todo lo que hace, y los avisos con los que el equipo cuenta lo que cambió.</p></div>
+  </div>
+</details>
+
+<details class="stage" id="parte-3" open><summary><h2><span class="pn">Parte 3</span> El modelo de datos</h2><span class="cuenta" data-etapa-cuenta="3"></span></summary>
+  <div class="mods">
+    <div class="mod soon" data-id="el-arbol-tr-181"><span class="n">05</span><b>TR-181: el árbol de parámetros del equipo</b><p>Un directorio de carpetas y archivos donde vive cada dato del equipo, desde la clave del Wi-Fi hasta la potencia de la señal.</p></div>
+    <div class="mod soon" data-id="varias-marcas-un-modelo"><span class="n">06</span><b>Varias marcas, un solo modelo: perfiles, plantillas y diferencias</b><p>Cada fabricante entiende la norma a su manera; el operador las iguala con perfiles por modelo y una capa que traduce.</p></div>
+  </div>
+</details>
+
+<details class="stage" id="parte-4" open><summary><h2><span class="pn">Parte 4</span> El trabajo de todos los días</h2><span class="cuenta" data-etapa-cuenta="4"></span></summary>
+  <div class="mods">
+    <div class="mod soon" data-id="aprovisionamiento-sin-tocar"><span class="n">07</span><b>Aprovisionamiento sin tocar (*zero-touch*)</b><p>El técnico conecta el equipo y se va; el equipo se presenta, el ACS lo reconoce, lo asocia al cliente y le carga su plan.</p></div>
+    <div class="mod soon" data-id="ciclo-de-vida-del-equipo"><span class="n">08</span><b>Del alta a la baja: el equipo en los procesos del negocio</b><p>Cambio de plan, reemplazo, mudanza, corte y baja: qué hace el ACS en cada momento y qué dato espera de los demás sistemas.</p></div>
+    <div class="mod soon" data-id="diagnosticos-remotos"><span class="n">09</span><b>Diagnósticos remotos: el ACS en la llamada de soporte</b><p>Las pruebas que el equipo corre por orden del ACS y la pantalla que le permite al agente resolver sin enviar a nadie.</p></div>
+    <div class="mod soon" data-id="wifi-gestionado"><span class="n">10</span><b>El Wi-Fi de la casa, gestionado desde el operador</b><p>La mitad de los reclamos son del Wi-Fi y no de la red: canales, bandas, cobertura, mallas y lo que el operador puede ajustar a distancia.</p></div>
+    <div class="mod soon" data-id="datos-del-equipo"><span class="n">11</span><b>El equipo como sensor: recolección de datos y cuidado proactivo</b><p>Cien mil equipos que reportan cada pocos minutos son un mapa vivo de la red y de la experiencia de cada cliente.</p></div>
+  </div>
+</details>
+
+<details class="stage" id="parte-5" open><summary><h2><span class="pn">Parte 5</span> Cambiar miles de equipos</h2><span class="cuenta" data-etapa-cuenta="5"></span></summary>
+  <div class="mods">
+    <div class="mod soon" data-id="cambios-masivos"><span class="n">12</span><b>Campañas y cambios masivos sin romper nada</b><p>Elegir a qué equipos, probar en un lote piloto, avanzar por tramos, reintentar a los que no respondieron y saber volver atrás.</p></div>
+    <div class="mod soon" data-id="firmware"><span class="n">13</span><b>Actualizar el firmware de la flota</b><p>El cambio más delicado: el software del propio equipo, con el riesgo de dejarlo inservible si algo sale mal a mitad de camino.</p></div>
+  </div>
+</details>
+
+<details class="stage" id="parte-6" open><summary><h2><span class="pn">Parte 6</span> Seguro, a escala y lo que viene</h2><span class="cuenta" data-etapa-cuenta="6"></span></summary>
+  <div class="mods">
+    <div class="mod soon" data-id="seguridad-del-acs"><span class="n">14</span><b>Seguridad del ACS y del equipo del cliente</b><p>Quien controla el ACS controla todos los equipos: cifrado, certificados, credenciales por equipo, puertos cerrados y lo que enseñan los ataques públicos.</p></div>
+    <div class="mod soon" data-id="arquitectura-y-escala"><span class="n">15</span><b>La arquitectura de un ACS y el peor día del año</b><p>Cómo está hecho un ACS por dentro, cuántas sesiones aguanta y qué pasa cuando, después de un corte eléctrico, todos los equipos llaman al mismo tiempo.</p></div>
+    <div class="mod soon" data-id="tr-369-usp"><span class="n">16</span><b>TR-369 (USP): la siguiente generación</b><p>El sucesor de TR-069: mensajes más livianos, conexión permanente, varios controladores y el mismo árbol TR-181.</p></div>
+  </div>
+</details>
+
+
+
+<nav class="pager" id="pager" aria-label="Capítulo anterior y siguiente"></nav>
+</main>
+</div>
+<footer><span>Curso abierto de aaramirez.github.io.</span><span>Sitio publicado: <a href="https://github.com/aaramirez/gestion-remota-de-equipos" target="_blank" rel="noopener">github.com/aaramirez/gestion-remota-de-equipos</a></span></footer>
+</div>
+<script src="assets/lab.js"></script>
+</body>
+</html>
