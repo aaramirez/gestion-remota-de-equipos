@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="es">
+<head>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-KX76XF8R');</script>
+<!-- End Google Tag Manager -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Actualizar firmware · Gestión remota de equipos (ACS) · Gestión remota de equipos (ACS)</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Cómo un operador configura, actualiza y diagnostica a distancia los equipos que tiene en casa de sus clientes: TR-069 y TR-369 a fondo, el modelo de datos TR-181, el aprovisionamiento sin visita, los cambios masivos, el firmware, los diagnósticos, la seguridad y la escala de un ACS.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400;1,8..60,600&display=swap">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KX76XF8R"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+<div class="wrap" data-page="firmware">
+<header class="topbar"><a class="brand" href="index.html">Gestión <b>remota</b> de equipos</a><span class="eyebrow">Curso visual e interactivo · Industrias y finanzas</span><a class="al-sitio" href="https://aaramirez.github.io/">← Todos los cursos</a></header>
+<div class="layout">
+<nav class="toc" id="toc" aria-label="Ruta de aprendizaje"></nav>
+<main>
+<header class="page-head"><span class="num">CAPÍTULO 13 DE 16</span><h1>Actualizar el firmware de la flota</h1><p class="lede">Cambiar un parámetro es mover una perilla; cambiar el firmware es cambiarle el cerebro al equipo mientras está en la casa del cliente. Este capítulo muestra cómo se hace con TR-069, cómo se elige la versión correcta para cada modelo, qué protege al equipo de quedar inservible y a qué ritmo se libera una versión en cien mil casas.</p></header>
+<section><div class="prose"><p>El fabricante de la marca A le escribe a Fibra Ejemplo: hay una versión nueva, la 5.1, para las ONT con Wi-Fi 6. Corrige una <b>vulnerabilidad</b> (<i>vulnerability</i>), una falla de seguridad que permite a un atacante entrar al equipo desde internet, arregla los reinicios de madrugada que el tablero del capítulo 11 encontró en la versión 4.2 y suma soporte para USP. Son cuarenta mil equipos.</p><p>En el capítulo 12, Fibra Ejemplo aprendió a cambiar un parámetro en toda la flota. El firmware es otra cosa. Un parámetro mal escrito se corrige con otro parámetro. Un firmware que deja al equipo sin arrancar no se corrige con nada que viaje por la red, porque el equipo ya no llama. Por eso el firmware es el cambio más delicado de todos, y tiene su propio método.</p><p>El capítulo 4 mostró la mecánica de la orden <code>Download</code>. Aquí vamos más adentro: qué pasa dentro del equipo, cómo se elige la versión correcta para cada modelo, qué lo salva de quedar convertido en un ladrillo y a qué ritmo se libera una versión.</p></div></section>
+<section><h2>Qué es el firmware y por qué hay que actualizarlo</h2><div class="analogia"><b>Imagínalo así</b><p>Piensa en un medicamento nuevo. Antes de venderse a millones, se prueba en pocas personas, después en algunos miles, y solo entonces se libera. Aun así, se vigila: si aparecen efectos raros, se frena la venta o se retira del mercado. Y la dosis se elige según el paciente: lo que le sirve a un adulto puede dañar a un niño. El firmware se libera igual: en dosis pequeñas, vigilado, con la versión justa para cada modelo y con la posibilidad de retirarlo.</p></div><div class="prose"><p>El <b>firmware</b> (<i>firmware</i>) es el software que viene dentro del equipo y lo hace funcionar. En una ONT o un router moderno es un sistema completo, casi siempre basado en Linux, con varias capas:</p><ul><li><b>El cargador de arranque</b> (<i>bootloader</i>): el primer programa que corre al encender. Decide qué versión del sistema arrancar.</li><li><b>El núcleo</b> (<i>kernel</i>) y los <b>controladores</b> (<i>drivers</i>): el corazón del sistema operativo y los programas que manejan el chip óptico, las radios Wi-Fi y los puertos.</li><li><b>Las aplicaciones</b>: el router, el Wi-Fi, la voz, la página de administración y el <b>agente</b> de TR-069 o de USP, el programa que habla con el ACS.</li></ul><p>Todo eso viaja en un solo archivo, la <b>imagen</b> (<i>image</i>) de firmware, de entre 20 y 100 MB según el equipo. Hay tres razones para cambiarla:</p><ol class="steps"><li><span><b>Seguridad.</b> Las vulnerabilidades públicas se registran con un código <b>CVE</b> (<i>Common Vulnerabilities and Exposures</i>, vulnerabilidades y exposiciones comunes). Un equipo con una CVE conocida y sin parche es una puerta abierta en la casa del cliente, y a veces un soldado de un ataque contra otros (capítulo 14).</span></li><li><span><b>Fallas.</b> El Wi-Fi que se cae cada tantos días, la llamada de voz que se corta, los reinicios de madrugada.</span></li><li><span><b>Funciones.</b> Una banda nueva, WPA3, soporte para USP o para una malla EasyMesh.</span></li></ol></div></section>
+<section><h2>El flujo completo: del archivo al aviso <code>TransferComplete</code></h2><div class="prose"><p>La orden es la del capítulo 4: <code>Download</code>, con el tipo de archivo <code>1 Firmware Upgrade Image</code>. Lo nuevo aquí es lo que pasa entre que el equipo acepta y el momento en que el ACS puede decir «actualizado».</p></div><figure class="fig fig-flujo" id="13-diagrama-1"><div class="lienzo"><svg viewBox="0 0 1000 700" style="min-width:780px" role="img" aria-label="Flujo de una actualización de firmware: el ACS manda Download con la URL de la imagen y el equipo acepta con estado 1; el equipo baja la imagen del servidor de archivos por HTTPS, verifica la firma, la graba en el banco de memoria que no usa y se reinicia desde él; vuelve con un Inform con 1 BOOT, 7 TRANSFER COMPLETE y M Download, manda TransferComplete y el ACS lee la versión para confirmar. Cada paso que puede fallar muestra su código de falla">
+  <defs>
+    <marker id="f13a-fl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--muted)"/></marker>
+    <marker id="f13a-fl-apl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--c-apl)"/></marker>
+    <marker id="f13a-fl-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--c-red)"/></marker>
+  </defs>
+  <rect x="30" y="14" width="150" height="52" rx="10" class="c-apl"/><text x="105" y="37" text-anchor="middle" class="t t-b">ACS</text><text x="105" y="54" text-anchor="middle" class="t t-s">acs.ejemplo.com</text>
+  <rect x="260" y="14" width="150" height="52" rx="10" class="caja"/><text x="335" y="37" text-anchor="middle" class="t t-b">Equipo</text><text x="335" y="54" text-anchor="middle" class="t t-s t-m">agente TR-069</text>
+  <rect x="490" y="14" width="150" height="52" rx="10" class="c-tra"/><text x="565" y="37" text-anchor="middle" class="t t-b">Memoria</text><text x="565" y="54" text-anchor="middle" class="t t-s">bancos A y B</text>
+  <rect x="720" y="14" width="150" height="52" rx="10" class="d-oper"/><text x="795" y="37" text-anchor="middle" class="t t-b">Servidor de archivos</text><text x="795" y="54" text-anchor="middle" class="t t-s t-m">fw.ejemplo.com</text>
+  <rect x="258" y="6" width="386" height="68" rx="14" class="ln ln-d" style="fill:none"/>
+  <text x="451" y="88" text-anchor="middle" class="t t-xs t-m">EN LA CASA</text>
+  <line x1="105" y1="66" x2="105" y2="650" class="vida"/>
+  <line x1="335" y1="96" x2="335" y2="650" class="vida"/>
+  <line x1="565" y1="96" x2="565" y2="650" class="vida"/>
+  <line x1="795" y1="66" x2="795" y2="650" class="vida"/>
+
+  
+  <line x1="105" y1="124" x2="332" y2="124" class="ln s-apl" style="stroke-width:2.4" marker-end="url(#f13a-fl-apl)"/>
+  <text x="115" y="116" class="t t-s">① <tspan class="t-mono t-b">Download</tspan> 1 Firmware Upgrade Image</text>
+  <text x="115" y="142" class="t t-s t-mono t-m">URL …/a6/5.1/imagen.bin</text>
+  <text x="115" y="158" class="t t-s t-mono t-m">CommandKey fw-5.1-t2</text>
+  <line x1="335" y1="184" x2="108" y2="184" class="ln s-apl" style="stroke-width:2" marker-end="url(#f13a-fl-apl)"/>
+  <text x="120" y="200" class="t t-s">② estado 1 y fin de la sesión</text>
+
+  
+  <line x1="335" y1="236" x2="792" y2="236" class="ln s-red" style="stroke-width:2" marker-end="url(#f13a-fl-red)"/>
+  <text x="590" y="228" class="t t-s">③ <tspan class="t-mono t-b">GET</tspan> por HTTPS</text>
+  <text x="590" y="252" class="t t-xs t-mono k-fis">9015 · sin servidor</text>
+  <line x1="795" y1="282" x2="341" y2="290" class="ln s-red" style="stroke-width:7" marker-end="url(#f13a-fl-red)"/>
+  <text x="590" y="312" class="t t-s">④ 60 MB</text>
+  <text x="590" y="328" class="t t-xs t-mono k-fis">9017 · descarga incompleta</text>
+
+  
+  <rect x="200" y="348" width="270" height="44" rx="8" class="caja"/>
+  <text x="335" y="367" text-anchor="middle" class="t t-s">⑤ verifica huella y firma</text>
+  <text x="335" y="384" text-anchor="middle" class="t t-xs t-mono k-fis">9018 · dañada · 9019 · firma</text>
+  <line x1="335" y1="420" x2="562" y2="420" class="ln" style="stroke-width:2" marker-end="url(#f13a-fl)"/>
+  <text x="345" y="412" class="t t-s">⑥ grabar en el banco B</text>
+  <text x="345" y="436" class="t t-xs t-m">(corre desde A)</text>
+  <rect x="490" y="452" width="150" height="44" rx="8" class="c-tra"/>
+  <text x="565" y="471" text-anchor="middle" class="t t-s">⑦ arrancar desde B</text>
+  <text x="565" y="487" text-anchor="middle" class="t t-xs">reinicio · 1 a 4 min</text>
+
+  
+  <line x1="335" y1="530" x2="108" y2="530" class="ln s-apl" style="stroke-width:2.4" marker-end="url(#f13a-fl-apl)"/>
+  <text x="120" y="522" class="t t-s">⑧ <tspan class="t-mono t-b">Inform</tspan></text>
+  <text x="120" y="546" class="t t-s t-mono t-m">1 BOOT · 7 TRANSFER COMPLETE</text>
+  <text x="120" y="562" class="t t-s t-mono t-m">M Download</text>
+  <line x1="335" y1="584" x2="108" y2="584" class="ln s-apl" style="stroke-width:2" marker-end="url(#f13a-fl-apl)"/>
+  <text x="120" y="600" class="t t-s">⑨ <tspan class="t-mono t-b">TransferComplete</tspan> fw-5.1-t2 · falla 0</text>
+  <line x1="105" y1="628" x2="332" y2="628" class="ln s-apl" style="stroke-width:2" marker-end="url(#f13a-fl-apl)"/>
+  <text x="115" y="646" class="t t-s">⑩ <tspan class="t-mono t-b">GetParameterValues</tspan> SoftwareVersion → 5.1 ✓</text>
+
+  <g class="t t-xs t-b">
+    <path d="M885 110v100" class="ln s-apl" style="stroke-width:3"/><text x="893" y="160" class="k-apl">ORDEN</text>
+    <path d="M885 222v112" class="ln s-red" style="stroke-width:3"/><text x="893" y="276" class="k-red">TRANSFE-</text><text x="893" y="290" class="k-red">RENCIA</text>
+    <path d="M885 346v152" class="ln s-tra" style="stroke-width:3"/><text x="893" y="414" class="k-tra">DENTRO DEL</text><text x="893" y="428" class="k-tra">EQUIPO</text>
+    <path d="M885 510v142" class="ln s-apl" style="stroke-width:3"/><text x="893" y="580" class="k-apl">AVISO</text>
+  </g>
+  <text x="14" y="380" class="t t-xs t-m" transform="rotate(-90 14 380)">EL TIEMPO CORRE HACIA ABAJO ↓</text>
+  <text x="480" y="688" text-anchor="middle" class="t t-s t-m">En naranja, el código de falla que el equipo devuelve si ese paso no sale bien.</text>
+</svg></div><figcaption><b>Una actualización de firmware, por dentro.</b> Cuatro participantes, de izquierda a derecha: el ACS, el equipo con su agente TR-069, la memoria del equipo con sus dos bancos (los dos dentro del recuadro punteado de la casa) y el servidor de archivos. En la orden (① y ②) el ACS manda <code>Download</code> con la URL de la imagen, su tamaño y una etiqueta, y el equipo acepta con estado 1. En la transferencia (③ y ④) el equipo pide el archivo por HTTPS y lo recibe. Dentro del equipo (⑤ a ⑦) verifica la firma, graba la imagen en el banco que no está usando, cambia la marca de arranque y se reinicia. En el aviso (⑧ a ⑩) vuelve con un Inform que trae <code>1 BOOT</code>, <code>7 TRANSFER COMPLETE</code> y <code>M Download</code>, manda <code>TransferComplete</code> y el ACS lee la versión para confirmar. Debajo de cada paso que puede fallar, en naranja, el código de falla que el equipo devolvería.</figcaption></figure><div class="prose"><p>Tres detalles del diagrama valen oro:</p><ul><li><b>El servidor de archivos</b> (<i>file server</i>) no es el ACS. Cuarenta mil equipos bajando 60 MB son 2,4 TB de tráfico: van a un servidor preparado para eso, con la imagen publicada en una dirección como <code>https://fw.ejemplo.com/a6/5.1/imagen.bin</code>, por HTTPS y con usuario y clave, para que nadie más la baje ni la cambie.</li><li><b>La verificación antes de grabar.</b> El equipo calcula un <b>resumen criptográfico</b> (<i>hash</i>), una huella del archivo como el SHA-256: si un solo bit cambió en el camino, la huella no coincide. Los equipos modernos además comprueban la <b>firma digital</b> (<i>digital signature</i>) del fabricante: una huella cifrada con una clave que solo el fabricante tiene. Una imagen alterada o de otro fabricante se rechaza con la falla <code>9019</code> (<i>file authentication failure</i>).</li><li><b>Confirmar con una lectura.</b> <code>TransferComplete</code> sin falla dice que la transferencia terminó. Que el equipo esté corriendo la versión nueva lo dice <code>Device.DeviceInfo.SoftwareVersion</code>, leído después del reinicio. Es el «leer después de escribir» del capítulo 12, aplicado al firmware.</li></ul><p>Las fallas tienen códigos propios en TR-069, y conviene conocer los más comunes, porque dicen dónde mirar: <code>9015</code> (no pudo contactar al servidor de archivos), <code>9017</code> (no pudo terminar la descarga), <code>9018</code> (archivo dañado), <code>9019</code> (falló la autenticación del archivo) y <code>9010</code> (falla genérica de la transferencia).</p><p>TR-069 tiene además una variante, <code>ScheduleDownload</code>, que le da al equipo <b>ventanas de tiempo</b> (<i>time windows</i>) en lugar de una orden inmediata: «descarga e instala entre la 1 y las 5 de la mañana». Cada ventana tiene un <b>modo</b> (<i>window mode</i>), y uno de ellos, <code>3 When Idle</code>, le pide al equipo que espere a estar sin uso. No todos los equipos la soportan; los que sí, resuelven solos parte del problema de no molestar.</p><p>El modelo TR-181 describe el estado de cada imagen en <code>Device.DeviceInfo.FirmwareImage.{i}</code>: su versión (<code>Version</code>), si está lista (<code>Available</code>) y su estado (<code>Status</code>), con valores como <code>Downloading</code>, <code>Validating</code>, <code>Available</code>, <code>ValidationFailed</code> o <code>ActivationFailed</code>. <code>Device.DeviceInfo.ActiveFirmwareImage</code> dice cuál está corriendo y <code>BootFirmwareImage</code>, cuál arrancará la próxima vez. En USP (capítulo 16), la descarga y la activación son dos comandos separados, <code>Download()</code> y <code>Activate()</code>: el equipo puede bajar la imagen de día y activarla de noche.</p><p>Puedes comprobar tú la huella de una imagen de firmware real.</p></div><div class="practica"><div class="practica-title"><span class="tag">En la terminal</span><h3>La huella de una imagen de firmware</h3></div><p>Vas a bajar una imagen pública de OpenWrt, un firmware libre para routers, y comparar su huella SHA-256 con la que publica el proyecto. Necesitas unos 7 MB de descarga. No se instala nada: el archivo solo se lee.</p><div class="cmds"><div class="cmd-tabs" role="tablist" aria-label="Sistema operativo"><button type="button" role="tab" data-so="win">Windows</button><button type="button" role="tab" data-so="mac">macOS</button><button type="button" role="tab" data-so="linux">Linux</button></div><div class="cmd-panel" role="tabpanel" data-so="win"><p class="cmd-nota">Windows (PowerShell)</p><div class="cmd-l"><code>curl.exe -O https://downloads.openwrt.org/releases/23.05.5/targets/ramips/mt7621/openwrt-23.05.5-ramips-mt7621-xiaomi_mi-router-4a-gigabit-squashfs-sysupgrade.bin</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>curl.exe -s https://downloads.openwrt.org/releases/23.05.5/targets/ramips/mt7621/sha256sums -o sha256sums.txt</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>certutil -hashfile openwrt-23.05.5-ramips-mt7621-xiaomi_mi-router-4a-gigabit-squashfs-sysupgrade.bin SHA256</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>Select-String -Path sha256sums.txt -Pattern "mi-router-4a-gigabit-squashfs-sysupgrade"</code><button type="button" class="copiar">Copiar</button></div></div><div class="cmd-panel" role="tabpanel" data-so="mac"><div class="cmd-l"><code>curl -O https://downloads.openwrt.org/releases/23.05.5/targets/ramips/mt7621/openwrt-23.05.5-ramips-mt7621-xiaomi_mi-router-4a-gigabit-squashfs-sysupgrade.bin</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>curl -s https://downloads.openwrt.org/releases/23.05.5/targets/ramips/mt7621/sha256sums -o sha256sums.txt</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>shasum -a 256 openwrt-23.05.5-ramips-mt7621-xiaomi_mi-router-4a-gigabit-squashfs-sysupgrade.bin</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>grep mi-router-4a-gigabit-squashfs-sysupgrade sha256sums.txt</code><button type="button" class="copiar">Copiar</button></div></div><div class="cmd-panel" role="tabpanel" data-so="linux"><div class="cmd-l"><code>curl -O https://downloads.openwrt.org/releases/23.05.5/targets/ramips/mt7621/openwrt-23.05.5-ramips-mt7621-xiaomi_mi-router-4a-gigabit-squashfs-sysupgrade.bin</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>curl -s https://downloads.openwrt.org/releases/23.05.5/targets/ramips/mt7621/sha256sums -o sha256sums.txt</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>sha256sum openwrt-23.05.5-ramips-mt7621-xiaomi_mi-router-4a-gigabit-squashfs-sysupgrade.bin</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>grep mi-router-4a-gigabit-squashfs-sysupgrade sha256sums.txt</code><button type="button" class="copiar">Copiar</button></div></div></div><ol class="steps"><li><span>Los dos primeros comandos bajan la imagen de un router doméstico y la lista de huellas que publica el proyecto.</span></li><li><span>El tercero calcula la huella del archivo que bajaste; el cuarto busca la huella publicada para ese mismo archivo.</span></li><li><span>Compara las dos cadenas de 64 caracteres.</span></li><li><span>Abre <code>sha256sums.txt</code> con cualquier editor y busca la línea de <code>mi-router-4a-gigabit-v2-squashfs-sysupgrade</code>: es el mismo router, en su segunda revisión de hardware.</span></li></ol><p><b>Qué observar:</b> si las dos huellas coinciden, el archivo llegó entero e igual al publicado. Si un solo bit del archivo cambiara, la huella sería otra por completo: así detecta un equipo una imagen dañada (<code>9018</code>). La revisión <code>v2</code> del mismo router tiene su propia imagen, con otra huella: es la compatibilidad de la sección siguiente, vista en un archivo. Fíjate en el nombre del archivo: lleva el modelo exacto del router y la palabra <code>sysupgrade</code>, el tipo de imagen para actualizar un equipo que ya tiene OpenWrt; cada modelo tiene la suya. Una huella publicada en el mismo sitio que el archivo protege contra errores, no contra un atacante que cambie los dos: para eso está la firma digital. Al terminar, borra los dos archivos.</p></div></section>
+<section><h2>Compatibilidad: qué versión va con qué equipo</h2><div class="prose"><p>Una imagen de firmware se compila para un hardware concreto: su chip, su memoria, sus radios. Darle a un equipo la imagen de otro es como darle a un niño la dosis de un adulto. Por eso, antes de cada campaña, ingeniería arma una <b>matriz de compatibilidad</b> (<i>compatibility matrix</i>) con tres preguntas:</p><ul><li><b>¿Para qué modelo y qué revisión de hardware?</b> Dos equipos con el mismo nombre comercial pueden tener por dentro chips distintos, y el fabricante los distingue con la <b>revisión de hardware</b> (<i>hardware revision</i>), en <code>Device.DeviceInfo.HardwareVersion</code>. La «A6 rev. 1» y la «A6 rev. 2» pueden necesitar imágenes distintas.</li><li><b>¿Desde qué versión se puede saltar?</b> Algunas versiones cambian cómo se reparte la memoria o el formato de la configuración guardada. El fabricante dice, por ejemplo, que a la 5.1 solo se llega desde la 4.x; un equipo en la 3.8 tiene que pasar primero por la 4.2. Esa versión intermedia se llama <b>escalón</b> (<i>stepping stone</i>), y la campaña se arma en dos saltos.</li><li><b>¿Qué cambia en el árbol de datos?</b> Un firmware nuevo puede renombrar parámetros, sumar objetos o, como en el lote C de Fibra Ejemplo, pasar del modelo antiguo <code>InternetGatewayDevice</code> al nuevo <code>Device</code>. Si el ACS no se entera, sus perfiles (capítulo 6) dejan de funcionar el día después. Por eso, después de actualizar, el ACS vuelve a descubrir el árbol del equipo y le reaplica su configuración deseada.</li></ul></div><figure class="fig fig-comparacion" id="13-diagrama-2"><div class="lienzo"><svg viewBox="0 0 960 440" style="min-width:760px" role="img" aria-label="Matriz de compatibilidad: cinco grupos de equipos contra cinco imágenes de firmware. Cada grupo tiene una sola imagen permitida; el A6 revisión 1 en versión 3.8 debe pasar antes por la 4.2; las imágenes de otro hardware dejarían al equipo inservible">
+<defs><marker id="f13b-fl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--muted)"/></marker></defs>
+<text x="20" y="30" class="t t-xs t-b t-m">GRUPO (EQUIPOS)</text><text x="210" y="30" class="t t-xs t-b t-m">IMAGEN DISPONIBLE →</text>
+<text x="279.0" y="48" text-anchor="middle" class="t t-s t-b t-mono">A6 r1 · 5.1</text>
+<text x="425.0" y="48" text-anchor="middle" class="t t-s t-b t-mono">A6 r1 · 4.2</text>
+<text x="571.0" y="48" text-anchor="middle" class="t t-s t-b t-mono">A6 r2 · 5.1</text>
+<text x="717.0" y="48" text-anchor="middle" class="t t-s t-b t-mono">A5 · 3.9</text>
+<text x="863.0" y="48" text-anchor="middle" class="t t-s t-b t-mono">C · 2.0</text>
+<text x="20" y="75" class="t t-s t-b">A6 rev. 1</text><text x="20" y="90" class="t t-xs t-m">versión 4.2 · 12.000</text>
+<rect x="210" y="60" width="138" height="36" rx="6" class="c-enl"/>
+<text x="279.0" y="82.0" text-anchor="middle" class="t t-s">sí</text>
+<rect x="356" y="60" width="138" height="36" rx="6" class="caja"/>
+<text x="425.0" y="82.0" text-anchor="middle" class="t t-s">ya la tiene</text>
+<rect x="502" y="60" width="138" height="36" rx="6" class="c-apl"/>
+<text x="571.0" y="82.0" text-anchor="middle" class="t t-s">✕ inservible</text>
+<rect x="648" y="60" width="138" height="36" rx="6" class="c-apl"/>
+<text x="717.0" y="82.0" text-anchor="middle" class="t t-s">✕ inservible</text>
+<rect x="794" y="60" width="138" height="36" rx="6" class="c-apl"/>
+<text x="863.0" y="82.0" text-anchor="middle" class="t t-s">✕ inservible</text>
+<text x="20" y="119" class="t t-s t-b">A6 rev. 1</text><text x="20" y="134" class="t t-xs t-m">versión 3.8 · 6.000</text>
+<rect x="210" y="104" width="138" height="36" rx="6" class="c-fis"/>
+<text x="279.0" y="126.0" text-anchor="middle" class="t t-s">→ antes 4.2</text>
+<rect x="356" y="104" width="138" height="36" rx="6" class="c-enl"/>
+<text x="425.0" y="126.0" text-anchor="middle" class="t t-s">sí</text>
+<rect x="502" y="104" width="138" height="36" rx="6" class="c-apl"/>
+<text x="571.0" y="126.0" text-anchor="middle" class="t t-s">✕ inservible</text>
+<rect x="648" y="104" width="138" height="36" rx="6" class="c-apl"/>
+<text x="717.0" y="126.0" text-anchor="middle" class="t t-s">✕ inservible</text>
+<rect x="794" y="104" width="138" height="36" rx="6" class="c-apl"/>
+<text x="863.0" y="126.0" text-anchor="middle" class="t t-s">✕ inservible</text>
+<text x="20" y="163" class="t t-s t-b">A6 rev. 2</text><text x="20" y="178" class="t t-xs t-m">versión 4.2 · 22.000</text>
+<rect x="210" y="148" width="138" height="36" rx="6" class="c-apl"/>
+<text x="279.0" y="170.0" text-anchor="middle" class="t t-s">✕ inservible</text>
+<rect x="356" y="148" width="138" height="36" rx="6" class="c-apl"/>
+<text x="425.0" y="170.0" text-anchor="middle" class="t t-s">✕ inservible</text>
+<rect x="502" y="148" width="138" height="36" rx="6" class="c-enl"/>
+<text x="571.0" y="170.0" text-anchor="middle" class="t t-s">sí</text>
+<rect x="648" y="148" width="138" height="36" rx="6" class="c-apl"/>
+<text x="717.0" y="170.0" text-anchor="middle" class="t t-s">✕ inservible</text>
+<rect x="794" y="148" width="138" height="36" rx="6" class="c-apl"/>
+<text x="863.0" y="170.0" text-anchor="middle" class="t t-s">✕ inservible</text>
+<text x="20" y="207" class="t t-s t-b">A5</text><text x="20" y="222" class="t t-xs t-m">versión 3.8 · 30.000</text>
+<rect x="210" y="192" width="138" height="36" rx="6" class="c-apl"/>
+<text x="279.0" y="214.0" text-anchor="middle" class="t t-s">✕ inservible</text>
+<rect x="356" y="192" width="138" height="36" rx="6" class="c-apl"/>
+<text x="425.0" y="214.0" text-anchor="middle" class="t t-s">✕ inservible</text>
+<rect x="502" y="192" width="138" height="36" rx="6" class="c-apl"/>
+<text x="571.0" y="214.0" text-anchor="middle" class="t t-s">✕ inservible</text>
+<rect x="648" y="192" width="138" height="36" rx="6" class="c-enl"/>
+<text x="717.0" y="214.0" text-anchor="middle" class="t t-s">sí</text>
+<rect x="794" y="192" width="138" height="36" rx="6" class="c-apl"/>
+<text x="863.0" y="214.0" text-anchor="middle" class="t t-s">✕ inservible</text>
+<text x="20" y="251" class="t t-s t-b">C (antiguo)</text><text x="20" y="266" class="t t-xs t-m">versión 1.7 · 12.000</text>
+<rect x="210" y="236" width="138" height="36" rx="6" class="c-apl"/>
+<text x="279.0" y="258.0" text-anchor="middle" class="t t-s">✕ inservible</text>
+<rect x="356" y="236" width="138" height="36" rx="6" class="c-apl"/>
+<text x="425.0" y="258.0" text-anchor="middle" class="t t-s">✕ inservible</text>
+<rect x="502" y="236" width="138" height="36" rx="6" class="c-apl"/>
+<text x="571.0" y="258.0" text-anchor="middle" class="t t-s">✕ inservible</text>
+<rect x="648" y="236" width="138" height="36" rx="6" class="c-apl"/>
+<text x="717.0" y="258.0" text-anchor="middle" class="t t-s">✕ inservible</text>
+<rect x="794" y="236" width="138" height="36" rx="6" class="c-enl"/>
+<text x="863.0" y="258.0" text-anchor="middle" class="t t-s">sí, y pasa a Device</text>
+<text x="20" y="316" class="t t-xs t-b t-m">EL CAMINO DEL GRUPO A6 REV. 1 EN 3.8</text>
+<rect x="20" y="330" width="200" height="56" rx="10" class="caja"/><text x="120" y="354" text-anchor="middle" class="t t-b t-mono">3.8</text><text x="120" y="372" text-anchor="middle" class="t t-xs">punto de partida</text>
+<rect x="250" y="330" width="200" height="56" rx="10" class="c-fis"/><text x="350" y="354" text-anchor="middle" class="t t-b t-mono">4.2</text><text x="350" y="372" text-anchor="middle" class="t t-xs">escalón</text>
+<rect x="480" y="330" width="200" height="56" rx="10" class="caja"/><text x="580" y="354" text-anchor="middle" class="t t-b t-mono">¿4.2?</text><text x="580" y="372" text-anchor="middle" class="t t-xs">leer SoftwareVersion</text>
+<rect x="710" y="330" width="200" height="56" rx="10" class="c-enl"/><text x="810" y="354" text-anchor="middle" class="t t-b t-mono">5.1</text><text x="810" y="372" text-anchor="middle" class="t t-xs">destino</text>
+<line x1="220" y1="358" x2="247" y2="358" class="ln" style="stroke-width:2" marker-end="url(#f13b-fl)"/>
+<line x1="450" y1="358" x2="477" y2="358" class="ln" style="stroke-width:2" marker-end="url(#f13b-fl)"/>
+<line x1="680" y1="358" x2="707" y2="358" class="ln" style="stroke-width:2" marker-end="url(#f13b-fl)"/>
+<text x="480.0" y="432" text-anchor="middle" class="t t-s t-m">Verde: permitido. Naranja: exige un escalón. Rosado: otro hardware, el equipo no arrancaría.</text>
+</svg></div><figcaption><b>La matriz de compatibilidad de Fibra Ejemplo.</b> Cada fila es un modelo con su revisión de hardware y su versión actual; cada columna, una imagen disponible. Las celdas verdes son saltos permitidos; la naranja con flecha, un salto que exige pasar primero por un escalón; las rosadas con una cruz, imágenes que dejarían al equipo inservible por ser de otro hardware. Debajo, el camino de un equipo A6 rev. 1 en la versión 3.8: primero a la 4.2, después a la 5.1, con una verificación en el medio.</figcaption></figure><div class="prose"><p>Elige tú las imágenes.</p></div><div class="lab" id="13-lab-2"><div class="lab-title"><span class="tag">Laboratorio</span><h3>La versión correcta</h3></div><p class="hint">Hay cinco grupos de equipos de Fibra Ejemplo, cada uno con su modelo, revisión y versión de partida. Para cada uno, elige qué imagen mandar en esta campaña. Aprieta «Revisar» y mira cuántos equipos quedarían actualizados, cuántos esperarían un escalón y cuántos quedarían inservibles.</p><div class="tbl"><table>
+  <thead><tr><th>Imagen disponible</th><th>Para el hardware</th><th>Se puede instalar desde</th></tr></thead>
+  <tbody>
+    <tr><td><code>A6r1-5.1</code></td><td>A6 revisión 1</td><td>4.0 o mayor</td></tr>
+    <tr><td><code>A6r2-5.1</code></td><td>A6 revisión 2</td><td>4.2 o mayor</td></tr>
+    <tr><td><code>A6r2-4.2</code></td><td>A6 revisión 2</td><td>3.5 o mayor</td></tr>
+    <tr><td><code>A5-3.9</code></td><td>A5</td><td>cualquier 3.x</td></tr>
+    <tr><td><code>B-2.3</code></td><td>B (malla)</td><td>2.0 o mayor</td></tr>
+    <tr><td><code>C-2.0</code></td><td>C (antiguo)</td><td>1.5 o mayor; cambia el árbol a <code>Device</code></td></tr>
+  </tbody>
+</table></div>
+<div class="opciones" id="g13b-sel"></div>
+<div class="btns"><button type="button" class="primary" id="g13b-rev">Revisar</button><button type="button" id="g13b-ayu">Mostrar la elección correcta</button></div>
+<div class="readout texto" id="g13b-out" aria-live="polite"></div>
+<p class="hint">Notas del fabricante y grupos inventados. Una imagen de otro hardware o un salto que el fabricante no permite pueden dejar el equipo sin arrancar; los dos bancos de memoria salvan a algunos, pero no conviene contar con eso.</p></div><div class="prose"><p>En la práctica, la matriz no la escribe una persona en cada campaña: se guarda en el ACS como regla. En GenieACS, por ejemplo, una provisión puede decir «si el modelo es este, la revisión es esta y la versión es menor que esta, descarga esta imagen», y el ACS lo evalúa en cada sesión. El navegador sirve para ver cómo publica un proyecto real una imagen distinta por modelo.</p></div><div class="practica"><div class="practica-title"><span class="tag">En el navegador</span><h3>Una imagen por modelo</h3></div><p>Vas a usar el selector de firmware público de OpenWrt para ver cómo una misma versión se publica en imágenes distintas para cada equipo. No hace falta registrarse ni bajar nada.</p><ol class="steps"><li><span>Abre el <a href="https://firmware-selector.openwrt.org/" target="_blank" rel="noopener">selector de firmware de OpenWrt</a>.</span></li><li><span>Escribe en el buscador una marca de router conocida, por ejemplo <code>TP-Link Archer</code>, y mira cuántos modelos aparecen con nombres casi iguales y la revisión al final («v1», «v2», «v5»).</span></li><li><span>Elige dos revisiones del mismo modelo y compara las imágenes que ofrece para cada una: el nombre del archivo y su huella SHA-256.</span></li><li><span>Fíjate si alguna revisión no aparece o si el sitio dice que ya no tiene versión nueva.</span></li></ol><p><b>Qué observar:</b> el mismo nombre comercial con distinta revisión lleva imágenes distintas, porque por dentro son equipos distintos. Es la primera columna de una matriz de compatibilidad. Que un modelo antiguo deje de recibir versiones nuevas es el <b>fin de soporte</b> (<i>end of support</i>): llegado ese punto, sus vulnerabilidades ya no se corrigen, y el operador tiene que decidir si lo reemplaza. Los nombres exactos de los modelos cambian con el tiempo.</p></div></section>
+<section><h2>Los equipos «ladrillo» y las memorias dobles</h2><div class="prose"><p>Un equipo que queda sin poder arrancar se llama, en la jerga, <b>ladrillo</b> (<i>brick</i>): sirve para sostener una puerta, no para dar internet. Hay dos maneras clásicas de fabricar uno a distancia: cortar la luz mientras el equipo graba la imagen, o mandar una imagen que no arranca en ese hardware.</p><p>La defensa está en el diseño del equipo: <b>dos bancos de memoria</b> (<i>dual bank</i>), A y B, cada uno con una versión completa del firmware. El equipo corre con uno, el activo, y la actualización se graba en el otro. El cargador de arranque decide cuál arrancar, y lleva la cuenta.</p></div><figure class="fig fig-esquema" id="13-diagrama-3"><div class="lienzo"><svg viewBox="0 0 960 470" style="min-width:760px" role="img" aria-label="Dos bancos de memoria y un contador de arranques: el equipo corre la 4.2 desde el banco A; la 5.1 se graba en el banco B sin tocar A; el cargador de arranque prueba B con un contador de intentos; si la 5.1 arranca y llama al ACS, B queda activo; si falla tres veces, el equipo vuelve solo a A y llama con la 4.2 y un registro de la falla">
+<defs><marker id="f13c-fl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--muted)"/></marker></defs>
+<text x="125" y="30" text-anchor="middle" class="t t-s t-b">1 · Antes</text>
+<rect x="20" y="40" width="210" height="150" rx="12" class="caja"/>
+<rect x="34" y="54" width="182" height="50" rx="8" class="c-enl"/>
+<text x="48" y="76" class="t t-b">Banco A</text><text x="202" y="76" text-anchor="end" class="t t-b t-mono">4.2</text>
+<text x="48" y="94" class="t t-xs">ACTIVO</text>
+<rect x="34" y="116" width="182" height="50" rx="8" class="caja"/>
+<text x="48" y="138" class="t t-b">Banco B</text><text x="202" y="138" text-anchor="end" class="t t-b t-mono">4.1</text>
+<text x="48" y="156" class="t t-xs">reserva</text>
+<text x="365" y="30" text-anchor="middle" class="t t-s t-b">2 · Grabando</text>
+<rect x="260" y="40" width="210" height="150" rx="12" class="caja"/>
+<rect x="274" y="54" width="182" height="50" rx="8" class="c-enl"/>
+<text x="288" y="76" class="t t-b">Banco A</text><text x="442" y="76" text-anchor="end" class="t t-b t-mono">4.2</text>
+<text x="288" y="94" class="t t-xs">ACTIVO: sigue el servicio</text>
+<rect x="274" y="116" width="182" height="50" rx="8" class="c-fis"/>
+<text x="288" y="138" class="t t-b">Banco B</text><text x="442" y="138" text-anchor="end" class="t t-b t-mono">5.1 …</text>
+<text x="288" y="156" class="t t-xs">se escribe aquí</text>
+<text x="365" y="210" text-anchor="middle" class="t t-xs t-m">¿corte de luz? arranca desde A</text>
+<text x="605" y="30" text-anchor="middle" class="t t-s t-b">3 · Probando</text>
+<rect x="500" y="40" width="210" height="150" rx="12" class="caja"/>
+<rect x="514" y="54" width="182" height="50" rx="8" class="caja"/>
+<text x="528" y="76" class="t t-b">Banco A</text><text x="682" y="76" text-anchor="end" class="t t-b t-mono">4.2</text>
+<text x="528" y="94" class="t t-xs">reserva</text>
+<rect x="514" y="116" width="182" height="50" rx="8" class="c-enl"/>
+<text x="528" y="138" class="t t-b">Banco B</text><text x="682" y="138" text-anchor="end" class="t t-b t-mono">5.1</text>
+<text x="528" y="156" class="t t-xs">PRUEBA · intento 1 de 3</text>
+<text x="605" y="210" text-anchor="middle" class="t t-xs t-m">el cargador cuenta los intentos</text>
+<line x1="232" y1="115" x2="256" y2="115" class="ln" style="stroke-width:2" marker-end="url(#f13c-fl)"/>
+<line x1="472" y1="115" x2="496" y2="115" class="ln" style="stroke-width:2" marker-end="url(#f13c-fl)"/>
+<path d="M710 100 C770 100 780 120 780 150" class="ln" style="stroke-width:2" marker-end="url(#f13c-fl)"/>
+<rect x="740" y="154" width="200" height="74" rx="10" class="c-enl"/><text x="840" y="176" text-anchor="middle" class="t t-s t-b">Arranca y llama al ACS</text><text x="840" y="194" text-anchor="middle" class="t t-xs">B queda activo con la 5.1</text><text x="840" y="210" text-anchor="middle" class="t t-xs">A guarda la 4.2 de reserva</text>
+<path d="M605 230 C605 280 560 290 520 300" class="ln" style="stroke-width:2" marker-end="url(#f13c-fl)"/>
+<rect x="250" y="270" width="270" height="84" rx="10" class="c-fis"/><text x="385" y="292" text-anchor="middle" class="t t-s t-b">Falla 3 veces seguidas</text><text x="385" y="310" text-anchor="middle" class="t t-xs">el cargador vuelve solo al banco A</text><text x="385" y="326" text-anchor="middle" class="t t-xs">llama con la 4.2 y deja el motivo en</text><text x="385" y="342" text-anchor="middle" class="t t-xs t-mono">FirmwareImage.2.BootFailureLog</text>
+<rect x="20" y="380" width="920" height="52" rx="10" class="caja" style="stroke:var(--warm);stroke-width:1.6"/>
+<text x="40" y="402" class="t t-s t-b k-warm">Lo que los dos bancos no ven:</text><text x="40" y="420" class="t t-s">una 5.1 que arranca, llama al ACS y corta el Wi-Fi cada dos días. Eso lo ven los indicadores del capítulo 11.</text>
+<text x="480.0" y="458" text-anchor="middle" class="t t-s t-m">Verde: el banco que corre. Naranja: el banco en riesgo.</text>
+</svg></div><figcaption><b>Dos bancos y un contador de arranques.</b> Arriba, tres momentos de izquierda a derecha. En el primero, el equipo corre la 4.2 desde el banco A; el B guarda la 4.1. En el segundo, la 5.1 se graba en el banco B mientras A sigue funcionando: si se corta la luz aquí, el equipo vuelve a arrancar desde A como si nada. En el tercero, el cargador de arranque prueba el banco B y cuenta los intentos. Después, los dos finales posibles: a la derecha, si la 5.1 arranca y el agente logra llamar al ACS, B queda como activo; abajo, si falla tres veces seguidas, el cargador vuelve solo a A y el equipo llama con la 4.2 y un registro de la falla. El recuadro de abajo recuerda lo que los bancos no ven.</figcaption></figure><div class="prose"><p>El contador de intentos es la pieza fina. Un firmware que arranca a medias, que levanta el sistema pero no logra conectarse, es tan malo como uno que no arranca. Por eso muchos equipos solo dan por buena la versión nueva cuando el agente TR-069 logró hablar con el ACS. Si no lo logra en unos minutos, el equipo se reinicia y el contador sube; al tercer fracaso, el cargador vuelve al banco anterior. TR-181 deja la huella en <code>Device.DeviceInfo.FirmwareImage.{i}.BootFailureLog</code>.</p><p>Los dos bancos tienen un límite que no hay que olvidar: protegen contra la versión que <b>no arranca</b>, no contra la que <b>arranca y anda mal</b>. Una 5.1 que arranca, llama al ACS y corta el Wi-Fi de 5 GHz cada dos días pasa todas las pruebas del cargador. Eso solo lo detectan los indicadores del capítulo 11, y lo frena el ritmo de la campaña.</p></div></section>
+<section><h2>Actualizar sin molestar</h2><div class="prose"><p>Una actualización deja la casa sin internet entre uno y cuatro minutos: el tiempo de reiniciar y volver a conectarse. En una película es una molestia; en una videollamada de trabajo o en una llamada de voz, un reclamo. Las reglas que usan muchos operadores son pocas:</p><ul><li><b>De madrugada</b>, dentro de la ventana de mantenimiento del capítulo 12.</li><li><b>Sin uso</b>: antes de mandar la orden, el ACS lee el tráfico del equipo o si tiene una llamada de voz activa, y si lo está, espera a la próxima sesión. Con <code>ScheduleDownload</code> y el modo <code>3 When Idle</code>, el equipo lo decide solo.</li><li><b>Con aviso</b>, cuando la actualización es grande o cambia algo visible: un mensaje en la aplicación o un SMS el día antes.</li><li><b>Sin insistir a la hora de la cena</b>: si el equipo estuvo apagado toda la noche y aparece a las ocho de la noche, la tarea espera a la ventana siguiente, salvo que sea un parche de seguridad urgente.</li></ul><p>La urgencia cambia las reglas. Un parche para una vulnerabilidad que ya se está explotando en internet no espera a la ventana de la semana que viene: se acorta el piloto y se acepta molestar un poco más. Esa decisión no es técnica: la toman juntos ingeniería, seguridad y atención al cliente.</p></div></section>
+<section><h2>El ritmo de una actualización masiva</h2><div class="prose"><p>El firmware sigue los tramos del capítulo 12, pero más despacio, porque los problemas de un firmware tardan más en verse. Un parámetro mal puesto falla en minutos; un firmware con una pérdida de memoria puede tardar tres días en reiniciar el equipo. Un ritmo típico para la 5.1 de Fibra Ejemplo:</p><div class="tbl"><table><thead><tr><th>Tramo</th><th>Equipos</th><th>Se mira durante</th><th>Qué lo frena</th></tr></thead><tbody><tr><td>Laboratorio</td><td>10 equipos propios</td><td>1 semana</td><td>Cualquier falla</td></tr><tr><td>Empleados</td><td>100</td><td>1 semana</td><td>Cualquier queja</td></tr><tr><td>Piloto</td><td>2 % (800)</td><td>1 semana</td><td>Más del 1 % de fallas de instalación, o más reinicios que la versión anterior</td></tr><tr><td>Tramo 2</td><td>10 %</td><td>4 días</td><td>Llamadas por cada mil equipos por encima del grupo de control</td></tr><tr><td>Tramo 3</td><td>50 %</td><td>4 días</td><td>Lo mismo</td></tr><tr><td>Resto</td><td>100 %</td><td>hasta el 98 %</td><td>Lo mismo</td></tr></tbody></table></div><p>El <b>grupo de control</b> (<i>control group</i>) es la idea clave: equipos del mismo modelo y la misma zona que todavía no se actualizaron. Comparar los actualizados con ellos, y no con «la semana pasada», separa el efecto del firmware del de un feriado, una lluvia o una falla de red. Si los actualizados se reinician o llaman más que su grupo de control, el firmware tiene algo.</p><p>La campaña se declara terminada cuando la versión vieja queda por debajo de un umbral, por ejemplo el 2 % de la flota, y los que faltan están en una lista con su motivo. Para esos, hay un seguro adicional: el aprovisionamiento del capítulo 7 revisa el firmware de todo equipo que vuelve a presentarse, así que un equipo que estuvo meses en un cajón se actualiza al volver.</p></div><div class="lab" id="13-lab-1"><div class="lab-title"><span class="tag">Laboratorio</span><h3>Actualización por tramos</h3></div><p class="hint">Elige qué tan buena es la versión que mandó el fabricante (sin saberlo, como en la vida real, o eligiéndolo) y libérala al 2 %. Cada tramo dura unos días: mira los reinicios y las llamadas de los equipos actualizados frente a su grupo de control, y decide si avanzar, esperar unos días más o revertir. La lectura final cuenta cuántos clientes sufrieron la versión.</p><div class="opciones">
+  <label>La versión 5.1 que mandó el fabricante
+    <select id="g13a-esc">
+      <option value="azar" selected>No lo sé (como en la vida real)</option>
+      <option value="sana">Sana</option>
+      <option value="sutil">Con un error sutil</option>
+      <option value="grave">Con un error grave</option>
+    </select></label>
+</div>
+<div class="btns">
+  <button type="button" class="primary" id="g13a-sig">Liberar al 2 %</button>
+  <button type="button" id="g13a-esp">Esperar 3 días más</button>
+  <button type="button" id="g13a-rev">Revertir</button>
+  <button type="button" id="g13a-rei">Empezar de nuevo</button>
+</div>
+<canvas id="g13a-c" role="img" aria-label="Tres paneles que comparan a los equipos actualizados con su grupo de control: fallas de instalación, reinicios por equipo y semana, y llamadas por cada mil equipos y semana"></canvas>
+<div class="legend"><span><i style="background:var(--muted)"></i>grupo de control: sin actualizar</span><span><i style="background:var(--accent)"></i>actualizados a la 5.1</span></div>
+<div class="readout texto" id="g13a-out" aria-live="polite"></div>
+<div class="readout" id="g13a-his" aria-live="polite"></div>
+<p class="hint">Flota de 40.000 equipos A6. Modelo simplificado: los números observados tienen el ruido natural de contar pocos casos, que baja cuando hay más equipos o más días de observación. Un tramo se observa 4 días; «Esperar» suma 3.</p></div><div class="caso"><b>Un caso real</b><p>Un operador FTTH de la región liberó una versión de firmware que había pasado sin problemas el laboratorio, los empleados y un piloto del 2 %. En el tramo del 10 %, la tasa de llamadas de los equipos actualizados subió apenas por encima de la de su grupo de control: una diferencia que, mirada sola, parecía ruido. El equipo de ingeniería pausó igual, porque esa era la regla escrita. Al cruzar los datos encontraron que el problema solo aparecía en una revisión de hardware de ese modelo, que en el piloto casi no estaba: su radio de 5 GHz se colgaba con ciertos celulares. La versión se revirtió en esa revisión y siguió en las demás. La lección: el piloto pequeño no ve lo raro, la regla de parada sí, y la matriz de compatibilidad necesita la revisión de hardware, no solo el modelo.</p></div><div class="prose"><p>Cómo se construye un firmware por dentro, con su cargador de arranque, su sistema de archivos y sus particiones, está en el curso de <a href="https://aaramirez.github.io/sistemas-embebidos/temario.html" target="_blank" rel="noopener">Sistemas embebidos e IoT</a>. El lado del cliente y del negocio de las campañas de firmware está en el capítulo 41 de <a href="https://aaramirez.github.io/telco/41-autogestion-del-wi-fi-y-actualizaciones-de-firmware.html" target="_blank" rel="noopener">Cómo funciona un telco</a>.</p><p>La regla con la que Fibra Ejemplo libera cada versión cierra el capítulo: <b>el firmware se libera como un medicamento: dosis pequeñas, vigilancia y la posibilidad de retirarlo.</b></p></div><div class="quiz"><h3>Pruébate</h3><details><summary>¿Por qué el firmware es más delicado que un cambio de parámetro?</summary><p>Porque un parámetro mal puesto se corrige con otro, pero un firmware que deja al equipo sin arrancar impide que el equipo vuelva a llamar al ACS, y ninguna orden por la red lo alcanza.</p></details><details><summary>¿Por qué <code>TransferComplete</code> sin falla no alcanza para decir que el equipo quedó actualizado?</summary><p>Porque dice que la transferencia terminó, no qué versión está corriendo. Hay que leer <code>Device.DeviceInfo.SoftwareVersion</code> después del reinicio.</p></details><details><summary>Un equipo devuelve la falla 9019. ¿Qué pasó?</summary><p>Falló la autenticación del archivo: la firma o la huella de la imagen no coinciden, y el equipo se negó a instalarla. Puede ser una imagen dañada, de otro fabricante o alterada.</p></details><details><summary>¿Qué es un escalón en una actualización?</summary><p>Una versión intermedia por la que hay que pasar porque el fabricante no permite saltar directo desde la versión de partida a la de destino.</p></details><details><summary>¿De qué protegen los dos bancos de memoria y de qué no?</summary><p>Protegen de un corte de luz durante la grabación y de una versión que no arranca o no logra llamar al ACS, porque el equipo vuelve al banco anterior. No protegen de una versión que arranca y anda mal: eso lo detectan los indicadores y lo frena el ritmo de la campaña.</p></details><details><summary>¿Para qué sirve el grupo de control en una campaña de firmware?</summary><p>Para comparar los equipos actualizados con otros iguales que todavía no se actualizaron, y así separar el efecto del firmware del de un feriado, el clima o una falla de red.</p></details></div><div class="investiga"><h3>Para investigar</h3><p class="hint">Estas preguntas no se responden en el capítulo: búscalas por tu cuenta.</p><ol><li>¿Qué es la memoria flash NAND y por qué se desgasta con cada escritura?<small>Pista: busca «NAND flash wear leveling».</small></li><li>¿Cómo funciona el arranque seguro (<i>secure boot</i>) y qué impide que se instale un firmware no firmado?<small>Pista: busca «secure boot chain of trust router».</small></li><li>¿Qué es el CVSS y cómo se decide si una vulnerabilidad es crítica?<small>Pista: busca «CVSS puntuación severidad».</small></li><li>¿Qué es una lista de materiales de software (SBOM) y por qué los operadores empiezan a pedírsela a los fabricantes de equipos?<small>Pista: busca «SBOM firmware».</small></li><li>¿Cómo se usa la multidifusión (<i>multicast</i>) para enviar una misma imagen a muchos equipos a la vez, y por qué es poco común en las redes de los hogares?<small>Pista: busca «multicast firmware download TR-069».</small></li></ol></div><div class="vids"><span>Para saber más</span><a class="vid" href="https://www.broadband-forum.org/pdfs/tr-069-1-6-1.pdf" target="_blank" rel="noopener">TR-069: CPE WAN Management Protocol, con Download, ScheduleDownload y los códigos de falla (Broadband Forum, inglés) <small>norma</small></a><a class="vid" href="https://cwmp-data-models.broadband-forum.org/tr-181-2-18-0-cwmp.html" target="_blank" rel="noopener">Modelo de datos TR-181 en línea, con Device.DeviceInfo.FirmwareImage (Broadband Forum, inglés) <small>referencia</small></a><a class="vid" href="https://aaramirez.github.io/telco/41-autogestion-del-wi-fi-y-actualizaciones-de-firmware.html" target="_blank" rel="noopener">Autogestión del Wi-Fi y actualizaciones de firmware, capítulo 41 de Cómo funciona un telco <small>lectura</small></a><a class="vid" href="https://firmware-selector.openwrt.org/" target="_blank" rel="noopener">Selector de firmware de OpenWrt (inglés) <small>herramienta</small></a></div></section>
+<label class="got"><input type="checkbox" id="got"> Lo tengo claro</label>
+<nav class="pager" id="pager" aria-label="Capítulo anterior y siguiente"></nav>
+</main>
+</div>
+<footer><span>Curso abierto de aaramirez.github.io.</span><span>Sitio publicado: <a href="https://github.com/aaramirez/gestion-remota-de-equipos" target="_blank" rel="noopener">github.com/aaramirez/gestion-remota-de-equipos</a></span></footer>
+</div>
+<script src="assets/lab.js"></script>
+<script>
+(function(){
+  const mil=n=>String(n).replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+  const {$}=window.Lab;
+  const IMG={'A6r1-5.1':{hw:'A6r1',desde:4.0},'A6r2-5.1':{hw:'A6r2',desde:4.2},'A6r2-4.2':{hw:'A6r2',desde:3.5},'A5-3.9':{hw:'A5',desde:3.0,hasta:3.99},'B-2.3':{hw:'B',desde:2.0},'C-2.0':{hw:'C',desde:1.5}};
+  const G=[
+    {id:'g1',n:9000,hw:'A6r1',v:4.1,t:'A6 rev. 1 · versión 4.1',ok:'A6r1-5.1'},
+    {id:'g2',n:15000,hw:'A6r2',v:3.9,t:'A6 rev. 2 · versión 3.9',ok:'A6r2-4.2'},
+    {id:'g3',n:30000,hw:'A5',v:3.8,t:'A5 · versión 3.8',ok:'A5-3.9'},
+    {id:'g4',n:12000,hw:'B',v:2.0,t:'B malla · versión 2.0',ok:'B-2.3'},
+    {id:'g5',n:12000,hw:'C',v:1.6,t:'C antiguo · versión 1.6',ok:'C-2.0'}];
+  const opts='<option value="">No actualizar ahora</option>'+Object.keys(IMG).map(k=>'<option>'+k+'</option>').join('');
+  $('#g13b-sel').innerHTML=G.map(g=>'<label>'+g.t+' ('+mil(g.n)+' equipos)<select id="g13b-'+g.id+'">'+opts+'</select></label>').join('');
+  function revisar(){
+    let act=0,esc=0,mal=0,sin=0;const lin=[];
+    G.forEach(g=>{
+      const k=$('#g13b-'+g.id).value,n=mil(g.n);
+      if(!k){sin+=g.n;lin.push('<span>'+g.t+': sin cambio. Se queda con la versión vieja y sus fallas.</span>');return;}
+      const im=IMG[k];
+      if(im.hw!==g.hw){mal+=g.n;lin.push('<span class="warn">'+g.t+': '+k+' es para otro hardware. '+n+' equipos quedarían inservibles.</span>');return;}
+      if(g.v<im.desde||(im.hasta&&g.v>im.hasta)){mal+=g.n;lin.push('<span class="warn">'+g.t+': el fabricante no permite saltar de '+g.v.toFixed(1)+' a '+k+'. Hace falta un escalón; mandarla igual arriesga '+n+' equipos.</span>');return;}
+      if(g.hw==='A6r2'&&k==='A6r2-4.2'){esc+=g.n;lin.push('<span class="ok">'+g.t+': '+k+' es el escalón correcto. En la campaña siguiente, a A6r2-5.1.</span>');return;}
+      act+=g.n;
+      lin.push('<span class="ok">'+g.t+': '+k+' es la correcta.'+(g.hw==='C'?' Ojo: cambia el árbol de InternetGatewayDevice a Device; el ACS tiene que redescubrir el equipo y usar el perfil nuevo de la marca C.':'')+'</span>');
+    });
+    const tot=G.reduce((a,g)=>a+g.n,0);
+    lin.unshift('<span class="big">Actualizados: '+mil(act)+' · en el escalón: '+mil(esc)+' · sin cambio: '+mil(sin)+' · inservibles: '+mil(mal)+' de '+mil(tot)+'</span>');
+    if(mal)lin.push('<span class="warn">Con una visita por equipo inservible, el error costaría '+mil(mal)+' visitas. Por eso la matriz se guarda en el ACS como regla y no se elige a mano en cada campaña.</span>');
+    $('#g13b-out').innerHTML=lin.join('');
+  }
+  $('#g13b-rev').addEventListener('click',revisar);
+  $('#g13b-ayu').addEventListener('click',()=>{G.forEach(g=>$('#g13b-'+g.id).value=g.ok);revisar();});
+  $('#g13b-out').innerHTML='<span>Elige una imagen para cada grupo con la tabla de notas del fabricante, y aprieta «Revisar».</span>';
+})();
+</script>
+<script>
+(function(){
+  const mil=n=>String(n).replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+  const {$,tok,canvasWidget}=window.Lab;
+  const N=40000,TR=[0.02,0.10,0.50,1];
+  const BASE={f:0.3,r:0.30,l:12};
+  let esc,ti,dias,obs,his,fin,sufridos;
+  const gauss=()=>{let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);};
+  function real(){ // valores verdaderos de los actualizados
+    if(esc==='grave')return {f:1.6,r:1.1,l:29};
+    if(esc==='sutil')return {f:0.3,r:0.31,l:15.4};
+    return {f:0.3,r:0.30,l:12.2};
+  }
+  // observar una tasa: conteo de Poisson aproximado
+  const ver=(tasa,expo)=>{const lam=tasa*expo;return Math.max(0,(lam+gauss()*Math.sqrt(Math.max(lam,1)))/expo);};
+  function observar(){
+    const n=Math.round(N*TR[ti]),ctrl=Math.max(2000,N-n)||2000,sem=dias/7,R=real();
+    obs={n,
+      f:[ver(BASE.f/100,ctrl)*100,ver(R.f/100,n)*100],
+      r:[ver(BASE.r,ctrl*sem),ver(R.r,n*sem)],
+      l:[ver(BASE.l/1000,ctrl*sem)*1000,ver(R.l/1000,n*sem)*1000]};
+  }
+  function nuevo(){
+    const v=$('#g13a-esc').value;
+    esc=v==='azar'?['sana','sana','sutil','grave'][Math.floor(Math.random()*4)]:v;
+    ti=-1;dias=0;obs=null;his=[];fin=false;sufridos=0;
+    leer('Elige y libera el primer tramo. Mira las tres comparaciones antes de decidir.');
+  }
+  function acumular(d){ // clientes-día con la versión mala
+    if(ti<0)return;const n=N*TR[ti];
+    if(esc==='grave')sufridos+=n*d;else if(esc==='sutil')sufridos+=n*0.35*d;
+  }
+  const f1=x=>x.toFixed(1).replace('.',','),f2=x=>x.toFixed(2).replace('.',',');
+  function linea(){return Math.round(TR[ti]*100)+' % · día '+dias+' · fallas '+f1(obs.f[1])+' % (control '+f1(obs.f[0])+') · reinicios '+f2(obs.r[1])+' ('+f2(obs.r[0])+') · llamadas '+f1(obs.l[1])+' ('+f1(obs.l[0])+')';}
+  function veredicto(motivo){
+    fin=true;
+    const nom={sana:'sana',sutil:'con un error sutil: corta el Wi-Fi de 5 GHz en la revisión 2 del hardware, poco más de un tercio de la flota',grave:'con un error grave: reinicios y fallas de instalación'}[esc];
+    let m=motivo+' La versión era '+nom+'. ';
+    const cd=mil(Math.round(sufridos));
+    if(esc==='sana')m+=motivo.startsWith('Revertiste')?'Revertiste una versión buena: los clientes se quedan sin el parche de seguridad. Frenar tiene costo, aunque menor que seguir con una mala.':'Bien hecho: la liberaste completa, vigilando cada tramo.';
+    else m+='Clientes-día que sufrieron la falla: '+cd+'. '+(sufridos<20000?'Lo frenaste a tiempo.':sufridos<150000?'Lo frenaste, pero tarde: el error ya había llegado a muchas casas.':'Llegó a casi toda la flota antes de frenarlo.');
+    leer(m);
+  }
+  function leer(msg){
+    $('#g13a-out').textContent=msg;
+    $('#g13a-his').innerHTML=his.map(h=>'<span>'+h+'</span>').join('')||'<span>Sin tramos todavía.</span>';
+    const sig=$('#g13a-sig');
+    sig.textContent=ti<0?'Liberar al 2 %':ti<3?'Avanzar al '+Math.round(TR[ti+1]*100)+' %':'Declarar terminada';
+    sig.disabled=fin;$('#g13a-esp').disabled=fin||ti<0;$('#g13a-rev').disabled=fin||ti<0;
+    dibujar();
+  }
+  const dibujar=canvasWidget($('#g13a-c'),w=>w<520?0.9:0.36,(ctx,w,h)=>{
+    ctx.clearRect(0,0,w,h);
+    const pan=[['Fallas de instalación','f','%',3],['Reinicios por equipo y semana','r','',1.5],['Llamadas por mil y semana','l','',40]];
+    const vertical=w<520,pw=vertical?w:w/3,ph=vertical?h/3:h;
+    pan.forEach(([t,k,u,max],i)=>{
+      const x0=vertical?0:i*pw,y0=vertical?i*ph:0;
+      ctx.fillStyle=tok('--ink');ctx.font='600 12px '+tok('--f-display');ctx.textAlign='left';ctx.textBaseline='top';
+      ctx.fillText(t,x0+8,y0+4);
+      if(!obs){ctx.fillStyle=tok('--muted');ctx.fillText('—',x0+8,y0+24);return;}
+      const vals=obs[k],bw=(pw-60)/2;
+      vals.forEach((v,j)=>{
+        const L=x0+20+j*(bw+20),top=y0+24,base=y0+ph-20,alto=(base-top)*Math.min(v,max)/max;
+        ctx.fillStyle=tok(j?'--accent':'--muted');ctx.fillRect(L,base-alto,bw,alto);
+        ctx.fillStyle=tok('--ink');ctx.font='600 11px '+tok('--f-mono');ctx.textAlign='center';ctx.textBaseline='bottom';
+        ctx.fillText((k==='r'?f2(v):f1(v))+u,L+bw/2,base-alto-2);
+        ctx.textBaseline='top';ctx.fillStyle=tok('--muted');ctx.fillText(j?'5.1':'control',L+bw/2,base+3);
+      });
+    });
+  });
+  $('#g13a-sig').addEventListener('click',()=>{
+    if(fin)return;
+    if(ti>=3){acumular(0);veredicto('Declaraste terminada la campaña.');return;}
+    ti++;dias=4;observar();acumular(4);his.push(linea());
+    leer('Tramo del '+Math.round(TR[ti]*100)+' %: '+mil(obs.n)+' equipos actualizados, observados 4 días. ¿Las barras azules se separan de las grises más de lo que se separan por azar?');
+  });
+  $('#g13a-esp').addEventListener('click',()=>{if(fin||ti<0)return;dias+=3;observar();acumular(3);his.push(linea());leer('Tres días más de observación: el ruido baja y una diferencia real se nota más.');});
+  $('#g13a-rev').addEventListener('click',()=>{if(fin||ti<0)return;veredicto('Revertiste en el tramo del '+Math.round(TR[ti]*100)+' %.');});
+  $('#g13a-rei').addEventListener('click',nuevo);
+  $('#g13a-esc').addEventListener('input',nuevo);
+  nuevo();
+})();
+</script>
+</body>
+</html>

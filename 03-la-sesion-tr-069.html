@@ -1,0 +1,527 @@
+<!doctype html>
+<html lang="es">
+<head>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-KX76XF8R');</script>
+<!-- End Google Tag Manager -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>La sesión TR-069 · Gestión remota de equipos (ACS) · Gestión remota de equipos (ACS)</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Cómo un operador configura, actualiza y diagnostica a distancia los equipos que tiene en casa de sus clientes: TR-069 y TR-369 a fondo, el modelo de datos TR-181, el aprovisionamiento sin visita, los cambios masivos, el firmware, los diagnósticos, la seguridad y la escala de un ACS.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400;1,8..60,600&display=swap">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KX76XF8R"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+<div class="wrap" data-page="la-sesion-tr-069">
+<header class="topbar"><a class="brand" href="index.html">Gestión <b>remota</b> de equipos</a><span class="eyebrow">Curso visual e interactivo · Industrias y finanzas</span><a class="al-sitio" href="https://aaramirez.github.io/">← Todos los cursos</a></header>
+<div class="layout">
+<nav class="toc" id="toc" aria-label="Ruta de aprendizaje"></nav>
+<main>
+<header class="page-head"><span class="num">CAPÍTULO 03 DE 16</span><h1>La sesión TR-069 paso a paso</h1><p class="lede">En TR-069 el equipo siempre llama primero: se presenta, recibe órdenes y cuelga. Este capítulo abre esa llamada mensaje por mensaje, mira el XML sin miedo y explica por qué a veces un cambio «tarda».</p></header>
+<section><div class="prose"><p>Son las diez de la mañana en el centro de atención de Fibra Ejemplo. Un agente cambia el nombre del Wi-Fi de un cliente, de <code>Casa-1203</code> a <code>Familia-Rojas</code>, y aprieta «Guardar». La pantalla dice «Tarea creada». El cliente, que sigue en la línea, mira su celular: el nombre viejo sigue ahí. Pasan veinte segundos. Nada. «¿Seguro que lo cambió?», pregunta.</p><p>Lo que pasa en esos veinte segundos es una conversación con reglas fijas entre el ACS y el equipo de la casa. Si el agente la entiende, sabe qué decirle al cliente; si no, aprieta «Guardar» otra vez y empeora las cosas. Este capítulo cuenta esa conversación de punta a punta: quién la empieza, qué se dice, cómo se ve por dentro y por qué a veces hay que esperar.</p></div></section>
+<section><h2>TR-069 en una frase</h2><div class="prose"><p><b>TR-069</b> (<i>Technical Report 069</i>, informe técnico 069) es la norma que define cómo conversan el equipo de la casa y el servidor del operador. Su nombre oficial es <b>CWMP</b> (<i>CPE WAN Management Protocol</i>, protocolo de gestión del equipo del cliente desde la red del operador). La publica el <b>Broadband Forum</b>, el consorcio de fabricantes y operadores de banda ancha, que la sacó en 2004 y la fue ampliando con enmiendas; la sexta, de 2018, es la base de los equipos actuales.</p><p>En una frase: <b>el equipo llama al servidor, se presenta, recibe las órdenes que haya pendientes, las cumple una por una y cuelga.</b> A cada una de esas llamadas se le dice <b>sesión</b> (<i>session</i>). Del lado del operador está el <b>ACS</b> (<i>Auto Configuration Server</i>, servidor de autoconfiguración); del otro, el <b>CPE</b> (<i>Customer Premises Equipment</i>, equipo en las instalaciones del cliente), que en Fibra Ejemplo casi siempre es una ONT con router y Wi-Fi.</p></div><div class="analogia"><b>Imagínalo así</b><p>Piensa en un vendedor que recorre pueblos sin teléfono fijo. Cada mañana llama él a la oficina: «Soy Pedro, estoy en San Martín, ayer vendí doce». La oficina aprovecha la llamada para darle los encargos del día, uno por uno, y él confirma cada uno. Cuando la oficina no tiene nada más, se despiden. Si un día surge algo urgente, la oficina no puede llamarlo, porque no sabe dónde está; lo que sí puede es mandarle un mensaje corto que diga «llámame». Y Pedro, al verlo, llama como siempre.</p></div></section>
+<section><h2>Por qué llama el equipo y no el servidor</h2><div class="prose"><p>Lo natural sería que el servidor, cuando tiene algo que hacer, llamara al equipo. TR-069 lo hace al revés por dos razones.</p><p><b>La primera es que desde afuera no se puede llegar a la casa.</b> Casi todos los equipos están detrás de <b>NAT</b> (<i>Network Address Translation</i>, traducción de direcciones de red), el mecanismo que permite que varios aparatos compartan una sola dirección pública, o de un <b>cortafuegos</b> (<i>firewall</i>), que deja salir las conexiones pero bloquea las que llegan sin haber sido pedidas. Desde adentro hacia afuera, en cambio, la puerta siempre está abierta: es el mismo camino por el que el navegador de la casa llega a cualquier página web.</p><p><b>La segunda es la escala.</b> Fibra Ejemplo tiene cien mil equipos. Si el ACS tuviera que llamarlos, necesitaría saber en todo momento la dirección de cada uno, que cambia cuando el equipo se reinicia o renueva su conexión. Si cada equipo llama por su cuenta y se presenta, el ACS no tiene que buscar a nadie: los equipos se reparten solos a lo largo del día, y cada llamada trae la dirección vigente.</p><p>La consecuencia es la regla que gobierna todo el capítulo: <b>el ACS solo puede dar órdenes dentro de una sesión, y las sesiones las abre el equipo.</b></p></div></section>
+<section><h2>El Inform: quién soy, qué pasó y mis datos</h2><div class="prose"><p>Cada sesión empieza con el mismo mensaje del equipo al ACS: el <b>Inform</b> (aviso). Tiene tres partes que conviene reconocer.</p><p><b>Quién soy</b> (<code>DeviceId</code>). Cuatro datos que identifican al equipo en todo el mundo: el fabricante, su <b>OUI</b> (<i>Organizationally Unique Identifier</i>, identificador único de organización), el mismo prefijo de fabricante que llevan las direcciones MAC, la <b>clase de producto</b> (<i>ProductClass</i>), que es el modelo, y el <b>número de serie</b> (<i>SerialNumber</i>). Con esos datos el ACS sabe a qué equipo de su base corresponde la llamada.</p><p><b>Qué pasó</b> (<code>Event</code>). Uno o varios <b>códigos de evento</b> (<i>event codes</i>) que dicen por qué llama:</p><div class="tbl"><table><thead><tr><th>Código</th><th>Qué significa</th><th>Qué suele hacer el ACS</th></tr></thead><tbody><tr><td><code>0 BOOTSTRAP</code></td><td>Es la primera vez que este equipo habla con este ACS (o volvió a valores de fábrica, o le cambiaron la dirección del ACS)</td><td>Olvida lo que sabía y le carga la configuración completa (capítulo 7)</td></tr><tr><td><code>1 BOOT</code></td><td>El equipo se encendió o se reinició</td><td>Revisa que la configuración siga en su lugar</td></tr><tr><td><code>2 PERIODIC</code></td><td>Es la llamada de rutina</td><td>Entrega las tareas que haya pendientes</td></tr><tr><td><code>3 SCHEDULED</code></td><td>Es una llamada que el propio ACS agendó para una hora dada</td><td>Lo que tenía preparado para esa hora</td></tr><tr><td><code>4 VALUE CHANGE</code></td><td>Cambió un valor que el ACS pidió vigilar</td><td>Toma nota del cambio (capítulo 4)</td></tr><tr><td><code>6 CONNECTION REQUEST</code></td><td>El ACS le tocó el timbre (más abajo)</td><td>Entrega la tarea urgente</td></tr><tr><td><code>7 TRANSFER COMPLETE</code></td><td>Terminó una descarga, por ejemplo de firmware</td><td>Pide el resultado (capítulos 4 y 13)</td></tr><tr><td><code>8 DIAGNOSTICS COMPLETE</code></td><td>Terminó una prueba que se le pidió</td><td>Lee el resultado (capítulo 9)</td></tr></tbody></table></div><p>Los eventos se combinan. Un equipo que se reinició porque el ACS se lo ordenó llama con <code>1 BOOT</code> y <code>M Reboot</code>; los códigos que empiezan con <code>M</code> dicen «esto pasó por un método que me pediste».</p><p><b>Mis datos</b> (<code>ParameterList</code>). Unos pocos parámetros que el equipo manda siempre, sin que nadie los pida: la versión de firmware, la versión de hardware, su dirección IP de gestión y la dirección donde escucha el timbre. Con eso el ACS tiene una foto mínima del equipo en cada llamada, aunque no le pregunte nada más.</p></div></section>
+<section><h2>SOAP sobre HTTP: cómo se ve un mensaje por dentro</h2><div class="prose"><p>TR-069 no inventó una forma nueva de transmitir: usa la de la web. Cada mensaje viaja en <b>HTTP</b> (<i>Hypertext Transfer Protocol</i>, protocolo de transferencia de hipertexto), el mismo que trae las páginas al navegador, normalmente cifrado como <b>HTTPS</b> (la versión segura, con <b>TLS</b>, <i>Transport Layer Security</i>, seguridad de la capa de transporte). Por dentro, el mensaje es un texto en <b>XML</b> (<i>Extensible Markup Language</i>, lenguaje de marcado extensible), etiquetas que abren y cierran como cajas una dentro de otra, con la forma que fija <b>SOAP</b> (<i>Simple Object Access Protocol</i>, protocolo simple de acceso a objetos): un <b>sobre</b> (<i>Envelope</i>) con una <b>cabecera</b> (<i>Header</i>) y un <b>cuerpo</b> (<i>Body</i>).</p><p>Así se ve, algo resumido, un Inform periódico de un equipo de Fibra Ejemplo. No hace falta leerlo todo: basta con reconocer las tres partes de la sección anterior.</p><div class="code-copia"><pre><code>&lt;soap-env:Envelope xmlns:soap-env="http://schemas.xmlsoap.org/soap/envelope/"
+    xmlns:cwmp="urn:dslforum-org:cwmp-1-4"&gt;
+  &lt;soap-env:Header&gt;
+    &lt;cwmp:ID soap-env:mustUnderstand="1"&gt;4f2a91&lt;/cwmp:ID&gt;
+  &lt;/soap-env:Header&gt;
+  &lt;soap-env:Body&gt;
+    &lt;cwmp:Inform&gt;
+      &lt;DeviceId&gt;
+        &lt;Manufacturer&gt;Marca A&lt;/Manufacturer&gt;
+        &lt;OUI&gt;0A1B2C&lt;/OUI&gt;
+        &lt;ProductClass&gt;ONT-AX3000&lt;/ProductClass&gt;
+        &lt;SerialNumber&gt;FEJ0001203&lt;/SerialNumber&gt;
+      &lt;/DeviceId&gt;
+      &lt;Event&gt;
+        &lt;EventStruct&gt;&lt;EventCode&gt;2 PERIODIC&lt;/EventCode&gt;&lt;CommandKey&gt;&lt;/CommandKey&gt;&lt;/EventStruct&gt;
+      &lt;/Event&gt;
+      &lt;MaxEnvelopes&gt;1&lt;/MaxEnvelopes&gt;
+      &lt;CurrentTime&gt;2026-11-24T10:00:12-04:00&lt;/CurrentTime&gt;
+      &lt;RetryCount&gt;0&lt;/RetryCount&gt;
+      &lt;ParameterList&gt;
+        &lt;ParameterValueStruct&gt;&lt;Name&gt;Device.DeviceInfo.SoftwareVersion&lt;/Name&gt;&lt;Value&gt;5.2&lt;/Value&gt;&lt;/ParameterValueStruct&gt;
+        &lt;ParameterValueStruct&gt;&lt;Name&gt;Device.ManagementServer.ConnectionRequestURL&lt;/Name&gt;&lt;Value&gt;http://10.20.3.23:7547/cr&lt;/Value&gt;&lt;/ParameterValueStruct&gt;
+      &lt;/ParameterList&gt;
+    &lt;/cwmp:Inform&gt;
+  &lt;/soap-env:Body&gt;
+&lt;/soap-env:Envelope&gt;</code></pre><button type="button" class="copiar copiar-todo">Copiar</button></div></div><figure class="fig fig-esquema" id="03-diagrama-2"><div class="lienzo"><svg viewBox="0 0 920 470" style="min-width:740px" role="img" aria-label="Anatomía de un Inform: la conexión TLS lleva un POST de HTTP con sus cabeceras; adentro, el sobre SOAP con una cabecera que lleva el número de mensaje y un cuerpo con el Inform; el Inform tiene quién soy (DeviceId), qué pasó (Event) y mis datos (ParameterList), más tres campos de control. A la derecha, el peso aproximado de cada capa">
+  
+  <rect x="14" y="14" width="650" height="440" rx="14" class="c-tra"/>
+  <text x="30" y="36" class="t t-xs t-b k-tra">CONEXIÓN CIFRADA · TLS (HTTPS)</text>
+  
+  <rect x="32" y="48" width="614" height="390" rx="12" class="caja"/>
+  <text x="48" y="70" class="t t-xs t-b t-m">PEDIDO HTTP</text>
+  <g class="t t-s t-mono">
+    <text x="48" y="92">POST /acs HTTP/1.1</text>
+    <text x="48" y="108">Host: acs.ejemplo.com</text>
+    <text x="48" y="124">Content-Type: text/xml; charset="utf-8"</text>
+    <text x="48" y="140">Authorization: Digest username="FEJ0001203", …</text>
+    <text x="48" y="156" class="t-m">(cuerpo del pedido ↓)</text>
+  </g>
+  
+  <rect x="48" y="168" width="582" height="256" rx="10" class="c-apl"/>
+  <text x="62" y="188" class="t t-xs t-b k-apl">SOBRE SOAP · soap-env:Envelope</text>
+  <rect x="64" y="198" width="550" height="36" rx="8" class="caja"/>
+  <text x="78" y="221" class="t t-s"><tspan class="t-b">Header</tspan> · <tspan class="t-mono">cwmp:ID = 4f2a91</tspan> <tspan class="t-m">(número de este mensaje)</tspan></text>
+  <rect x="64" y="244" width="550" height="168" rx="8" class="caja"/>
+  <text x="78" y="264" class="t t-s"><tspan class="t-b">Body</tspan> · <tspan class="t-mono t-b">cwmp:Inform</tspan></text>
+
+  <rect x="78" y="276" width="168" height="94" rx="8" class="d-casa"/>
+  <text x="90" y="296" class="t t-xs t-b k-casa">QUIÉN SOY</text>
+  <text x="90" y="314" class="t t-s t-mono t-b">DeviceId</text>
+  <text x="90" y="332" class="t t-s">fabricante, OUI,</text>
+  <text x="90" y="348" class="t t-s">clase de producto,</text>
+  <text x="90" y="364" class="t t-s">número de serie</text>
+
+  <rect x="256" y="276" width="168" height="94" rx="8" class="d-oper"/>
+  <text x="268" y="296" class="t t-xs t-b k-oper">QUÉ PASÓ</text>
+  <text x="268" y="314" class="t t-s t-mono t-b">Event</text>
+  <text x="268" y="332" class="t t-s">uno o más códigos:</text>
+  <text x="268" y="348" class="t t-s t-mono">2 PERIODIC</text>
+  <text x="268" y="364" class="t t-s t-mono">1 BOOT, M Reboot</text>
+
+  <rect x="434" y="276" width="168" height="94" rx="8" class="d-sis"/>
+  <text x="446" y="296" class="t t-xs t-b k-sis">MIS DATOS</text>
+  <text x="446" y="314" class="t t-s t-mono t-b">ParameterList</text>
+  <text x="446" y="332" class="t t-s">firmware, hardware,</text>
+  <text x="446" y="348" class="t t-s">IP de gestión,</text>
+  <text x="446" y="364" class="t t-s">dirección del timbre</text>
+
+  <text x="78" y="396" class="t t-s t-m">Control: <tspan class="t-mono">MaxEnvelopes</tspan> · <tspan class="t-mono">CurrentTime</tspan> · <tspan class="t-mono">RetryCount</tspan> (intentos fallidos)</text>
+
+  
+  <text x="690" y="40" class="t t-xs t-b t-m">CUÁNTO PESA (APROXIMADO)</text>
+  <text x="690" y="74" class="t t-s">Cabeceras HTTP</text>
+  <rect x="690" y="82" width="24" height="18" rx="3" class="c-tra"/><text x="722" y="96" class="t t-s t-mono">~150 B</text>
+  <text x="690" y="134" class="t t-s">Sobre y etiquetas XML</text>
+  <rect x="690" y="142" width="160" height="18" rx="3" class="c-apl"/><text x="690" y="178" class="t t-s t-mono">~1.000 B</text>
+  <text x="690" y="214" class="t t-s">Datos útiles</text>
+  <rect x="690" y="222" width="24" height="18" rx="3" class="d-sis"/><text x="722" y="236" class="t t-s t-mono">~150 B</text>
+  <text x="690" y="280" class="t t-s t-m">Los nombres de las</text>
+  <text x="690" y="296" class="t t-s t-m">etiquetas se repiten en</text>
+  <text x="690" y="312" class="t t-s t-m">cada dato: por eso el XML</text>
+  <text x="690" y="328" class="t t-s t-m">pesa más que lo que lleva.</text>
+  <text x="690" y="360" class="t t-s t-m">TR-369 (capítulo 16)</text>
+  <text x="690" y="376" class="t t-s t-m">usa un formato binario</text>
+  <text x="690" y="392" class="t t-s t-m">mucho más liviano.</text>
+</svg></div><figcaption><b>Un Inform, caja por caja.</b> De afuera hacia adentro: la conexión cifrada (TLS) lleva un pedido HTTP <code>POST</code> con sus cabeceras; adentro va el sobre SOAP; el sobre tiene una cabecera con el número de mensaje (<code>cwmp:ID</code>) y un cuerpo con el Inform. El Inform tiene sus tres partes con el color de la pregunta que responde: quién soy (<code>DeviceId</code>), qué pasó (<code>Event</code>) y mis datos (<code>ParameterList</code>), más tres campos de control (<code>MaxEnvelopes</code>, <code>CurrentTime</code> y <code>RetryCount</code>, que cuenta los intentos fallidos). A la derecha, cuánto ocupa cada capa en un Inform típico: el XML pesa más que los datos que lleva.</figcaption></figure><div class="prose"><p>Dos detalles más del transporte. El equipo se identifica ante el ACS con un usuario y una clave, usando la <b>autenticación</b> (<i>authentication</i>) de HTTP, o con un <b>certificado</b> digital si el operador lo exige; el capítulo 14 lo trata a fondo. Y como la sesión son varios pedidos HTTP seguidos, el ACS le entrega al equipo una <b>cookie</b> (un pequeño dato que el equipo devuelve en cada pedido) para saber que todos pertenecen a la misma conversación.</p></div></section>
+<section><h2>El turno de las órdenes y el mensaje vacío</h2><div class="prose"><p>Aquí está la parte ingeniosa de TR-069. En HTTP, el que pide es siempre el <b>cliente</b> (<i>client</i>) y el que responde es el <b>servidor</b>. En una sesión TR-069 el cliente HTTP es el equipo, porque es el que llama. Pero el que manda es el ACS. ¿Cómo da órdenes alguien que solo puede responder? <b>Las mete dentro de sus respuestas.</b></p><p>La sesión completa queda así:</p><ol class="steps"><li><span>El equipo abre la conexión y manda el <b>Inform</b> en un <code>POST</code>.</span></li><li><span>El ACS contesta con un <b>InformResponse</b>: «te escuché».</span></li><li><span>Si el equipo tiene algo propio que avisar, por ejemplo que terminó una descarga (<code>TransferComplete</code>), lo manda ahora. Si no, manda un <b><code>POST</code> vacío</b>, sin contenido. Ese vacío quiere decir: «no tengo nada más que contarte; ¿tienes algo para mí?».</span></li><li><span>El ACS contesta con la primera orden, por ejemplo <b><code>SetParameterValues</code></b> con el nombre nuevo del Wi-Fi.</span></li><li><span>El equipo la cumple y manda el resultado en el siguiente <code>POST</code>.</span></li><li><span>Se repiten 4 y 5 por cada orden pendiente.</span></li><li><span>Cuando el ACS no tiene más órdenes, contesta con una <b>respuesta vacía</b>: un HTTP <code>204</code> (<i>No Content</i>, sin contenido).</span></li><li><span>El equipo cierra la conexión. La sesión terminó.</span></li></ol></div><figure class="fig fig-flujo" id="03-diagrama-1"><div class="lienzo"><svg viewBox="0 0 960 560" style="min-width:760px" role="img" aria-label="Flujo de una sesión TR-069: el equipo abre una conexión TCP cifrada con TLS; envía el Inform en un POST; el ACS responde InformResponse; el equipo envía un POST vacío; el ACS responde con SetParameterValues; el equipo envía el resultado en otro POST; el ACS responde 204 sin contenido y el equipo cierra la conexión">
+  <defs>
+    <marker id="g31-fl-apl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--c-apl)"/></marker>
+    <marker id="g31-fl-tra" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--c-tra)"/></marker>
+    <symbol id="g31-ont" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="10" rx="1.6"/><path d="M8 12h.01M11 12h.01M14 12h.01"/><path d="M12 18v3.5"/><circle cx="12" cy="4.5" r="1.6"/></g></symbol>
+    <symbol id="g31-srv" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="7" rx="1.5"/><rect x="4" y="14" width="16" height="7" rx="1.5"/><path d="M8 6.5h.01M8 17.5h.01M12 6.5h5M12 17.5h5"/></g></symbol>
+  </defs>
+
+  <rect x="140" y="14" width="220" height="56" rx="10" class="caja"/><use href="#g31-ont" x="150" y="26" width="32" height="32" class="ico"/>
+  <text x="190" y="38" class="t t-b">Equipo</text><text x="190" y="56" class="t t-s t-m">cliente HTTP · habla primero</text>
+  <rect x="550" y="14" width="220" height="56" rx="10" class="c-apl"/><use href="#g31-srv" x="560" y="26" width="32" height="32" class="ico"/>
+  <text x="600" y="38" class="t t-b">ACS</text><text x="600" y="56" class="t t-s">servidor HTTP · manda</text>
+  <line x1="250" y1="70" x2="250" y2="520" class="vida"/>
+  <line x1="660" y1="70" x2="660" y2="520" class="vida"/>
+  <text x="20" y="92" class="t t-xs t-b t-m">HTTP</text>
+
+  
+  <line x1="250" y1="110" x2="658" y2="112" class="ln s-tra ln-d" style="stroke-width:2" marker-end="url(#g31-fl-tra)"/>
+  <line x1="660" y1="128" x2="252" y2="130" class="ln s-tra ln-d" style="stroke-width:2" marker-end="url(#g31-fl-tra)"/>
+  <text x="455" y="104" text-anchor="middle" class="t t-s k-tra">conexión TCP y saludo TLS (cifrado)</text>
+
+  
+  <text x="20" y="178" class="t t-s t-mono t-b">POST</text>
+  <line x1="250" y1="180" x2="658" y2="184" class="ln s-apl" style="stroke-width:2.4" marker-end="url(#g31-fl-apl)"/>
+  <text x="262" y="172" class="t t-s">① <tspan class="t-mono t-b">Inform</tspan> · quién soy, <tspan class="t-mono">2 PERIODIC</tspan>, mis datos</text>
+  <text x="20" y="228" class="t t-s t-mono t-b">200</text>
+  <line x1="660" y1="228" x2="252" y2="232" class="ln s-apl" style="stroke-width:2" marker-end="url(#g31-fl-apl)"/>
+  <text x="380" y="222" class="t t-s">② <tspan class="t-mono t-b">InformResponse</tspan> · «te escuché»</text>
+
+  
+  <text x="20" y="298" class="t t-s t-mono t-b">POST</text>
+  <line x1="250" y1="298" x2="658" y2="302" class="ln s-apl ln-d" style="stroke-width:2" marker-end="url(#g31-fl-apl)"/>
+  <text x="262" y="290" class="t t-s">③ vacío · «¿tienes algo para mí?»</text>
+  <text x="20" y="348" class="t t-s t-mono t-b">200</text>
+  <line x1="660" y1="348" x2="252" y2="352" class="ln s-apl" style="stroke-width:2.4" marker-end="url(#g31-fl-apl)"/>
+  <text x="340" y="342" class="t t-s">④ <tspan class="t-mono t-b">SetParameterValues</tspan> · SSID = Familia-Rojas</text>
+  <text x="20" y="398" class="t t-s t-mono t-b">POST</text>
+  <line x1="250" y1="398" x2="658" y2="402" class="ln s-apl" style="stroke-width:2" marker-end="url(#g31-fl-apl)"/>
+  <text x="262" y="390" class="t t-s">⑤ <tspan class="t-mono t-b">SetParameterValuesResponse</tspan> · Status 0</text>
+
+  
+  <text x="20" y="460" class="t t-s t-mono t-b">204</text>
+  <line x1="660" y1="460" x2="252" y2="464" class="ln s-apl ln-d" style="stroke-width:2" marker-end="url(#g31-fl-apl)"/>
+  <text x="380" y="454" class="t t-s">⑥ vacío · «no tengo más órdenes»</text>
+  <line x1="250" y1="500" x2="658" y2="502" class="ln s-tra ln-d" style="stroke-width:2" marker-end="url(#g31-fl-tra)"/>
+  <text x="262" y="494" class="t t-s k-tra">⑦ el equipo cierra la conexión</text>
+
+  
+  <g class="t t-xs t-b">
+    <path d="M800 96v40" class="ln s-tra" style="stroke-width:3"/><text x="812" y="112" class="k-tra">APERTURA</text><text x="812" y="126" class="t-m">2 a 3 idas y vueltas</text>
+    <path d="M800 160v80" class="ln s-apl" style="stroke-width:3"/><text x="812" y="196" class="k-apl">PRESENTACIÓN</text><text x="812" y="210" class="t-m">1 ida y vuelta</text>
+    <path d="M800 278v134" class="ln s-apl" style="stroke-width:3"/><text x="812" y="336" class="k-apl">ÓRDENES</text><text x="812" y="350" class="t-m">1 ida y vuelta para pedir,</text><text x="812" y="364" class="t-m">+1 por cada orden</text>
+    <path d="M800 440v70" class="ln s-apl" style="stroke-width:3"/><text x="812" y="470" class="k-apl">CIERRE</text><text x="812" y="484" class="t-m">el ACS dice «basta»</text>
+  </g>
+  <text x="480" y="548" text-anchor="middle" class="t t-s t-m">El equipo pide (POST) y el ACS ordena en sus respuestas (200). Las líneas punteadas no llevan contenido TR-069.</text>
+</svg></div><figcaption><b>Una sesión TR-069 completa.</b> Dos participantes: el equipo, que hace de cliente HTTP, y el ACS, que hace de servidor; el tiempo corre hacia abajo. En la apertura, el equipo arma la conexión TCP y la cifra con TLS. En la presentación (① y ②) va el Inform y vuelve su respuesta. En las órdenes (③ a ⑤) el equipo pide trabajo con un POST vacío y el ACS le devuelve el cambio de Wi-Fi dentro de una respuesta; el equipo contesta con el resultado en el siguiente POST. En el cierre (⑥ y ⑦) el ACS responde vacío con un 204 y el equipo cuelga. A la izquierda de cada flecha, el método HTTP; sobre ella, el mensaje TR-069. A la derecha, cuántas idas y vueltas cuesta cada fase.</figcaption></figure><div class="prose"><p>El ACS manda una orden por vez y espera el resultado antes de mandar la siguiente. Eso hace que una sesión con diez órdenes sean diez idas y vueltas por la red: unos pocos segundos que, multiplicados por cien mil equipos, importan. El capítulo 4 recorre todas las órdenes posibles; aquí basta con ver dónde encajan.</p><p>Ahora míralo de cerca, mensaje por mensaje.</p></div><div class="lab" id="03-lab-1"><div class="lab-title"><span class="tag">Laboratorio</span><h3>Sesión TR-069 en cámara lenta</h3></div><p class="hint">Elige cómo empieza la sesión y escribe un nombre nuevo para el Wi-Fi. Avanza mensaje por mensaje y mira el XML de cada uno, quién lo manda y cuántos bytes lleva. Después prueba con un nombre de más de 32 caracteres y mira qué contesta el equipo.</p><style>
+[id="03-lab-1"] svg{min-width:480px;width:100%;height:auto;display:block;background:var(--card);border-radius:8px;font-family:var(--f-display)}
+[id="03-lab-1"] svg .g3a-part{fill:var(--paper);stroke:var(--line);stroke-width:1.5}
+[id="03-lab-1"] svg .g3a-part.acs{fill:var(--c-apl-s);stroke:var(--c-apl)}
+[id="03-lab-1"] svg .g3a-pn{fill:var(--ink);font-size:14px;font-weight:700}
+[id="03-lab-1"] svg .g3a-vida{stroke:var(--line);stroke-width:1.5;stroke-dasharray:3 5}
+[id="03-lab-1"] svg .g3a-msg line{stroke:var(--muted);stroke-width:2}
+[id="03-lab-1"] svg .g3a-msg text{fill:var(--muted);font-size:12px}
+[id="03-lab-1"] svg .g3a-msg .h{font:600 11px var(--f-mono)}
+[id="03-lab-1"] svg .g3a-msg.fut{opacity:.18}
+[id="03-lab-1"] svg .g3a-msg.act line{stroke:var(--c-apl);stroke-width:3.5}
+[id="03-lab-1"] svg .g3a-msg.act text{fill:var(--ink);font-weight:700}
+[id="03-lab-1"] svg .g3a-msg.act.err line{stroke:var(--warm)}
+[id="03-lab-1"] svg .g3a-msg.act .h{fill:var(--c-apl)}
+[id="03-lab-1"] .g3a-xml{margin:0;max-height:260px;overflow:auto;padding:10px 12px;border-radius:8px;background:var(--paper);border:1px solid var(--line);font:500 .74rem/1.45 var(--f-mono);white-space:pre;color:var(--ink)}
+[id="03-lab-1"] input[type=text]{font:500 .95rem var(--f-mono);padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--ink);width:100%;box-sizing:border-box}
+</style>
+<div class="opciones">
+  <label>Cómo empieza la sesión
+    <select id="g3a-ini">
+      <option value="per">Llamada de rutina (2 PERIODIC)</option>
+      <option value="cr">El ACS tocó el timbre (6 CONNECTION REQUEST)</option>
+      <option value="boot">El equipo se reinició (1 BOOT)</option>
+      <option value="bs">Primera vez con este ACS (0 BOOTSTRAP)</option>
+    </select></label>
+  <label>Nombre nuevo del Wi-Fi (SSID)
+    <input type="text" id="g3a-ssid" value="Familia-Rojas" maxlength="64" spellcheck="false" aria-describedby="g3a-largo"></label>
+</div>
+<p class="hint" id="g3a-largo"></p>
+<div class="btns">
+  <button type="button" id="g3a-ant">◀ Anterior</button>
+  <button type="button" id="g3a-sig" class="primary">Siguiente mensaje ▶</button>
+  <button type="button" id="g3a-ini0">Volver al principio</button>
+</div>
+<div class="lab-desliza" style="overflow-x:auto"><svg id="g3a-svg" viewBox="0 0 600 360" role="img" aria-label="Diagrama de la sesión: los mensajes entre el equipo y el ACS, con el actual resaltado"></svg></div>
+<div class="readout texto" id="g3a-out" aria-live="polite"></div>
+<pre class="g3a-xml" id="g3a-xml" tabindex="0" aria-label="Contenido del mensaje actual"></pre></div><div class="practica"><div class="practica-title"><span class="tag">En la terminal</span><h3>Escucha una sesión TR-069 en tu computadora</h3></div><p>Vas a instalar GenieACS, un ACS de código abierto, y su simulador de equipos, dejar que un equipo simulado se conecte y capturar la sesión con <b>Wireshark</b>, un analizador de tráfico gratuito. Todo corre en tu computadora y no toca ninguna red ajena. Necesitas <b>Node.js</b> (el entorno que ejecuta JavaScript fuera del navegador), <b>Docker</b> (para correr la base de datos sin instalarla) y Wireshark. En Windows, abre los comandos en <b>WSL</b> (<i>Windows Subsystem for Linux</i>, el Linux integrado de Windows) con Ubuntu. Usa una terminal por cada servicio que queda corriendo.</p><div class="cmds"><div class="cmd-tabs" role="tablist" aria-label="Sistema operativo"><button type="button" role="tab" data-so="win">Windows</button><button type="button" role="tab" data-so="mac linux">macOS y Linux</button></div><div class="cmd-panel" role="tabpanel" data-so="win"><p class="cmd-nota">Windows (en WSL, con Ubuntu)</p><div class="cmd-l"><code>docker run -d --name mongo-acs -p 27017:27017 mongo:6.0</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>sudo npm install -g genieacs@1.2.16</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>genieacs-cwmp</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>genieacs-nbi</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>GENIEACS_UI_JWT_SECRET=prueba-local genieacs-ui</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>git clone https://github.com/genieacs/genieacs-sim.git</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>cd genieacs-sim &amp;&amp; npm install</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>./genieacs-sim -u http://127.0.0.1:7547/</code><button type="button" class="copiar">Copiar</button></div></div><div class="cmd-panel" role="tabpanel" data-so="mac linux"><div class="cmd-l"><code>docker run -d --name mongo-acs -p 27017:27017 mongo:6.0</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>sudo npm install -g genieacs@1.2.16</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>genieacs-cwmp</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>genieacs-nbi</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>GENIEACS_UI_JWT_SECRET=prueba-local genieacs-ui</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>git clone https://github.com/genieacs/genieacs-sim.git</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>cd genieacs-sim &amp;&amp; npm install</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>./genieacs-sim -u http://127.0.0.1:7547/</code><button type="button" class="copiar">Copiar</button></div></div></div><ol class="steps"><li><span>Antes de lanzar el simulador, abre Wireshark, elige la interfaz de bucle local (<i>loopback</i>, la que se llama <code>lo</code>, <code>lo0</code> o <i>Adapter for loopback traffic capture</i>) y escribe el filtro <code>tcp.port == 7547</code>. En Windows con WSL, captura dentro de WSL con <code>sudo tcpdump -i lo -w sesion.pcap port 7547</code> y abre el archivo en Wireshark.</span></li><li><span>Lanza el simulador. En su terminal verás que se conecta y que queda escuchando el timbre en otro puerto.</span></li><li><span>En Wireshark, haz clic derecho sobre un paquete y elige <i>Seguir</i> → <i>Flujo HTTP</i> (<i>Follow HTTP Stream</i>): verás la sesión entera como texto.</span></li><li><span>Abre la interfaz de GenieACS en <code>http://localhost:3000</code>, crea el usuario administrador que te propone la primera vez y busca el equipo <code>202BC1-BM632w-000000</code> en la lista.</span></li></ol><p><b>Qué observar:</b> el primer <code>POST</code> lleva el Inform con su <code>DeviceId</code> y su evento; la respuesta trae el <code>InformResponse</code>; luego aparece un <code>POST</code> con <code>Content-Length: 0</code>, el mensaje vacío, y el ACS contesta con las órdenes que le dicten sus reglas: con un equipo nuevo suelen ser lecturas (<code>GetParameterNames</code>, <code>GetParameterValues</code>) para conocer su árbol; si no hay ninguna, contesta directo con un <code>204</code>, que cierra la sesión. El simulador es sencillo: se presenta con <code>2 PERIODIC</code> aun la primera vez, donde un equipo real diría <code>0 BOOTSTRAP</code>, y usa el modelo de datos antiguo (<code>InternetGatewayDevice</code>), que el capítulo 5 compara con el actual. Al terminar, detén todo con Ctrl+C y borra la base con <code>docker rm -f mongo-acs</code>.</p></div></section>
+<section><h2>El Inform periódico: cada cuánto llama el equipo</h2><div class="prose"><p>Si nada pasa, el equipo llama igual: es el <code>2 PERIODIC</code>, la llamada de rutina. Lo controlan tres parámetros del propio equipo, en el objeto <code>Device.ManagementServer</code>:</p><ul><li><code>PeriodicInformEnable</code>: si llama o no por rutina.</li><li><code>PeriodicInformInterval</code>: cada cuántos segundos. Valores típicos: entre 3.600 (una hora) y 86.400 (un día).</li><li><code>PeriodicInformTime</code>: una hora de referencia, para que las llamadas caigan en momentos elegidos y no al azar.</li></ul><p>Elegir el intervalo es un equilibrio entre dos costos. <b>Llamar seguido</b> hace que el ACS tenga datos frescos y que los cambios sin timbre lleguen rápido, pero multiplica la carga: cien mil equipos que llaman cada cinco minutos son más de trescientas sesiones por segundo, todo el día. <b>Llamar poco</b> alivia al servidor, pero el dato que ve el agente puede tener horas, y una orden sin timbre puede esperar hasta el día siguiente.</p><p>La cuenta es sencilla: <b>sesiones por segundo = equipos ÷ intervalo en segundos</b>. Con cien mil equipos y un intervalo de una hora salen unas 28 sesiones por segundo; con quince minutos, unas 111. Mueve los números y mira qué pasa con la carga y con la espera.</p></div><div class="lab" id="03-lab-2"><div class="lab-title"><span class="tag">Laboratorio</span><h3>Reloj del Inform periódico</h3></div><p class="hint">Mueve el número de equipos, el intervalo del Inform y cuánto dura cada sesión. Mira las sesiones por segundo que recibe el ACS y cuánto tarda en aplicarse un cambio, con y sin timbre. En la línea de tiempo, cada marca es una llamada del equipo y la estrella es el momento en que el agente pidió el cambio.</p><style>
+[id="03-lab-2"] svg{min-width:500px;width:100%;height:auto;display:block;background:var(--card);border-radius:8px;font-family:var(--f-display)}
+[id="03-lab-2"] svg .eje{stroke:var(--line);stroke-width:1}
+[id="03-lab-2"] svg .tx{fill:var(--muted);font-size:12px}
+[id="03-lab-2"] svg .tv{fill:var(--ink);font:700 12px var(--f-mono)}
+[id="03-lab-2"] svg .bar{fill:var(--grid)}
+[id="03-lab-2"] svg .bar.sel{fill:var(--accent)}
+[id="03-lab-2"] svg .bar.sel.mucho{fill:var(--warm)}
+[id="03-lab-2"] svg .cap{stroke:var(--warm);stroke-width:2;stroke-dasharray:6 4}
+[id="03-lab-2"] svg .capt{fill:var(--warm);font-size:11px;font-weight:600}
+[id="03-lab-2"] svg .tick{stroke:var(--c-apl);stroke-width:3}
+[id="03-lab-2"] svg .linea{stroke:var(--line);stroke-width:2}
+[id="03-lab-2"] svg .espera{stroke:var(--warm);stroke-width:3}
+[id="03-lab-2"] svg .rapida{stroke:var(--good);stroke-width:3}
+[id="03-lab-2"] svg .estrella{fill:var(--warm)}
+</style>
+<div class="ctls">
+  <label class="ctl">Equipos <output id="g3b-nv">100.000</output><input type="range" id="g3b-n" min="0" max="6" step="1" value="3" aria-label="Número de equipos"></label>
+  <label class="ctl">Intervalo del Inform <output id="g3b-iv">1 h</output><input type="range" id="g3b-i" min="0" max="7" step="1" value="4" aria-label="Intervalo del Inform periódico"></label>
+  <label class="ctl">Duración de cada sesión <output id="g3b-dv">2 s</output><input type="range" id="g3b-d" min="0.5" max="5" step="0.5" value="2" aria-label="Duración de cada sesión en segundos"></label>
+  <label class="ctl">El timbre funciona en <output id="g3b-pv">90 %</output><input type="range" id="g3b-p" min="0" max="100" step="5" value="90" aria-label="Porcentaje de equipos a los que les llega el timbre"></label>
+</div>
+<div class="lab-desliza" style="overflow-x:auto"><svg id="g3b-bar" viewBox="0 0 600 230" role="img" aria-label="Sesiones por segundo que recibe el ACS según el intervalo del Inform"></svg></div>
+<div class="btns"><button type="button" id="g3b-pedir">Pedir un cambio en un momento al azar</button></div>
+<div class="lab-desliza" style="overflow-x:auto"><svg id="g3b-lin" viewBox="0 0 600 96" role="img" aria-label="Línea de tiempo de un equipo: sus llamadas periódicas y cuándo se aplica un cambio"></svg></div>
+<div class="readout texto" id="g3b-out" aria-live="polite"></div>
+<p class="hint">La capacidad de 300 sesiones por segundo es un número de ejemplo para un servidor; el capítulo 15 muestra cómo se dimensiona de verdad.</p></div><div class="caso"><b>Un caso real</b><p>Un operador FTTH de la región bajó el intervalo del Inform de todos sus equipos a cinco minutos para que los cambios de atención «se vieran rápido». Funcionó una semana. Luego el ACS empezó a responder lento, las sesiones se cortaban a la mitad y los equipos reintentaban, lo que sumaba todavía más carga. La solución fue doble: volver a un intervalo de varias horas, repartido con una hora de referencia distinta por grupo de equipos, y hacer que funcionara el timbre, que es la herramienta pensada para la urgencia. La lección: el intervalo es para tener datos razonablemente frescos, no para dar órdenes rápido.</p></div></section>
+<section><h2>Despertar al equipo: el Connection Request</h2><div class="prose"><p>Para la urgencia, TR-069 tiene el <b>Connection Request</b> (pedido de conexión): el timbre de la analogía. El ACS hace un pedido HTTP muy corto, un <code>GET</code>, a una dirección que el propio equipo informó en cada Inform (<code>ConnectionRequestURL</code>, por ejemplo <code>http://10.20.3.23:7547/cr</code>). El pedido lleva un usuario y una clave que solo conocen el ACS y ese equipo, para que nadie más pueda tocarle el timbre.</p><p>El equipo contesta «recibido» y, enseguida, <b>abre él una sesión normal</b> hacia el ACS, con el evento <code>6 CONNECTION REQUEST</code>. Por el timbre no viaja ninguna orden: solo un «llámame». Así se mantiene la regla de oro, y todo lo que el ACS le pide al equipo pasa siempre por una sesión que el equipo abrió.</p><p>El puerto <code>7547</code> que aparece en la dirección es el que la <b>IANA</b> (<i>Internet Assigned Numbers Authority</i>, autoridad de números asignados de Internet) reservó para CWMP, y suele ser el del timbre.</p><h3>Cuando el equipo está detrás de un NAT</h3><p>El timbre tiene un problema evidente: es un pedido que <b>llega</b> al equipo desde afuera, justo lo que NAT y los cortafuegos bloquean. Los operadores lo resuelven de tres maneras.</p><p><b>Una red de gestión alcanzable.</b> La más común en fibra: el equipo tiene, además de la conexión del cliente, una conexión de gestión en una VLAN propia del operador, con una dirección a la que el ACS llega sin NAT de por medio. El timbre entra directo.</p><p><b>STUN.</b> Cuando hay un NAT en el camino, la norma ofrece, en su anexo G, una salida con <b>STUN</b> (<i>Session Traversal Utilities for NAT</i>, utilidades para atravesar NAT), descrito en la <a href="https://www.rfc-editor.org/rfc/rfc5389" target="_blank" rel="noopener">RFC 5389</a>. El equipo manda cada cierto tiempo un mensaje pequeño por <b>UDP</b> (<i>User Datagram Protocol</i>, protocolo de datagramas de usuario) a un servidor STUN. Eso hace dos cosas: le enseña al equipo con qué dirección y puerto lo ve el mundo exterior, que informa al ACS, y mantiene abierto el «agujero» en el NAT. Cuando el ACS quiere tocar el timbre, manda un mensaje UDP firmado a esa dirección y el NAT lo deja pasar, porque cree que es la respuesta a lo que el equipo mandó. Como UDP no garantiza la entrega, el ACS lo repite unas cuantas veces.</p><p><b>XMPP.</b> Desde la enmienda 5, el anexo K permite otra salida con <b>XMPP</b> (<i>Extensible Messaging and Presence Protocol</i>, protocolo extensible de mensajería y presencia), el mismo tipo de protocolo de algunas aplicaciones de chat. El equipo abre una conexión permanente hacia un servidor XMPP del operador y la deja abierta; el ACS le manda el timbre como un mensaje de chat por esa conexión. Funciona a través de casi cualquier NAT, a cambio de mantener miles de conexiones abiertas.</p></div><figure class="fig fig-arquitectura" id="03-diagrama-3"><div class="lienzo"><svg viewBox="0 0 920 480" style="min-width:740px" role="img" aria-label="Tres formas de tocar el timbre: por una red de gestión el pedido GET llega directo al equipo; con STUN, el equipo mantiene abierto el paso por el NAT con mensajes al servidor STUN y el ACS manda el timbre por UDP; con XMPP, el equipo mantiene una conexión abierta con el servidor XMPP y el timbre viaja por ella. En los tres casos el equipo abre después una sesión TR-069 con el evento 6 CONNECTION REQUEST">
+  <defs>
+    <marker id="g33-fl-apl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--c-apl)"/></marker>
+    <marker id="g33-fl-tra" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--c-tra)"/></marker>
+    <marker id="g33-fl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--muted)"/></marker>
+  </defs>
+
+  
+  <rect x="10" y="10" width="900" height="140" rx="12" class="d-oper" style="fill-opacity:.35"/>
+  <text x="26" y="32" class="t t-xs t-b k-oper">1 · RED DE GESTIÓN ALCANZABLE</text>
+  <rect x="30" y="56" width="150" height="56" rx="10" class="caja"/><text x="105" y="80" text-anchor="middle" class="t t-b">Equipo</text><text x="105" y="98" text-anchor="middle" class="t t-s t-m">10.20.3.23</text>
+  <rect x="740" y="56" width="150" height="56" rx="10" class="c-apl"/><text x="815" y="80" text-anchor="middle" class="t t-b">ACS</text><text x="815" y="98" text-anchor="middle" class="t t-s">acs.ejemplo.com</text>
+  <line x1="740" y1="74" x2="182" y2="74" class="ln" style="stroke-width:2" marker-end="url(#g33-fl)"/>
+  <text x="460" y="66" text-anchor="middle" class="t t-s">① <tspan class="t-mono">GET /cr</tspan> con usuario y clave: «llámame»</text>
+  <line x1="180" y1="98" x2="738" y2="98" class="ln s-apl" style="stroke-width:2.4" marker-end="url(#g33-fl-apl)"/>
+  <text x="460" y="120" text-anchor="middle" class="t t-s k-apl">② sesión TR-069 · Inform con 6 CONNECTION REQUEST</text>
+
+  
+  <rect x="10" y="166" width="900" height="146" rx="12" class="d-inet" style="fill-opacity:.35"/>
+  <text x="26" y="188" class="t t-xs t-b k-inet">2 · DETRÁS DE NAT, CON STUN (ANEXO G)</text>
+  <rect x="30" y="226" width="150" height="56" rx="10" class="caja"/><text x="105" y="250" text-anchor="middle" class="t t-b">Equipo</text><text x="105" y="268" text-anchor="middle" class="t t-s t-m">dirección privada</text>
+  <rect x="260" y="212" width="70" height="84" rx="8" class="c-tra"/><text x="295" y="254" text-anchor="middle" class="t t-b">NAT</text>
+  <rect x="510" y="198" width="150" height="40" rx="10" class="caja"/><text x="585" y="223" text-anchor="middle" class="t t-b">Servidor STUN</text>
+  <rect x="740" y="226" width="150" height="56" rx="10" class="c-apl"/><text x="815" y="250" text-anchor="middle" class="t t-b">ACS</text><text x="815" y="268" text-anchor="middle" class="t t-s">conoce el puerto</text>
+  <path d="M180 236H258M332 222H508" class="ln s-tra ln-d" style="stroke-width:2" marker-end="url(#g33-fl-tra)"/>
+  <text x="352" y="214" class="t t-s k-tra">mantenimiento UDP</text>
+  <text x="352" y="242" class="t t-xs t-m">CADA POCOS SEGUNDOS</text>
+  <path d="M740 262H334M258 262H182" class="ln" style="stroke-width:2" marker-end="url(#g33-fl)"/>
+  <text x="540" y="256" text-anchor="middle" class="t t-s">① timbre UDP firmado</text>
+  <line x1="180" y1="282" x2="738" y2="282" class="ln s-apl" style="stroke-width:2.4" marker-end="url(#g33-fl-apl)"/>
+  <text x="540" y="302" text-anchor="middle" class="t t-s k-apl">② sesión TR-069 · 6 CONNECTION REQUEST</text>
+
+  
+  <rect x="10" y="328" width="900" height="140" rx="12" class="d-sis" style="fill-opacity:.35"/>
+  <text x="26" y="350" class="t t-xs t-b k-sis">3 · DETRÁS DE NAT, CON XMPP (ANEXO K)</text>
+  <rect x="30" y="380" width="150" height="56" rx="10" class="caja"/><text x="105" y="404" text-anchor="middle" class="t t-b">Equipo</text><text x="105" y="422" text-anchor="middle" class="t t-s t-m">dirección privada</text>
+  <rect x="260" y="366" width="70" height="84" rx="8" class="c-tra"/><text x="295" y="423" text-anchor="middle" class="t t-b">NAT</text>
+  <rect x="510" y="374" width="150" height="40" rx="10" class="caja"/><text x="585" y="399" text-anchor="middle" class="t t-b">Servidor XMPP</text>
+  <rect x="740" y="380" width="150" height="56" rx="10" class="c-apl"/><text x="815" y="404" text-anchor="middle" class="t t-b">ACS</text><text x="815" y="422" text-anchor="middle" class="t t-s">manda un mensaje</text>
+  <path d="M180 392H510" class="ln s-tra" style="stroke-width:5;stroke-opacity:.55"/>
+  <text x="420" y="384" text-anchor="middle" class="t t-xs k-tra">CONEXIÓN SIEMPRE ABIERTA</text>
+  <path d="M740 400H662" class="ln" style="stroke-width:2" marker-end="url(#g33-fl)"/>
+  <text x="700" y="392" text-anchor="middle" class="t t-s">① timbre</text>
+  <path d="M510 404H182" class="ln" style="stroke-width:2" marker-end="url(#g33-fl)"/>
+  <line x1="180" y1="432" x2="738" y2="432" class="ln s-apl" style="stroke-width:2.4" marker-end="url(#g33-fl-apl)"/>
+  <text x="540" y="454" text-anchor="middle" class="t t-s k-apl">② sesión TR-069 · 6 CONNECTION REQUEST</text>
+</svg></div><figcaption><b>Tres formas de tocar el timbre.</b> Tres filas, cada una con el ACS a la derecha, el equipo de la casa a la izquierda y, cuando lo hay, un NAT en el medio. Arriba, la red de gestión: el <code>GET</code> del timbre llega directo. En el medio, STUN: el equipo manda mensajes de mantenimiento al servidor STUN (flechas punteadas que salen) y eso deja abierto el paso por el que entra el timbre UDP. Abajo, XMPP: el equipo mantiene una conexión abierta con el servidor XMPP y el timbre viaja por ella. En las tres, la flecha final es la misma: el equipo abre una sesión TR-069 con el evento <code>6 CONNECTION REQUEST</code>.</figcaption></figure><div class="prose"><p>Pruébalo con un NAT de verdad en el medio. Fíjate en lo que pasa con STUN si el equipo tarda demasiado entre un mensaje de mantenimiento y el siguiente.</p></div><div class="lab" id="03-lab-3"><div class="lab-title"><span class="tag">Laboratorio</span><h3>Detrás del NAT</h3></div><p class="hint">Elige cómo está conectado el equipo y aprieta «Tocar el timbre». Mira qué paquetes pasan el NAT y cuáles se quedan afuera. Con STUN, mueve cada cuánto el equipo manda su mensaje de mantenimiento y cuánto recuerda el NAT un paso abierto: si el NAT olvida antes, el timbre no entra.</p><style>
+[id="03-lab-3"] svg{min-width:480px;width:100%;height:auto;display:block;background:var(--card);border-radius:8px;font-family:var(--f-display)}
+[id="03-lab-3"] svg .nodo{fill:var(--paper);stroke:var(--line);stroke-width:1.5}
+[id="03-lab-3"] svg .nodo.acs{fill:var(--c-apl-s);stroke:var(--c-apl)}
+[id="03-lab-3"] svg .nat{fill:var(--c-tra-s);stroke:var(--c-tra);stroke-width:2}
+[id="03-lab-3"] svg .off{opacity:.2}
+[id="03-lab-3"] svg .tn{fill:var(--ink);font-size:14px;font-weight:700}
+[id="03-lab-3"] svg .ts{fill:var(--muted);font-size:11px}
+[id="03-lab-3"] svg .via{stroke:var(--line);stroke-width:2}
+[id="03-lab-3"] svg .tubo{stroke:var(--c-tra);stroke-width:7;stroke-opacity:.35;fill:none}
+[id="03-lab-3"] svg .pkt{fill:var(--c-apl)}
+[id="03-lab-3"] svg .pkt.ka{fill:var(--c-tra)}
+[id="03-lab-3"] svg .pkt.cr{fill:var(--card);stroke:var(--warm);stroke-width:3}
+[id="03-lab-3"] svg .equis{stroke:var(--warm);stroke-width:3.5;stroke-linecap:round}
+[id="03-lab-3"] svg .lbl{fill:var(--ink);font:600 12px var(--f-mono)}
+</style>
+<div class="opciones">
+  <label>Cómo está conectado el equipo
+    <select id="g3c-esc">
+      <option value="gest">Red de gestión alcanzable, sin NAT</option>
+      <option value="nat">Detrás de un NAT, sin ayuda</option>
+      <option value="stun">Detrás de un NAT, con STUN</option>
+      <option value="xmpp">Detrás de un NAT, con XMPP</option>
+    </select></label>
+</div>
+<div class="ctls" id="g3c-stun">
+  <label class="ctl">El NAT recuerda un paso abierto <output id="g3c-tv">60 s</output><input type="range" id="g3c-t" min="20" max="300" step="10" value="60" aria-label="Segundos que el NAT recuerda un paso UDP sin tráfico"></label>
+  <label class="ctl">Mantenimiento STUN cada <output id="g3c-kv">30 s</output><input type="range" id="g3c-k" min="10" max="600" step="10" value="30" aria-label="Segundos entre mensajes de mantenimiento STUN"></label>
+</div>
+<div class="btns"><button type="button" id="g3c-go" class="primary">Tocar el timbre</button></div>
+<div class="lab-desliza" style="overflow-x:auto"><svg viewBox="0 0 600 210" role="img" aria-label="El ACS intenta despertar al equipo a través de un NAT">
+  <line x1="110" y1="140" x2="490" y2="140" class="via"/>
+  <path id="g3c-tubo" d="M110 132H230V70H400" class="tubo" opacity="0"/>
+  <g id="g3c-srv"><rect x="350" y="20" width="120" height="44" rx="9" class="nodo"/><text x="410" y="47" text-anchor="middle" class="tn" id="g3c-srvn">STUN</text></g>
+  <rect x="10" y="110" width="100" height="60" rx="10" class="nodo"/><text x="60" y="137" text-anchor="middle" class="tn">Equipo</text><text x="60" y="155" text-anchor="middle" class="ts" id="g3c-ip">10.20.3.23</text>
+  <g id="g3c-natg"><rect x="200" y="100" width="60" height="80" rx="8" class="nat"/><text x="230" y="145" text-anchor="middle" class="tn">NAT</text></g>
+  <rect x="490" y="110" width="100" height="60" rx="10" class="nodo acs"/><text x="540" y="137" text-anchor="middle" class="tn">ACS</text><text x="540" y="155" text-anchor="middle" class="ts">acs.ejemplo.com</text>
+  <text x="300" y="196" text-anchor="middle" class="lbl" id="g3c-lbl"></text>
+  <circle r="8" cx="540" cy="140" class="pkt" id="g3c-pkt" opacity="0"/>
+  <g id="g3c-x" opacity="0"><line x1="262" y1="126" x2="280" y2="154" class="equis"/><line x1="280" y1="126" x2="262" y2="154" class="equis"/></g>
+</svg></div>
+<div class="readout texto" id="g3c-out" aria-live="polite"></div></div></section>
+<section><h2>Por qué a veces un cambio «tarda»</h2><div class="prose"><p>Volvamos al agente del principio. Cuando apretó «Guardar», el ACS no le cambió nada al equipo: <b>creó una tarea</b> y la dejó en la cola de ese equipo. La tarea se cumple en la próxima sesión, y la próxima sesión puede llegar por tres caminos:</p><ol class="steps"><li><span><b>El timbre funcionó.</b> El equipo llamó en uno o dos segundos y el cambio quedó hecho. Es el caso normal.</span></li><li><span><b>El timbre no entró.</b> Un NAT, un cortafuegos o un equipo ocupado. La tarea espera a la próxima llamada de rutina: en promedio, la mitad del intervalo del Inform; en el peor caso, el intervalo entero.</span></li><li><span><b>El equipo no está.</b> Está apagado, sin luz o sin conexión. La tarea espera hasta que vuelva, que puede ser mañana.</span></li></ol><p>Hay una cuarta causa, más sutil: <b>el equipo ya estaba en una sesión.</b> Una sesión no se interrumpe para meter un timbre; el equipo termina la que tiene y recién entonces abre otra para atender el timbre. Mientras tanto, la orden espera.</p><p>Muchos ACS muestran esa diferencia en la pantalla. La API de GenieACS, por ejemplo, contesta <code>200</code> cuando la tarea se cumplió en el momento y <code>202</code> cuando quedó en cola para la próxima llamada. El capítulo 4 muestra qué queda registrado en cada caso.</p></div><div class="ml"><b>En la práctica</b><p>Lo que el agente le dice al cliente depende de lo que ve. Si la tarea aparece cumplida, el cambio ya está y el celular solo tiene que volver a buscar redes. Si aparece pendiente, conviene decirlo con honestidad («su equipo recibirá el cambio en su próxima conexión con nosotros, normalmente en minutos») y <b>no repetir la orden</b>: repetirla solo agrega una segunda tarea a la cola. Si el equipo no llama desde hace horas, el problema no es el cambio sino el equipo, y la conversación cambia: luz, energía y fibra, como en el capítulo 1.</p></div><div class="prose"><p>En Fibra Ejemplo, el cambio de <code>Casa-1203</code> a <code>Familia-Rojas</code> tardó veinte segundos porque el equipo estaba en medio de su llamada periódica cuando llegó el timbre: terminó esa sesión, abrió otra y recibió la orden. Con la pantalla adecuada, el agente lo habría visto en un segundo.</p><p>La idea con la que cierra este capítulo es la que ordena todo TR-069: <b>el equipo inicia, el servidor ordena dentro de la sesión, y para adelantarse el servidor solo puede pedir que el equipo llame.</b></p></div><div class="quiz"><h3>Pruébate</h3><details><summary>¿Por qué en TR-069 es el equipo el que abre la sesión y no el ACS?</summary><p>Porque el equipo suele estar detrás de NAT o de un cortafuegos que bloquean lo que llega desde afuera, mientras que salir siempre se puede; y porque así el ACS no necesita conocer la dirección de cada equipo: cada uno llama y se presenta.</p></details><details><summary>¿Qué tres cosas dice un Inform?</summary><p>Quién soy (fabricante, OUI, clase de producto y número de serie), qué pasó (los códigos de evento) y algunos datos clave (firmware, dirección de gestión, dirección del timbre).</p></details><details><summary>¿Qué significa un POST vacío del equipo y qué significa un 204 del ACS?</summary><p>El POST vacío es «no tengo más que contarte, ¿tienes algo para mí?»; el 204 es «no tengo más órdenes», y con él termina la sesión.</p></details><details><summary>Un equipo llama con <code>0 BOOTSTRAP</code>. ¿Qué indica y qué debe hacer el ACS?</summary><p>Que es la primera vez que habla con ese ACS, o que volvió a valores de fábrica o le cambiaron la dirección del ACS. El ACS debe tratarlo como nuevo y cargarle la configuración completa.</p></details><details><summary>Con 100.000 equipos y un Inform cada 30 minutos, ¿cuántas sesiones por segundo recibe el ACS en promedio?</summary><p>100.000 ÷ 1.800 ≈ 56 sesiones por segundo.</p></details><details><summary>¿Qué viaja por un Connection Request?</summary><p>Solo un «llámame», con usuario y clave. Ninguna orden: el equipo abre después una sesión normal con el evento 6 CONNECTION REQUEST y ahí recibe lo pendiente.</p></details></div><div class="investiga"><h3>Para investigar</h3><p class="hint">Estas preguntas no se responden en el capítulo: búscalas por tu cuenta.</p><ol><li>¿Qué diferencia hay entre la autenticación HTTP Basic y la Digest, y por qué Basic sin TLS es peligrosa?<small>Pista: busca «HTTP Digest authentication <a href="https://www.rfc-editor.org/rfc/rfc7616" target="_blank" rel="noopener">RFC 7616</a>».</small></li><li>¿Qué es el CGNAT, por qué los operadores lo usan con IPv4 y cómo afecta a los servicios que necesitan recibir conexiones?<small>Pista: busca «Carrier-Grade NAT <a href="https://www.rfc-editor.org/rfc/rfc6598" target="_blank" rel="noopener">RFC 6598</a>».</small></li><li>¿Qué es un HMAC y cómo permite que el equipo compruebe que un mensaje UDP lo mandó su ACS?<small>Pista: busca «HMAC SHA-1 firma de mensajes».</small></li><li>¿Por qué la web moderna prefiere APIs con JSON en lugar de SOAP y XML?<small>Pista: busca «SOAP vs REST historia».</small></li><li>¿Cuánto tiempo recuerda un NAT típico de un router doméstico una «conversación» UDP sin tráfico, y quién decide ese valor?<small>Pista: busca «NAT UDP mapping timeout <a href="https://www.rfc-editor.org/rfc/rfc4787" target="_blank" rel="noopener">RFC 4787</a>».</small></li></ol></div><div class="vids"><span>Para saber más</span><a class="vid" href="https://www.broadband-forum.org/pdfs/tr-069-1-6-1.pdf" target="_blank" rel="noopener">TR-069: CPE WAN Management Protocol, enmienda 6 (Broadband Forum, inglés) <small>norma</small></a><a class="vid" href="https://aaramirez.github.io/telco/28-gestionar-el-equipo-en-casa-del-cliente.html" target="_blank" rel="noopener">Gestionar el equipo en casa del cliente, capítulo 28 de Cómo funciona un telco <small>lectura</small></a><a class="vid" href="https://docs.genieacs.com/en/latest/installation-guide.html" target="_blank" rel="noopener">Guía de instalación de GenieACS (inglés) <small>referencia</small></a><a class="vid" href="https://github.com/genieacs/genieacs-sim" target="_blank" rel="noopener">Simulador de equipos TR-069 de GenieACS (inglés) <small>herramienta</small></a><a class="vid" href="https://www.rfc-editor.org/rfc/rfc5389" target="_blank" rel="noopener">RFC 5389: Session Traversal Utilities for NAT (inglés) <small>norma</small></a></div></section>
+<label class="got"><input type="checkbox" id="got"> Lo tengo claro</label>
+<nav class="pager" id="pager" aria-label="Capítulo anterior y siguiente"></nav>
+</main>
+</div>
+<footer><span>Curso abierto de aaramirez.github.io.</span><span>Sitio publicado: <a href="https://github.com/aaramirez/gestion-remota-de-equipos" target="_blank" rel="noopener">github.com/aaramirez/gestion-remota-de-equipos</a></span></footer>
+</div>
+<script src="assets/lab.js"></script>
+<script>
+(function(){
+  const {$}=window.Lab;
+  const NS='http://www.w3.org/2000/svg';
+  const XE=90, XA=510;
+  let paso=0, pasos=[];
+  const env=(body)=>'<soap-env:Envelope xmlns:soap-env="http://schemas.xmlsoap.org/soap/envelope/"\n    xmlns:cwmp="urn:dslforum-org:cwmp-1-4"\n    xmlns:xsd="http://www.w3.org/2001/XMLSchema"\n    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">\n  <soap-env:Header>\n    <cwmp:ID soap-env:mustUnderstand="1">4f2a91</cwmp:ID>\n  </soap-env:Header>\n  <soap-env:Body>\n'+body+'  </soap-env:Body>\n</soap-env:Envelope>';
+  const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const post='POST /acs HTTP/1.1\nHost: acs.ejemplo.com\nContent-Type: text/xml; charset="utf-8"\nCookie: sesion=a81f…\n\n';
+  const ok200='HTTP/1.1 200 OK\nContent-Type: text/xml; charset="utf-8"\n\n';
+  function armar(){
+    const ini=$('#g3a-ini').value, ssid=$('#g3a-ssid').value;
+    const valido=ssid.length>=1&&ssid.length<=32;
+    const ev={per:['2 PERIODIC'],cr:['6 CONNECTION REQUEST'],boot:['1 BOOT'],bs:['0 BOOTSTRAP','1 BOOT']}[ini];
+    const P=[];
+    if(ini==='cr'){
+      P.push({de:'a',h:'GET',n:'Connection Request',x:'GET /cr HTTP/1.1\nHost: 10.20.3.23:7547\nAuthorization: Digest username="cr-FEJ0001203", realm="cpe", …\n\n(sin cuerpo: no lleva ninguna orden)',e:'El ACS toca el timbre: un GET corto a la dirección que el equipo informó, con usuario y clave. No es parte de la sesión: solo dice «llámame».'});
+      P.push({de:'e',h:'200',n:'«recibido»',x:'HTTP/1.1 200 OK\nContent-Length: 0',e:'El equipo confirma que oyó el timbre y, enseguida, abre su propia conexión hacia el ACS. Desde aquí empieza la sesión.'});
+    }
+    const evx=ev.map(c=>'          <EventStruct><EventCode>'+c+'</EventCode><CommandKey></CommandKey></EventStruct>\n').join('');
+    P.push({de:'e',h:'POST',n:'Inform',x:post+env('    <cwmp:Inform>\n      <DeviceId>\n        <Manufacturer>Marca A</Manufacturer>\n        <OUI>0A1B2C</OUI>\n        <ProductClass>ONT-AX3000</ProductClass>\n        <SerialNumber>FEJ0001203</SerialNumber>\n      </DeviceId>\n      <Event>\n'+evx+'      </Event>\n      <MaxEnvelopes>1</MaxEnvelopes>\n      <CurrentTime>2026-11-24T10:00:12-04:00</CurrentTime>\n      <RetryCount>0</RetryCount>\n      <ParameterList>\n        <ParameterValueStruct>\n          <Name>Device.DeviceInfo.SoftwareVersion</Name><Value>5.2</Value>\n        </ParameterValueStruct>\n        <ParameterValueStruct>\n          <Name>Device.ManagementServer.ConnectionRequestURL</Name>\n          <Value>http://10.20.3.23:7547/cr</Value>\n        </ParameterValueStruct>\n      </ParameterList>\n    </cwmp:Inform>\n'),
+      e:'El equipo se presenta: quién soy (DeviceId), qué pasó ('+ev.join(' y ')+') y mis datos. '+({per:'Es la llamada de rutina.',cr:'El evento dice que llama porque le tocaron el timbre.',boot:'El ACS revisará que la configuración siga en su lugar después del reinicio.',bs:'Para el ACS es un equipo nuevo: debe olvidar lo que sabía y darle la configuración completa.'})[ini]});
+    P.push({de:'a',h:'200',n:'InformResponse',x:ok200+env('    <cwmp:InformResponse>\n      <MaxEnvelopes>1</MaxEnvelopes>\n    </cwmp:InformResponse>\n'),e:'El ACS contesta «te escuché». Todavía no manda órdenes: es el turno del equipo de decir si tiene algo más que contar.'});
+    P.push({de:'e',h:'POST',n:'(vacío)',x:'POST /acs HTTP/1.1\nHost: acs.ejemplo.com\nCookie: sesion=a81f…\nContent-Length: 0\n\n(cuerpo vacío)',e:'Un POST sin contenido: «no tengo nada más que contarte; ¿tienes algo para mí?». La cookie le dice al ACS que es la misma sesión.'});
+    P.push({de:'a',h:'200',n:'SetParameterValues',x:ok200+env('    <cwmp:SetParameterValues>\n      <ParameterList>\n        <ParameterValueStruct>\n          <Name>Device.WiFi.SSID.1.SSID</Name>\n          <Value xsi:type="xsd:string">'+esc(ssid)+'</Value>\n        </ParameterValueStruct>\n      </ParameterList>\n      <ParameterKey>ssid-20261124-1</ParameterKey>\n    </cwmp:SetParameterValues>\n'),
+      e:'La orden viaja dentro de la respuesta HTTP: cambiar Device.WiFi.SSID.1.SSID. La ParameterKey es una etiqueta que el equipo guarda para que el ACS sepa qué cambio fue el último aplicado.'+(ini==='bs'?' Con un 0 BOOTSTRAP, un ACS real mandaría aquí muchas órdenes más: la configuración completa del plan (capítulo 7).':'')});
+    if(valido){
+      P.push({de:'e',h:'POST',n:'SetParameterValuesResponse',x:post+env('    <cwmp:SetParameterValuesResponse>\n      <Status>0</Status>\n    </cwmp:SetParameterValuesResponse>\n'),e:'El equipo cumplió: Status 0 quiere decir «aplicado». Un Status 1 diría «guardado, pero se aplicará al reiniciar».'});
+    }else{
+      P.push({de:'e',h:'POST',n:'Fault 9003',err:true,x:post+env('    <soap-env:Fault>\n      <faultcode>Client</faultcode>\n      <faultstring>CWMP fault</faultstring>\n      <detail>\n        <cwmp:Fault>\n          <FaultCode>9003</FaultCode>\n          <FaultString>Invalid arguments</FaultString>\n          <SetParameterValuesFault>\n            <ParameterName>Device.WiFi.SSID.1.SSID</ParameterName>\n            <FaultCode>9007</FaultCode>\n            <FaultString>Invalid parameter value</FaultString>\n          </SetParameterValuesFault>\n        </cwmp:Fault>\n      </detail>\n    </soap-env:Fault>\n'),
+        e:'El equipo se niega: el SSID admite de 1 a 32 caracteres y le mandaste '+ssid.length+'. Responde con una falla 9003 y, adentro, el detalle por parámetro: 9007, valor inválido. No cambió nada: la orden es todo o nada (capítulo 4).'});
+    }
+    P.push({de:'a',h:'204',n:'(vacío) No Content',x:'HTTP/1.1 204 No Content\n\n(sin cuerpo)',e:'El ACS no tiene más órdenes y responde vacío. Con eso la sesión terminó.'});
+    P.push({de:'e',h:'TCP',n:'cierra la conexión',x:'(fin de la conexión TCP; no hay más mensajes HTTP)',e:'El equipo cuelga. La próxima sesión será la siguiente llamada de rutina, un timbre o un evento nuevo.'});
+    return P;
+  }
+  function bytes(s){return new TextEncoder().encode(s).length;}
+  function dibujar(){
+    const svg=$('#g3a-svg');const H=74+pasos.length*36+10;svg.setAttribute('viewBox','0 0 600 '+H);
+    let h='<rect x="20" y="10" width="140" height="40" rx="9" class="g3a-part"/><text x="90" y="35" text-anchor="middle" class="g3a-pn">Equipo</text>'+
+      '<rect x="440" y="10" width="140" height="40" rx="9" class="g3a-part acs"/><text x="510" y="35" text-anchor="middle" class="g3a-pn">ACS</text>'+
+      '<line x1="'+XE+'" y1="50" x2="'+XE+'" y2="'+(H-6)+'" class="g3a-vida"/><line x1="'+XA+'" y1="50" x2="'+XA+'" y2="'+(H-6)+'" class="g3a-vida"/>';
+    pasos.forEach((m,i)=>{
+      const y=84+i*36, x1=m.de==='e'?XE:XA, x2=m.de==='e'?XA:XE, d=x2>x1?-1:1;
+      const cls='g3a-msg'+(i>paso?' fut':'')+(i===paso?' act':'')+(m.err?' err':'');
+      h+='<g class="'+cls+'"><line x1="'+x1+'" y1="'+y+'" x2="'+(x2+d*2)+'" y2="'+y+'"/>'+
+        '<path d="M'+(x2)+' '+y+' l'+(d*10)+' -5 v10z" style="fill:'+(i===paso?(m.err?'var(--warm)':'var(--c-apl)'):'var(--muted)')+'"/>'+
+        '<text x="300" y="'+(y-7)+'" text-anchor="middle"><tspan class="h">'+m.h+'</tspan> · '+(i+1)+'. '+m.n+'</text></g>';
+    });
+    svg.innerHTML=h;
+  }
+  function mostrar(){
+    paso=Math.max(0,Math.min(paso,pasos.length-1));
+    dibujar();
+    const m=pasos[paso];
+    $('#g3a-xml').textContent=m.x;
+    let tot=0;for(let i=0;i<=paso;i++)tot+=bytes(pasos[i].x);
+    $('#g3a-out').innerHTML='<span class="'+(m.err?'warn':'big')+'">'+(paso+1)+' de '+pasos.length+' · '+(m.de==='e'?'equipo → ACS':'ACS → equipo')+' · '+m.n+'</span><span>'+m.e+'</span><span>Este mensaje: '+bytes(m.x).toLocaleString('es')+' bytes · acumulado de la sesión: '+tot.toLocaleString('es')+' bytes.</span>';
+    $('#g3a-ant').disabled=paso===0;$('#g3a-sig').disabled=paso===pasos.length-1;
+  }
+  function rehacer(){
+    const n=$('#g3a-ssid').value.length;
+    $('#g3a-largo').textContent='El nombre tiene '+n+' caracteres. La norma admite de 1 a 32.'+(n>32||n<1?' Este no va a pasar.':'');
+    pasos=armar();mostrar();
+  }
+  $('#g3a-sig').addEventListener('click',()=>{paso++;mostrar();});
+  $('#g3a-ant').addEventListener('click',()=>{paso--;mostrar();});
+  $('#g3a-ini0').addEventListener('click',()=>{paso=0;mostrar();});
+  $('#g3a-ini').addEventListener('change',()=>{paso=0;rehacer();});
+  $('#g3a-ssid').addEventListener('input',rehacer);
+  rehacer();
+})();
+</script>
+<script>
+(function(){
+  const {$}=window.Lab;
+  const NS=[10000,20000,50000,100000,200000,500000,1000000];
+  const IS=[60,300,900,1800,3600,21600,43200,86400];
+  const IL=['1 min','5 min','15 min','30 min','1 h','6 h','12 h','24 h'];
+  const CAP=300;
+  const f=(x,d)=>x.toLocaleString('es',{maximumFractionDigits:d||0});
+  const dur=s=>s<90?f(s)+' s':s<5400?f(s/60,s<600?1:0)+' min':f(s/3600,1)+' h';
+  let fase=Math.random(), pedido=Math.random();
+  function calc(){
+    const N=NS[+$('#g3b-n').value], ii=+$('#g3b-i').value, I=IS[ii], D=+$('#g3b-d').value, p=+$('#g3b-p').value/100;
+    $('#g3b-nv').textContent=f(N);$('#g3b-iv').textContent=IL[ii];$('#g3b-dv').textContent=f(D,1)+' s';$('#g3b-pv').textContent=f(p*100)+' %';
+    // barras (escala logarítmica)
+    const lo=Math.log10(0.05), hi=Math.log10(20000), y=v=>200-(Math.log10(Math.max(v,0.05))-lo)/(hi-lo)*170;
+    let h='<line x1="50" y1="200" x2="590" y2="200" class="eje"/>';
+    [0.1,1,10,100,1000,10000].forEach(v=>{h+='<line x1="50" y1="'+y(v)+'" x2="590" y2="'+y(v)+'" class="eje" style="stroke-dasharray:2 4"/><text x="44" y="'+(y(v)+4)+'" text-anchor="end" class="tx">'+f(v,1)+'</text>';});
+    IS.forEach((I2,k)=>{const r=N/I2,x=60+k*66,yy=y(r);
+      h+='<rect x="'+x+'" y="'+yy+'" width="46" height="'+(200-yy)+'" rx="3" class="bar'+(k===ii?' sel'+(r>CAP?' mucho':''):'')+'"/>'+
+        '<text x="'+(x+23)+'" y="216" text-anchor="middle" class="tx">'+IL[k]+'</text>'+(k===ii?'<text x="'+(x+23)+'" y="'+(yy-6)+'" text-anchor="middle" class="tv">'+f(r,r<10?1:0)+'/s</text>':'');});
+    h+='<line x1="50" y1="'+y(CAP)+'" x2="590" y2="'+y(CAP)+'" class="cap"/><text x="586" y="'+(y(CAP)-6)+'" text-anchor="end" class="capt">capacidad de ejemplo: '+CAP+'/s</text>';
+    h+='<text x="8" y="16" class="tx">sesiones por segundo</text>';
+    $('#g3b-bar').innerHTML=h;
+    // línea de tiempo: dos intervalos
+    const T=2*I, X=t=>20+t/T*560;
+    const t0=fase*I, tp=pedido*T*0.9+0.05*T;
+    let sig=t0;while(sig<tp)sig+=I;
+    let l='<line x1="20" y1="50" x2="580" y2="50" class="linea"/>';
+    for(let t=t0;t<=T;t+=I)l+='<line x1="'+X(t)+'" y1="34" x2="'+X(t)+'" y2="66" class="tick"/>';
+    if(sig<=T)l+='<line x1="'+X(tp)+'" y1="50" x2="'+X(sig)+'" y2="50" class="espera"/>';
+    else l+='<line x1="'+X(tp)+'" y1="50" x2="580" y2="50" class="espera"/>';
+    l+='<path d="M'+X(tp)+' 40 l3 7 7 0 -6 4 3 7 -7 -4 -7 4 3 -7 -6 -4 7 0z" class="estrella"/>';
+    l+='<line x1="'+X(tp)+'" y1="62" x2="'+(X(tp)+10)+'" y2="62" class="rapida"/>';
+    l+='<text x="20" y="20" class="tx">llamadas del equipo (rosado) · el cambio pedido (estrella)</text><text x="20" y="88" class="tx">0</text><text x="580" y="88" text-anchor="end" class="tx">'+dur(T)+'</text>';
+    $('#g3b-lin').innerHTML=l;
+    const r=N/I, sim=r*D, espSin=sig-tp, media=p*2+(1-p)*I/2;
+    $('#g3b-out').innerHTML=
+      '<span class="'+(r>CAP?'warn':'big')+'">'+f(r,r<10?1:0)+' sesiones por segundo, '+f(N*86400/I)+' al día</span>'+
+      '<span>Sesiones abiertas a la vez: unas '+f(sim,sim<10?1:0)+'.'+(r>CAP?' Supera la capacidad de ejemplo: harían falta '+Math.ceil(r/CAP)+' servidores solo para las llamadas de rutina.':'')+'</span>'+
+      '<span>Este cambio: con timbre, unos 2 s (línea verde); sin timbre, '+dur(espSin)+' hasta la próxima llamada (línea naranja).</span>'+
+      '<span>Espera promedio de un cambio con el timbre funcionando en el '+f(p*100)+' %: '+dur(media)+'. Peor caso sin timbre: '+dur(I)+'.</span>';
+  }
+  ['#g3b-n','#g3b-i','#g3b-d','#g3b-p'].forEach(s=>$(s).addEventListener('input',calc));
+  $('#g3b-pedir').addEventListener('click',()=>{pedido=Math.random();fase=Math.random();calc();});
+  calc();
+})();
+</script>
+<script>
+(function(){
+  const {$}=window.Lab;
+  const quieto=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let turno=0;
+  const espera=ms=>new Promise(r=>setTimeout(r,quieto?0:ms));
+  function mover(pts,cls,txt,mio){
+    const p=$('#g3c-pkt');p.setAttribute('class','pkt '+(cls||''));$('#g3c-lbl').textContent=txt;p.setAttribute('opacity','1');
+    return pts.slice(1).reduce((pr,b,i)=>pr.then(()=>new Promise(res=>{
+      const a=pts[i],ini=performance.now(),d=quieto?0:Math.hypot(b[0]-a[0],b[1]-a[1])*3.2;
+      (function paso(t){if(mio!==turno)return res();const k=d?Math.min(1,(t-ini)/d):1;p.setAttribute('cx',a[0]+(b[0]-a[0])*k);p.setAttribute('cy',a[1]+(b[1]-a[1])*k);if(k<1)requestAnimationFrame(paso);else res();})(performance.now());
+    })),Promise.resolve());
+  }
+  function vista(){
+    turno++;
+    const e=$('#g3c-esc').value;
+    $('#g3c-stun').hidden=e!=='stun';
+    $('#g3c-natg').setAttribute('class',e==='gest'?'off':'');
+    $('#g3c-srv').setAttribute('class',(e==='stun'||e==='xmpp')?'':'off');
+    $('#g3c-srvn').textContent=e==='xmpp'?'XMPP':'STUN';
+    $('#g3c-tubo').setAttribute('opacity',e==='xmpp'?'1':'0');
+    $('#g3c-ip').textContent=e==='gest'?'10.20.3.23':'192.168.1.10';
+    $('#g3c-x').setAttribute('opacity','0');$('#g3c-pkt').setAttribute('opacity','0');$('#g3c-lbl').textContent='';
+    $('#g3c-tv').textContent=$('#g3c-t').value+' s';$('#g3c-kv').textContent=$('#g3c-k').value+' s';
+    const txt={gest:'El equipo tiene una dirección de gestión a la que el ACS llega sin NAT de por medio. Es lo más común en redes de fibra.',
+      nat:'Entre el ACS y el equipo hay un NAT que no deja entrar nada que el equipo no haya pedido.',
+      stun:'El equipo manda mensajes de mantenimiento al servidor STUN para que el NAT recuerde el paso abierto.',
+      xmpp:'El equipo mantiene abierta una conexión con el servidor XMPP del operador (el tubo violeta).'}[e];
+    let extra='';
+    if(e==='stun'){const k=+$('#g3c-k').value;extra='<span>Con 100.000 equipos, el servidor STUN recibe '+Math.round(100000/k).toLocaleString('es')+' mensajes por segundo, solo de mantenimiento.</span>';}
+    $('#g3c-out').innerHTML='<span>'+txt+'</span>'+extra+'<span>Aprieta «Tocar el timbre».</span>';
+  }
+  async function timbre(){
+    const mio=++turno;const e=$('#g3c-esc').value;
+    $('#g3c-x').setAttribute('opacity','0');
+    const ok=async(...a)=>{await mover(...a,mio);if(mio!==turno)throw 0;};
+    const inform=async()=>{await ok([[110,140],[490,140]],'','Inform · 6 CONNECTION REQUEST');};
+    try{
+      if(e==='gest'){
+        await ok([[490,140],[110,140]],'cr','GET /cr · «llámame»');await espera(250);await inform();
+        $('#g3c-out').innerHTML='<span class="ok">El timbre entró directo y el equipo abrió una sesión en un segundo.</span><span>Sin NAT en el medio, el GET llega como cualquier pedido web.</span>';
+      }else if(e==='nat'){
+        await ok([[490,140],[262,140]],'cr','GET /cr · «llámame»');$('#g3c-x').setAttribute('opacity','1');
+        $('#g3c-out').innerHTML='<span class="warn">El NAT descartó el timbre: no sabe a qué aparato de adentro entregarlo.</span><span>La tarea queda en cola hasta la próxima llamada de rutina del equipo. Salir sí puede: cuando llame, el Inform pasará el NAT sin problema.</span>';
+      }else if(e==='stun'){
+        const T=+$('#g3c-t').value,K=+$('#g3c-k').value;
+        await ok([[110,140],[230,140],[230,64],[350,42]],'ka','mantenimiento STUN (UDP)');
+        await espera(200);
+        if(K<=T){
+          await ok([[490,140],[110,140]],'cr','timbre UDP firmado');await espera(250);await inform();
+          $('#g3c-out').innerHTML='<span class="ok">El timbre UDP entró: el NAT lo tomó como respuesta a los mensajes del equipo.</span><span>El equipo manda mantenimiento cada '+K+' s y el NAT recuerda el paso '+T+' s: el paso nunca se cierra.</span><span>Con 100.000 equipos, el servidor STUN recibe '+Math.round(100000/K).toLocaleString('es')+' mensajes por segundo.</span>';
+        }else{
+          await ok([[490,140],[262,140]],'cr','timbre UDP firmado');$('#g3c-x').setAttribute('opacity','1');
+          for(let i=2;i<=3;i++){await espera(300);await ok([[490,140],[262,140]],'cr','reintento '+i+' del timbre UDP');}
+          $('#g3c-out').innerHTML='<span class="warn">El timbre no entró: el NAT olvidó el paso.</span><span>El NAT lo recuerda '+T+' s, pero el equipo manda mantenimiento cada '+K+' s. Durante '+(K-T)+' s de cada ciclo el paso está cerrado. El ACS reintenta porque UDP no garantiza la entrega, pero mientras el paso esté cerrado no sirve.</span><span>Baja el intervalo de mantenimiento por debajo de '+T+' s.</span>';
+        }
+      }else{
+        await ok([[490,140],[470,42]],'cr','mensaje XMPP «llámame»');await ok([[400,70],[230,70],[230,132],[110,132]],'cr','por la conexión abierta');
+        await espera(250);await inform();
+        $('#g3c-out').innerHTML='<span class="ok">El timbre llegó por la conexión que el equipo ya tenía abierta hacia afuera.</span><span>Funciona con casi cualquier NAT, a cambio de que el servidor XMPP mantenga abierta una conexión por cada equipo.</span>';
+      }
+    }catch(err){}
+  }
+  $('#g3c-esc').addEventListener('change',vista);
+  $('#g3c-t').addEventListener('input',vista);$('#g3c-k').addEventListener('input',vista);
+  $('#g3c-go').addEventListener('click',timbre);
+  vista();
+})();
+</script>
+</body>
+</html>

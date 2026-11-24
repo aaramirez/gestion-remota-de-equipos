@@ -1,0 +1,829 @@
+<!doctype html>
+<html lang="es">
+<head>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-KX76XF8R');</script>
+<!-- End Google Tag Manager -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Qué es la gestión remota · Gestión remota de equipos (ACS) · Gestión remota de equipos (ACS)</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Cómo un operador configura, actualiza y diagnostica a distancia los equipos que tiene en casa de sus clientes: TR-069 y TR-369 a fondo, el modelo de datos TR-181, el aprovisionamiento sin visita, los cambios masivos, el firmware, los diagnósticos, la seguridad y la escala de un ACS.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400;1,8..60,600&display=swap">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KX76XF8R"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+<div class="wrap" data-page="que-es-la-gestion-remota">
+<header class="topbar"><a class="brand" href="index.html">Gestión <b>remota</b> de equipos</a><span class="eyebrow">Curso visual e interactivo · Industrias y finanzas</span><a class="al-sitio" href="https://aaramirez.github.io/">← Todos los cursos</a></header>
+<div class="layout">
+<nav class="toc" id="toc" aria-label="Ruta de aprendizaje"></nav>
+<main>
+<header class="page-head"><span class="num">CAPÍTULO 01 DE 16</span><h1>La visita que no se hizo: qué es la gestión remota de equipos</h1><p class="lede">El operador deja un equipo en cada casa y responde por él. Este capítulo muestra qué se puede arreglar por la red, qué exige ir y por qué esa frontera cambia las cuentas de todas las áreas.</p></header>
+<section><div class="prose"><p>Un martes a las nueve de la noche, una clienta llama a su operador de Internet. Dice que el Wi-Fi «no anda» en el cuarto de su hija. La historia puede terminar de dos maneras.</p><p>En la primera, el agente le pide que reinicie el equipo, espera, le pide que lo reinicie otra vez y, como nada cambia, agenda una visita técnica para el jueves. El jueves llega un técnico en camioneta, entra a la configuración del equipo, cambia el canal del Wi-Fi y se va. Fueron dos días sin buen servicio, una camioneta, un técnico y una hora de trabajo para mover un número.</p><p>En la segunda, el agente escribe el número de cliente, ve en su pantalla el equipo de esa casa, nota que el Wi-Fi está en un canal que comparten los doce vecinos del edificio y lo cambia a uno libre. Seis minutos después la clienta cuelga contenta. Nadie fue a ninguna casa.</p><p>La diferencia entre las dos historias no es el agente: es la <b>gestión remota de equipos</b> (<i>remote device management</i>), la capacidad del operador de configurar, actualizar y diagnosticar por la red los equipos que tiene en casa de sus clientes. De eso trata este curso, y este capítulo dibuja el mapa: qué equipos son, qué se puede hacer sin ir, qué no, quién lo usa y cuánto cambia las cuentas.</p></div><figure class="fig fig-arquitectura" id="01-diagrama-1"><div class="lienzo"><svg viewBox="0 0 900 370" style="min-width:720px" role="img" aria-label="Dónde estamos: en la casa del cliente, la ONT con router y Wi-Fi, un punto de malla, el decodificador y el teléfono; en la red del operador, la OLT, unida a la ONT por fibra, y el ACS, al que cada equipo de la casa llama por TR-069 o USP; a la derecha, la pantalla de atención, el CRM, el inventario y la mesa de ayuda, conectados con el ACS">
+  <defs>
+    <marker id="f1-fl-apl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--c-apl)"/></marker>
+    <marker id="f1-fl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--muted)"/></marker>
+    <symbol id="f1-ont" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="10" rx="1.6"/><path d="M8 12h.01M11 12h.01M14 12h.01"/><path d="M12 18v3.5"/><circle cx="12" cy="4.5" r="1.6"/></g></symbol>
+    <symbol id="f1-router" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="13" width="18" height="7" rx="1.6"/><path d="M7 13 5.5 6M17 13l1.5-7"/><path d="M7 16.5h.01M10 16.5h.01"/><path d="M9.5 6.5a3.5 3.5 0 0 1 5 0M8 4.6a6 6 0 0 1 8 0"/></g></symbol>
+    <symbol id="f1-tv" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="12" rx="1.5"/><path d="M8 21.5h8M12 18v3.5"/><path d="M8.5 2.5 12 6l3.5-3.5"/></g></symbol>
+    <symbol id="f1-tel" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3.5h3.5l2 5-2.5 1.6a11 11 0 0 0 5.9 5.9l1.6-2.5 5 2V19a2 2 0 0 1-2 2A16.5 16.5 0 0 1 3 5.5a2 2 0 0 1 2-2z"/></g></symbol>
+    <symbol id="f1-olt" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="1.6"/><path d="M3 9h18M3 15h18"/><path d="M6 6h.01M9 6h.01M6 12h.01M9 12h.01M6 18h.01M9 18h.01"/><path d="M14 6h4M14 12h4M14 18h4"/></g></symbol>
+    <symbol id="f1-srv" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="7" rx="1.5"/><rect x="4" y="14" width="16" height="7" rx="1.5"/><path d="M8 6.5h.01M8 17.5h.01M12 6.5h5M12 17.5h5"/></g></symbol>
+    <symbol id="f1-mon" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M8 20h8M12 16v4"/><path d="M6 12l3-3 3 2 4-4"/></g></symbol>
+  </defs>
+
+  <rect x="10" y="10" width="300" height="350" rx="12" class="d-casa"/>
+  <rect x="320" y="10" width="270" height="350" rx="12" class="d-oper"/>
+  <rect x="600" y="10" width="290" height="350" rx="12" class="d-sis"/>
+  <text x="160" y="34" text-anchor="middle" class="t t-xs t-b k-casa">CASA DEL CLIENTE (CPE)</text>
+  <text x="455" y="34" text-anchor="middle" class="t t-xs t-b k-oper">RED DEL OPERADOR</text>
+  <text x="745" y="34" text-anchor="middle" class="t t-xs t-b k-sis">SISTEMAS DEL NEGOCIO</text>
+
+  
+  <rect x="30" y="56" width="260" height="56" rx="10" class="caja"/><use href="#f1-ont" x="40" y="67" width="34" height="34" class="ico"/>
+  <text x="84" y="80" class="t t-b">ONT con router y Wi-Fi</text><text x="84" y="98" class="t t-s t-m">termina la fibra</text>
+  <rect x="30" y="134" width="260" height="56" rx="10" class="caja"/><use href="#f1-router" x="40" y="145" width="34" height="34" class="ico"/>
+  <text x="84" y="158" class="t t-b">Punto de Wi-Fi de malla</text><text x="84" y="176" class="t t-s t-m">amplía la cobertura</text>
+  <rect x="30" y="212" width="260" height="56" rx="10" class="caja"/><use href="#f1-tv" x="40" y="223" width="34" height="34" class="ico"/>
+  <text x="84" y="236" class="t t-b">Decodificador de TV</text><text x="84" y="254" class="t t-s t-m">set-top box (STB)</text>
+  <rect x="30" y="290" width="260" height="56" rx="10" class="caja"/><use href="#f1-tel" x="40" y="301" width="34" height="34" class="ico"/>
+  <text x="84" y="314" class="t t-b">Teléfono fijo</text><text x="84" y="332" class="t t-s t-m">puerto de voz de la ONT</text>
+
+  
+  <rect x="350" y="56" width="210" height="56" rx="10" class="caja"/><use href="#f1-olt" x="360" y="67" width="34" height="34" class="ico"/>
+  <text x="404" y="80" class="t t-b">OLT</text><text x="404" y="98" class="t t-s t-m">atiende las ONT</text>
+  <line x1="290" y1="76" x2="350" y2="76" class="ln s-fis" style="stroke-width:3"/>
+  <text x="320" y="68" text-anchor="middle" class="t t-xs t-b k-fis">FIBRA</text>
+
+  
+  <rect x="350" y="196" width="210" height="88" rx="10" class="c-apl" style="stroke-width:2"/><use href="#f1-srv" x="362" y="210" width="34" height="34" class="ico"/>
+  <text x="406" y="226" class="t t-b">ACS</text><text x="406" y="244" class="t t-s">servidor de</text><text x="406" y="259" class="t t-s">autoconfiguración</text>
+  <text x="455" y="182" text-anchor="middle" class="t t-s t-b k-apl">TR-069 o USP</text>
+
+  
+  <path d="M290 98C320 98 322 214 348 214" class="ln s-apl" style="stroke-width:2" marker-end="url(#f1-fl-apl)"/>
+  <path d="M290 162C318 162 322 230 348 230" class="ln s-apl" style="stroke-width:2" marker-end="url(#f1-fl-apl)"/>
+  <path d="M290 240C318 240 322 248 348 248" class="ln s-apl" style="stroke-width:2" marker-end="url(#f1-fl-apl)"/>
+  <path d="M290 318C320 318 322 266 348 266" class="ln s-apl" style="stroke-width:2" marker-end="url(#f1-fl-apl)"/>
+  <text x="455" y="312" text-anchor="middle" class="t t-s t-m">Cada equipo llama al ACS</text>
+  <text x="455" y="328" text-anchor="middle" class="t t-s t-m">y recibe órdenes en esa llamada</text>
+
+  
+  <rect x="620" y="56" width="250" height="56" rx="10" class="caja"/><use href="#f1-mon" x="630" y="67" width="34" height="34" class="ico"/>
+  <text x="674" y="80" class="t t-b">Pantalla de atención</text><text x="674" y="98" class="t t-s t-m">agentes y soporte</text>
+  <rect x="620" y="134" width="250" height="56" rx="10" class="caja"/><use href="#f1-mon" x="630" y="145" width="34" height="34" class="ico"/>
+  <text x="674" y="158" class="t t-b">CRM</text><text x="674" y="176" class="t t-s t-m">la ficha de cada cliente</text>
+  <rect x="620" y="212" width="250" height="56" rx="10" class="caja"/><use href="#f1-mon" x="630" y="223" width="34" height="34" class="ico"/>
+  <text x="674" y="236" class="t t-b">Inventario</text><text x="674" y="254" class="t t-s t-m">equipos en comodato</text>
+  <rect x="620" y="290" width="250" height="56" rx="10" class="caja"/><use href="#f1-mon" x="630" y="301" width="34" height="34" class="ico"/>
+  <text x="674" y="314" class="t t-b">Mesa de ayuda</text><text x="674" y="332" class="t t-s t-m">casos y visitas</text>
+  <path d="M562 222C592 222 590 84 618 84" class="ln" marker-start="url(#f1-fl)" marker-end="url(#f1-fl)"/>
+  <path d="M562 234C592 234 590 162 618 162" class="ln" marker-start="url(#f1-fl)" marker-end="url(#f1-fl)"/>
+  <path d="M562 246C592 246 590 240 618 240" class="ln" marker-start="url(#f1-fl)" marker-end="url(#f1-fl)"/>
+  <path d="M562 258C592 258 590 318 618 318" class="ln" marker-start="url(#f1-fl)" marker-end="url(#f1-fl)"/>
+</svg></div><figcaption><b>Dónde estamos.</b> Tres franjas: a la izquierda, la casa del cliente con sus equipos; en el medio, la red del operador; a la derecha, los sistemas del negocio. La línea naranja gruesa es la fibra, que llega de la OLT a la ONT. Las flechas rosadas son la gestión remota: cada equipo de la casa llama por la red al servidor de autoconfiguración (ACS), y el ACS le devuelve órdenes en esa misma llamada. A la derecha, las pantallas de atención, el CRM y el inventario le piden al ACS lo que necesitan. Este curso vive en las flechas rosadas.</figcaption></figure></section>
+<section><h2>El equipo del cliente: lo que el operador deja en cada casa</h2><div class="prose"><p>Todo lo que el operador instala dentro de la casa se llama <b>CPE</b> (<i>Customer Premises Equipment</i>, equipo en las instalaciones del cliente). En una red de <b>FTTH</b> (<i>Fiber To The Home</i>, fibra hasta el hogar) suelen ser cuatro tipos de aparatos:</p><ul><li><b>La ONT</b> (<i>Optical Network Terminal</i>, terminal de red óptica), la caja donde termina la fibra y la luz se convierte en datos. Muchas veces trae adentro el <b>router</b> (enrutador), que reparte la conexión entre los dispositivos de la casa, y el <b>Wi-Fi</b>, la red inalámbrica que sigue las normas IEEE 802.11. Otras veces la ONT y el router son dos cajas separadas.</li><li><b>Los puntos de Wi-Fi adicionales</b>: extensores o equipos <b>de malla</b> (<i>mesh</i>), varios puntos que trabajan como una sola red para cubrir una casa grande.</li><li><b>El decodificador</b> (<i>set-top box</i>, STB), la caja que recibe la televisión por la red y la muestra en el televisor.</li><li><b>El teléfono</b>: un puerto de voz en la propia ONT o un adaptador aparte, al que se conecta el teléfono fijo de siempre.</li></ul><p>Esos aparatos están en la casa del cliente, pero en la mayoría de los operadores siguen siendo del operador. Se entregan en <b>comodato</b> (<i>loan for use</i>, préstamo de uso): el cliente los usa mientras tenga el servicio y los devuelve al darse de baja. Hay tres razones de fondo:</p><ol class="steps"><li><span><b>El operador responde por el servicio hasta el Wi-Fi</b>, no solo hasta la puerta. Si el Wi-Fi anda mal, para el cliente «el Internet anda mal», y el reclamo llega al operador.</span></li><li><span><b>Un equipo uniforme es un equipo gestionable.</b> Si cada cliente comprara el suyo, habría cientos de modelos y nadie podría configurarlos a todos de la misma manera.</span></li><li><span><b>Un equipo vulnerable es un problema de toda la red.</b> Un router con una falla de seguridad puede terminar atacando a otros. El operador necesita poder actualizarlo.</span></li></ol><p>Para el área de finanzas, el comodato tiene otra cara: decenas de miles de equipos que son <b>activos</b> (<i>assets</i>) del operador, repartidos en casas ajenas, que hay que inventariar y recuperar. Volveremos a eso.</p></div><div class="practica"><div class="practica-title"><span class="tag">En la terminal</span><h3>Encuentra el CPE de tu casa</h3></div><p>Vas a ver la dirección del equipo que te conecta a Internet y su dirección física, que dice quién lo fabricó. Solo se lee: no cambia nada.</p><div class="cmds"><div class="cmd-tabs" role="tablist" aria-label="Sistema operativo"><button type="button" role="tab" data-so="win">Windows</button><button type="button" role="tab" data-so="mac">macOS</button><button type="button" role="tab" data-so="linux">Linux</button></div><div class="cmd-panel" role="tabpanel" data-so="win"><p class="cmd-nota">Windows (PowerShell)</p><div class="cmd-l"><code>ipconfig</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>arp -a</code><button type="button" class="copiar">Copiar</button></div></div><div class="cmd-panel" role="tabpanel" data-so="mac"><div class="cmd-l"><code>route -n get default</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>arp -a</code><button type="button" class="copiar">Copiar</button></div></div><div class="cmd-panel" role="tabpanel" data-so="linux"><div class="cmd-l"><code>ip route</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>ip neigh</code><button type="button" class="copiar">Copiar</button></div></div></div><ol class="steps"><li><span>Busca la <b>puerta de enlace</b> (<i>default gateway</i>): en Windows, la línea «Puerta de enlace predeterminada»; en macOS, <code>gateway</code>; en Linux, la dirección después de <code>default via</code>. Suele ser algo como <code>192.168.1.1</code> o <code>192.168.0.1</code>.</span></li><li><span>En la salida de <code>arp -a</code> o <code>ip neigh</code>, busca esa dirección y anota la <b>dirección MAC</b> (<i>Media Access Control address</i>, dirección de control de acceso al medio) que aparece al lado: seis pares de caracteres como <code>a4-91-b1-…</code> (Windows los separa con guiones; macOS y Linux, con dos puntos).</span></li><li><span>Copia los primeros seis caracteres y búscalos en <a href="https://maclookup.app/" target="_blank" rel="noopener">maclookup.app</a>, un buscador público y gratuito de fabricantes.</span></li></ol><p><b>Qué observar:</b> la puerta de enlace es tu CPE, la frontera entre tu casa y la red del operador. Los primeros seis caracteres de la MAC identifican al fabricante: casi siempre es una marca de equipos para operadores, no una que se vende en tiendas. Si en tu casa hay un router propio detrás del equipo del operador, verás el tuyo, no el del operador. Algunos equipos muestran una MAC «aleatoria» que el buscador no reconoce.</p></div></section>
+<section><h2>La analogía del mecánico a distancia</h2><div class="analogia"><b>Imagínalo así</b><p>Piensa en un auto moderno. El fabricante puede, sin que lo lleves al taller, actualizar el software del GPS, ajustar la radio, leer los códigos de falla del motor y avisarte que te toca un cambio de aceite. Lo hace porque el auto tiene su propia conexión y, cada tanto, se comunica con la computadora del taller. Pero si se pincha una llanta o se rompe un espejo, nadie lo arregla por Internet: alguien tiene que ir con las manos.</p></div><div class="prose"><p>En la gestión remota, el auto es el equipo de la casa, el taller es el operador y la computadora del taller es el <b>ACS</b> (<i>Auto Configuration Server</i>, servidor de autoconfiguración): un <b>servidor</b> (<i>server</i>), una computadora que da un servicio a otras, que conoce a cada equipo, guarda su configuración y le da órdenes.</p><p>El idioma entre los dos lo fija una norma del <b>Broadband Forum</b>, el consorcio de la industria de banda ancha: <b>TR-069</b> (<i>Technical Report 069</i>, informe técnico 069), cuyo nombre oficial es <b>CWMP</b> (<i>CPE WAN Management Protocol</i>, protocolo de gestión del equipo del cliente desde la red del operador). Se publicó en 2004 y hoy lo habla la gran mayoría de los routers y ONT residenciales. Su sucesor es <b>TR-369</b>, llamado <b>USP</b> (<i>User Services Platform</i>, plataforma de servicios de usuario). Los dos hablan del mismo catálogo de datos, el <b>modelo de datos</b> (<i>data model</i>) <b>TR-181</b>, un árbol donde cada dato del equipo tiene un nombre fijo, como <code>Device.WiFi.SSID.1.SSID</code> para el nombre de la red.</p><p>La analogía tiene un detalle que conviene retener desde ya: <b>es el auto el que llama al taller</b>, no al revés. El equipo de la casa suele estar detrás de <b>NAT</b> (<i>Network Address Translation</i>, traducción de direcciones de red), que comparte una dirección pública entre varios aparatos, y desde afuera no se le puede hablar directamente. Por eso el equipo llama al ACS cuando arranca y cada cierto tiempo, y el ACS aprovecha esa llamada para darle sus órdenes. Si el ACS tiene apuro, solo puede tocarle el timbre para que llame antes. El capítulo 3 cuenta esa conversación mensaje por mensaje; el capítulo 28 de <a href="https://aaramirez.github.io/telco/28-gestionar-el-equipo-en-casa-del-cliente.html" target="_blank" rel="noopener">Cómo funciona un telco</a> la presenta en una página.</p></div></section>
+<section><h2>Lo que se puede hacer sin ir</h2><div class="prose"><p>Casi todo lo que el operador le hace a un equipo a distancia cabe en cinco verbos:</p><div class="tbl"><table><thead><tr><th>Verbo</th><th>Ejemplos</th><th>Por dentro</th></tr></thead><tbody><tr><td><b>Configurar</b></td><td>Cuenta de Internet, línea de voz, control parental, puertos para la consola</td><td>Escribe parámetros y crea objetos del árbol TR-181 (cap. 4, 7 y 8)</td></tr><tr><td><b>Cambiar el Wi-Fi</b></td><td>Nombre, clave, canal, banda, red de invitados</td><td>Escribe parámetros de <code>Device.WiFi</code> (cap. 10)</td></tr><tr><td><b>Reiniciar</b></td><td>Reiniciar o volver a valores de fábrica</td><td>Órdenes <code>Reboot</code> y <code>FactoryReset</code> (cap. 4)</td></tr><tr><td><b>Actualizar</b></td><td>Instalar una versión nueva del <b>firmware</b>, el software interno del equipo</td><td>Orden <code>Download</code> con la dirección del archivo (cap. 13)</td></tr><tr><td><b>Diagnosticar</b></td><td>Ver si está en línea, sus dispositivos conectados y la señal de la fibra; un <b>ping</b> (la prueba que mide si algo responde y cuánto tarda) o una prueba de velocidad</td><td>Lee parámetros y le pide al equipo que corra pruebas (cap. 9 y 11)</td></tr></tbody></table></div><p>Hay un sexto verbo que no se ve pero que sostiene a los otros: <b>saber</b>. El ACS sabe qué modelo hay en cada casa, qué firmware tiene, cuándo llamó por última vez y cómo estaba su Wi-Fi ayer. Con eso, el agente de atención deja de preguntar «¿qué luces tiene encendidas?» y empieza a mirar.</p><p>Así se ve una de las tareas más comunes, cambiar la clave del Wi-Fi, de punta a punta:</p></div><figure class="fig fig-flujo" id="01-diagrama-2"><div class="lienzo"><svg viewBox="0 0 940 600" style="min-width:760px" role="img" aria-label="Flujo para cambiar la clave del Wi-Fi sin visita: la clienta llama al agente; el agente busca el equipo en el ACS y ve su ficha; pide el cambio; el ACS despierta al equipo con un Connection Request; el equipo llama con un Inform; el ACS manda SetParameterValues con la clave nueva; el equipo responde aplicado; el ACS avisa al agente y el agente le da la clave nueva a la clienta">
+  <defs>
+    <marker id="f2-fl-apl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--c-apl)"/></marker>
+    <marker id="f2-fl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--muted)"/></marker>
+    <symbol id="f2-persona" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></g></symbol>
+    <symbol id="f2-mon" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M8 20h8M12 16v4"/><path d="M6 12l3-3 3 2 4-4"/></g></symbol>
+    <symbol id="f2-srv" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="7" rx="1.5"/><rect x="4" y="14" width="16" height="7" rx="1.5"/><path d="M8 6.5h.01M8 17.5h.01M12 6.5h5M12 17.5h5"/></g></symbol>
+    <symbol id="f2-ont" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="10" rx="1.6"/><path d="M8 12h.01M11 12h.01M14 12h.01"/><path d="M12 18v3.5"/><circle cx="12" cy="4.5" r="1.6"/></g></symbol>
+  </defs>
+
+  
+  <rect x="30" y="14" width="150" height="56" rx="10" class="caja"/><use href="#f2-persona" x="40" y="26" width="32" height="32" class="ico"/><text x="80" y="38" class="t t-b">Clienta</text><text x="80" y="56" class="t t-s t-m">la que llama</text>
+  <rect x="245" y="14" width="150" height="56" rx="10" class="caja"/><use href="#f2-mon" x="255" y="26" width="32" height="32" class="ico"/><text x="295" y="38" class="t t-b">Agente</text><text x="295" y="56" class="t t-s t-m">con su pantalla</text>
+  <rect x="460" y="14" width="150" height="56" rx="10" class="c-apl"/><use href="#f2-srv" x="470" y="26" width="32" height="32" class="ico"/><text x="510" y="38" class="t t-b">ACS</text><text x="510" y="56" class="t t-s">del operador</text>
+  <rect x="675" y="14" width="150" height="56" rx="10" class="caja"/><use href="#f2-ont" x="685" y="26" width="32" height="32" class="ico"/><text x="725" y="38" class="t t-b">Equipo</text><text x="725" y="56" class="t t-s t-m">ONT con Wi-Fi</text>
+  <line x1="105" y1="70" x2="105" y2="560" class="vida"/>
+  <line x1="320" y1="70" x2="320" y2="560" class="vida"/>
+  <line x1="535" y1="70" x2="535" y2="560" class="vida"/>
+  <line x1="750" y1="70" x2="750" y2="560" class="vida"/>
+
+  
+  <line x1="105" y1="106" x2="318" y2="112" class="ln" style="stroke-width:2" marker-end="url(#f2-fl)"/>
+  <text x="115" y="98" class="t t-s">① «Olvidé la clave del Wi-Fi»</text>
+  
+  <line x1="320" y1="152" x2="533" y2="158" class="ln s-apl" style="stroke-width:2" marker-end="url(#f2-fl-apl)"/>
+  <text x="330" y="144" class="t t-s">② buscar el equipo del cliente</text>
+  <line x1="535" y1="198" x2="322" y2="204" class="ln s-apl" style="stroke-width:2" marker-end="url(#f2-fl-apl)"/>
+  <text x="340" y="190" class="t t-s">③ ficha: en línea, firmware 5.2</text>
+  
+  <line x1="320" y1="244" x2="533" y2="250" class="ln s-apl" style="stroke-width:2" marker-end="url(#f2-fl-apl)"/>
+  <text x="330" y="236" class="t t-s">④ cambiar la clave</text>
+  
+  <line x1="535" y1="290" x2="748" y2="296" class="ln s-apl ln-d" style="stroke-width:2" marker-end="url(#f2-fl-apl)"/>
+  <text x="545" y="282" class="t t-s">⑤ <tspan class="t-mono t-b">Connection Request</tspan></text>
+  <text x="545" y="314" class="t t-s t-m">«llámame»</text>
+  
+  <line x1="750" y1="342" x2="537" y2="348" class="ln s-apl" style="stroke-width:2.4" marker-end="url(#f2-fl-apl)"/>
+  <text x="555" y="334" class="t t-s">⑥ <tspan class="t-mono t-b">Inform</tspan> «aquí estoy»</text>
+  <text x="555" y="366" class="t t-s t-mono t-m">6 CONNECTION REQUEST</text>
+  
+  <line x1="535" y1="394" x2="748" y2="400" class="ln s-apl" style="stroke-width:2.4" marker-end="url(#f2-fl-apl)"/>
+  <text x="545" y="386" class="t t-s">⑦ <tspan class="t-mono t-b">SetParameterValues</tspan></text>
+  <text x="545" y="418" class="t t-s t-mono t-m">…KeyPassphrase = ••••</text>
+  
+  <line x1="750" y1="444" x2="537" y2="450" class="ln s-apl" style="stroke-width:2" marker-end="url(#f2-fl-apl)"/>
+  <text x="555" y="436" class="t t-s">⑧ estado 0: aplicado</text>
+  
+  <line x1="535" y1="490" x2="322" y2="496" class="ln s-apl" style="stroke-width:2" marker-end="url(#f2-fl-apl)"/>
+  <text x="340" y="482" class="t t-s">⑨ listo: clave cambiada</text>
+  <line x1="320" y1="534" x2="107" y2="540" class="ln" style="stroke-width:2" marker-end="url(#f2-fl)"/>
+  <text x="125" y="526" class="t t-s">⑩ «Tu clave nueva es…»</text>
+
+  
+  <g class="t t-xs t-b">
+    <path d="M850 140v70" class="ln s-apl" style="stroke-width:3"/><text x="860" y="172" class="k-apl">CONSULTA</text><text x="860" y="186" class="t-m">la ficha</text>
+    <path d="M850 230v228" class="ln s-apl" style="stroke-width:3"/><text x="860" y="336" class="k-apl">ORDEN</text><text x="860" y="350" class="t-m">una sesión</text><text x="860" y="364" class="t-m">TR-069</text>
+    <path d="M850 476v70" class="ln s-apl" style="stroke-width:3"/><text x="860" y="508" class="k-apl">AVISO</text><text x="860" y="522" class="t-m">al cliente</text>
+  </g>
+  <text x="14" y="330" class="t t-xs t-m" transform="rotate(-90 14 330)">EL TIEMPO CORRE HACIA ABAJO ↓</text>
+  <text x="470" y="588" text-anchor="middle" class="t t-s t-m">Todo el recorrido, de ① a ⑩, cabe en menos de un minuto.</text>
+</svg></div><figcaption><b>Cambiar la clave del Wi-Fi sin visita.</b> Cuatro participantes: la clienta, el agente de atención con su pantalla, el ACS y el equipo de la casa; el tiempo corre hacia abajo. En la fase de consulta (② y ③) el agente busca el equipo y ve su ficha. En la de orden (④ a ⑧) el ACS despierta al equipo con un <i>Connection Request</i>, el equipo llama y se presenta con un <i>Inform</i>, recibe la orden <code>SetParameterValues</code> con la clave nueva y confirma con estado 0, que quiere decir «aplicado». En la de aviso (⑨ y ⑩) la confirmación vuelve hasta la clienta. Las flechas rosadas son mensajes entre sistemas; las grises, la conversación telefónica. Todo cabe en menos de un minuto. En la sesión real hay un par de mensajes más entre ⑥ y ⑦, que el capítulo 3 muestra uno por uno.</figcaption></figure><div class="prose"><p>Pruébalo tú: en este laboratorio eres el agente, y el equipo de la casa responde, o no, según el escenario.</p></div><div class="lab" id="01-lab-3"><div class="lab-title"><span class="tag">Laboratorio</span><h3>Consola del agente: el equipo de la casa 1203</h3></div><p class="hint">Elige un escenario y aprieta una acción. Mira viajar los mensajes entre tu pantalla, el ACS y el equipo, y lee qué respondió. Prueba después con «Fibra cortada» o «Equipo desenchufado»: ¿qué ve el ACS cuando el equipo no llama?</p><style>
+[id="01-lab-3"] .g1c-ficha{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,170px),1fr));gap:6px 14px;border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:var(--paper)}
+[id="01-lab-3"] .g1c-ficha div{display:grid;gap:1px;min-width:0}
+[id="01-lab-3"] .g1c-ficha span{font:600 .7rem var(--f-display);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+[id="01-lab-3"] .g1c-ficha b{font:600 .92rem var(--f-mono);overflow-wrap:anywhere}
+[id="01-lab-3"] .g1c-ficha b.mal{color:var(--warm)}
+[id="01-lab-3"] .g1c-ficha b.bien{color:var(--good)}
+[id="01-lab-3"] svg{width:100%;max-width:560px;margin:0 auto;height:auto;display:block;background:var(--card);border-radius:8px;font-family:var(--f-display)}
+[id="01-lab-3"] svg .nodo{fill:var(--paper);stroke:var(--line);stroke-width:1.5}
+[id="01-lab-3"] svg .nodo.acs{fill:var(--c-apl-s);stroke:var(--c-apl)}
+[id="01-lab-3"] svg .nodo.caido{stroke:var(--warm);stroke-dasharray:5 4}
+[id="01-lab-3"] svg .tn{fill:var(--ink);font-size:15px;font-weight:700}
+[id="01-lab-3"] svg .ts{fill:var(--muted);font-size:12px}
+[id="01-lab-3"] svg .via{stroke:var(--line);stroke-width:2}
+[id="01-lab-3"] svg .lbl{fill:var(--c-apl);font:600 12px var(--f-mono)}
+[id="01-lab-3"] svg .pkt{fill:var(--c-apl)}
+[id="01-lab-3"] svg .pkt.cr{fill:var(--card);stroke:var(--c-apl);stroke-width:2.5}
+[id="01-lab-3"] svg .equis{stroke:var(--warm);stroke-width:3;stroke-linecap:round}
+[id="01-lab-3"] .g1c-log{list-style:none;margin:0;padding:0;display:grid;gap:4px;max-height:220px;overflow-y:auto;font:500 .82rem var(--f-mono)}
+[id="01-lab-3"] .g1c-log li{display:grid;grid-template-columns:52px minmax(0,1fr);gap:8px;padding:4px 8px;border-radius:6px;background:var(--paper)}
+[id="01-lab-3"] .g1c-log li i{font-style:normal;color:var(--muted)}
+[id="01-lab-3"] .g1c-log li.err{background:var(--warm-soft)}
+[id="01-lab-3"] .g1c-log li.ok{background:var(--good-soft)}
+</style>
+<div class="opciones">
+  <label>Escenario de la casa 1203
+    <select id="g1c-esc">
+      <option value="sano">Equipo sano</option>
+      <option value="canal">Wi-Fi en un canal saturado</option>
+      <option value="firm">Firmware viejo que se reinicia solo</option>
+      <option value="fibra">Fibra cortada (sin luz)</option>
+      <option value="luz">Equipo desenchufado</option>
+    </select></label>
+</div>
+<div class="g1c-ficha" id="g1c-ficha" aria-live="polite"></div>
+<div class="btns" id="g1c-acc">
+  <button type="button" data-a="leer">Leer estado</button>
+  <button type="button" data-a="clave">Cambiar la clave del Wi-Fi</button>
+  <button type="button" data-a="canal">Cambiar de canal</button>
+  <button type="button" data-a="reboot">Reiniciar</button>
+  <button type="button" data-a="firm">Actualizar firmware</button>
+  <button type="button" data-a="ping">Prueba de ping</button>
+</div>
+<svg viewBox="0 0 360 140" role="img" aria-label="Los mensajes viajan entre la pantalla del agente, el ACS y el equipo de la casa">
+  <line x1="106" y1="72" x2="130" y2="72" class="via"/>
+  <line x1="230" y1="72" x2="254" y2="72" class="via"/>
+  <rect x="6" y="44" width="100" height="56" rx="10" class="nodo"/>
+  <text x="56" y="69" text-anchor="middle" class="tn">Agente</text><text x="56" y="87" text-anchor="middle" class="ts">tu pantalla</text>
+  <rect x="130" y="44" width="100" height="56" rx="10" class="nodo acs"/>
+  <text x="180" y="69" text-anchor="middle" class="tn">ACS</text><text x="180" y="87" text-anchor="middle" class="ts">del operador</text>
+  <rect x="254" y="44" width="100" height="56" rx="10" class="nodo" id="g1c-eqbox"/>
+  <text x="304" y="69" text-anchor="middle" class="tn">Equipo</text><text x="304" y="87" text-anchor="middle" class="ts">casa 1203</text>
+  <text x="180" y="24" text-anchor="middle" class="lbl" id="g1c-lbl"></text>
+  <circle r="7" cx="56" cy="72" class="pkt" id="g1c-pkt" opacity="0"/>
+  <g id="g1c-x" opacity="0"><line x1="236" y1="60" x2="250" y2="84" class="equis"/><line x1="250" y1="60" x2="236" y2="84" class="equis"/></g>
+  <text x="180" y="126" text-anchor="middle" class="ts" id="g1c-reloj">tiempo simulado: 0 s</text>
+</svg>
+<ol class="g1c-log" id="g1c-log" aria-live="polite"></ol>
+<div class="readout texto" id="g1c-out" aria-live="polite"></div></div><div class="practica"><div class="practica-title"><span class="tag">En el navegador</span><h3>Lo que ve el ACS, en pequeño: la página de tu router</h3></div><p>Abre en el navegador la dirección de la puerta de enlace que encontraste en la práctica anterior (por ejemplo <code>http://192.168.1.1</code>). Si te pide usuario y clave, suelen estar en la etiqueta del equipo. <b>Solo mira: no cambies nada.</b> Si no tienes la clave o el operador bloqueó el acceso, salta al paso 3.</p><ol class="steps"><li><span>En la página de estado (<i>Status</i>), anota el modelo, la versión de firmware y el tiempo encendido (<i>uptime</i>).</span></li><li><span>Busca una sección llamada «TR-069», «Gestión remota», «ACS» o <i>Remote management</i>. Si existe, mira si tiene una dirección de ACS escrita y un intervalo de aviso periódico (<i>Periodic Inform Interval</i>).</span></li><li><span>Si no pudiste entrar, busca en la web «manual» y el modelo de tu equipo, y encuentra en el manual esa misma sección.</span></li></ol><p><b>Qué observar:</b> el modelo, el firmware y el tiempo encendido son de los primeros datos que el ACS lee de cada equipo. Si encuentras una dirección de ACS, tu operador gestiona tu equipo a distancia; muchas veces esa sección está oculta o bloqueada para el cliente, justamente para que nadie la cambie por error. El intervalo, si aparece, dice cada cuántos segundos tu equipo llama al operador «solo para reportarse».</p></div></section>
+<section><h2>Lo que siempre exige visita</h2><div class="prose"><p>La gestión remota tiene un límite claro: <b>el ACS solo puede hablar con un equipo que lo llama</b>. Y para llamar, el equipo necesita estar encendido, tener luz en la fibra y una conexión que funcione. Todo lo que rompe esa cadena es físico, y lo físico exige ir:</p><ul><li><b>La fibra rota o doblada.</b> Un poste caído, un cable pisado, un conector sucio. La luz no llega o llega muy débil, y el equipo queda mudo.</li><li><b>El equipo quemado o sin energía.</b> Una tormenta eléctrica, una gotera, una fuente de alimentación dañada. Si no enciende, no llama.</li><li><b>El equipo mal ubicado.</b> El ACS puede medir que el Wi-Fi no llega al tercer piso, pero no puede mover la caja ni tender un cable. Puede, eso sí, darle al técnico el diagnóstico antes de salir.</li><li><b>Las instalaciones y las mudanzas.</b> Alguien tiene que llevar la fibra hasta la casa nueva.</li></ul><p>Cuando el equipo no llama, el ACS es ciego, y la pregunta pasa a otro sistema: la <b>OLT</b> (<i>Optical Line Terminal</i>, terminal de línea óptica), el equipo de la central que atiende a todas las ONT de una zona. La OLT sí sabe si a esa ONT le llega luz. Si dice <b>LOS</b> (<i>Loss of Signal</i>, pérdida de señal), el problema es la fibra. Si recibió un <b><i>dying gasp</b></i> («último suspiro»), el aviso que la ONT manda al quedarse sin energía, lo primero es preguntar si se fue la luz en la casa. El capítulo 2 reparte el trabajo entre la OLT, el ACS y los demás sistemas.</p></div><figure class="fig fig-esquema" id="01-diagrama-3"><div class="lienzo"><svg viewBox="0 0 900 430" style="min-width:720px" role="img" aria-label="Árbol de decisión remoto o visita: si el equipo llamó al ACS en la última hora y el problema es de configuración, Wi-Fi o software, se resuelve a distancia; si es físico, visita con diagnóstico hecho. Si no llamó, se mira la OLT: sin luz, visita por la fibra; con último suspiro, llamar al cliente por la energía; con luz pero sin ACS, soporte a distancia">
+  <defs>
+    <marker id="f3-fl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--muted)"/></marker>
+  </defs>
+
+  
+  <rect x="290" y="14" width="320" height="60" rx="12" class="caja" style="stroke-width:2"/>
+  <text x="450" y="39" text-anchor="middle" class="t t-b">¿El equipo llamó al ACS</text>
+  <text x="450" y="58" text-anchor="middle" class="t t-b">en la última hora?</text>
+
+  <rect x="40" y="128" width="340" height="60" rx="12" class="caja" style="stroke-width:2"/>
+  <text x="210" y="153" text-anchor="middle" class="t t-b">¿El problema es de configuración,</text>
+  <text x="210" y="172" text-anchor="middle" class="t t-b">Wi-Fi o software?</text>
+
+  <rect x="520" y="128" width="340" height="60" rx="12" class="caja" style="stroke-width:2"/>
+  <text x="690" y="153" text-anchor="middle" class="t t-b">Se le pregunta a la OLT:</text>
+  <text x="690" y="172" text-anchor="middle" class="t t-b">¿le llega luz a la ONT?</text>
+
+  <path d="M450 74V100H210V126" class="ln" style="stroke-width:1.8" marker-end="url(#f3-fl)"/>
+  <path d="M450 100H690V126" class="ln" style="stroke-width:1.8" marker-end="url(#f3-fl)"/>
+  <text x="330" y="94" text-anchor="middle" class="t t-xs t-b">SÍ, LLAMÓ</text>
+  <text x="570" y="94" text-anchor="middle" class="t t-xs t-b">NO LLAMA</text>
+
+  
+  <path d="M210 188V214H105V246" class="ln" style="stroke-width:1.8" marker-end="url(#f3-fl)"/>
+  <path d="M210 214H295V246" class="ln" style="stroke-width:1.8" marker-end="url(#f3-fl)"/>
+  <path d="M690 188V214H508V246" class="ln" style="stroke-width:1.8" marker-end="url(#f3-fl)"/>
+  <path d="M690 214H658V246" class="ln" style="stroke-width:1.8" marker-end="url(#f3-fl)"/>
+  <path d="M690 214H810V246" class="ln" style="stroke-width:1.8" marker-end="url(#f3-fl)"/>
+
+  
+  <rect x="20" y="248" width="170" height="120" rx="10" class="c-enl"/>
+  <text x="32" y="270" class="t t-xs t-b k-enl">SÍ</text>
+  <text x="32" y="292" class="t t-b">A distancia</text>
+  <text x="32" y="314" class="t t-s">cambiar el Wi-Fi,</text>
+  <text x="32" y="330" class="t t-s">reiniciar, actualizar,</text>
+  <text x="32" y="346" class="t t-s">diagnosticar</text>
+
+  <rect x="210" y="248" width="170" height="120" rx="10" class="d-sis"/>
+  <text x="222" y="270" class="t t-xs t-b k-sis">NO, ES FÍSICO</text>
+  <text x="222" y="292" class="t t-b">Visita con el</text>
+  <text x="222" y="309" class="t t-b">diagnóstico hecho</text>
+  <text x="222" y="330" class="t t-s">ubicación, cableado,</text>
+  <text x="222" y="346" class="t t-s">un punto de malla</text>
+
+  <rect x="440" y="248" width="136" height="120" rx="10" class="d-sis"/>
+  <text x="452" y="270" class="t t-xs t-b k-sis">SIN LUZ (LOS)</text>
+  <text x="452" y="292" class="t t-b">Visita</text>
+  <text x="452" y="314" class="t t-s">fibra cortada,</text>
+  <text x="452" y="330" class="t t-s">doblada o un</text>
+  <text x="452" y="346" class="t t-s">conector sucio</text>
+
+  <rect x="590" y="248" width="136" height="120" rx="10" class="c-tra"/>
+  <text x="602" y="270" class="t t-xs t-b k-tra">ÚLTIMO SUSPIRO</text>
+  <text x="602" y="292" class="t t-b">Hablar con</text>
+  <text x="602" y="309" class="t t-b">el cliente</text>
+  <text x="602" y="330" class="t t-s">¿se fue la luz?</text>
+  <text x="602" y="346" class="t t-s">¿lo desenchufó?</text>
+
+  <rect x="740" y="248" width="140" height="120" rx="10" class="c-enl"/>
+  <text x="752" y="270" class="t t-xs t-b k-enl">CON LUZ</text>
+  <text x="752" y="292" class="t t-b">Soporte,</text>
+  <text x="752" y="309" class="t t-b">a distancia</text>
+  <text x="752" y="330" class="t t-s">revisar la VLAN y</text>
+  <text x="752" y="346" class="t t-s">la dirección del ACS</text>
+
+  
+  <g class="t t-s">
+    <rect x="160" y="394" width="14" height="14" rx="3" class="c-enl"/><text x="182" y="406">se resuelve sin ir</text>
+    <rect x="340" y="394" width="14" height="14" rx="3" class="d-sis"/><text x="362" y="406">exige visita</text>
+    <rect x="480" y="394" width="14" height="14" rx="3" class="c-tra"/><text x="502" y="406">se resuelve hablando con el cliente</text>
+  </g>
+</svg></div><figcaption><b>¿Remoto o visita?</b> El árbol que sigue un agente bien entrenado, de arriba hacia abajo. La primera pregunta es si el equipo llamó hace poco al ACS. Si llamó (rama izquierda), casi todo lo que no es físico se resuelve a distancia; lo físico, como la ubicación, sale en visita pero con el diagnóstico hecho. Si no llamó (rama derecha), se le pregunta a la OLT: sin luz, la visita es para la fibra; con un «último suspiro», basta con revisar la energía en la casa; con luz pero sin llamadas al ACS, el problema está en la gestión y lo resuelve soporte a distancia. En verde lo que se resuelve sin ir; en naranja, lo que exige visita; en violeta, lo que se resuelve hablando con el cliente.</figcaption></figure><div class="prose"><p>Ahora clasifica tú. Los reclamos de este laboratorio son los típicos de cualquier operador FTTH.</p></div><div class="lab" id="01-lab-1"><div class="lab-title"><span class="tag">Laboratorio</span><h3>¿Remoto o visita?</h3></div><p class="hint">Lee cada reclamo y decide si se resuelve por la red o exige que alguien vaya. Después de cada respuesta verás por qué, y con qué sistema. Al final, compara cuántas visitas habría sin un ACS y cuántas con él.</p><style>
+[id="01-lab-1"] .g1a-tarjeta{border:1px solid var(--line);border-radius:10px;background:var(--paper);padding:14px 16px;display:grid;gap:10px;min-width:0}
+[id="01-lab-1"] .g1a-num{font:700 .74rem var(--f-display);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+[id="01-lab-1"] .g1a-texto{font:500 1.12rem/1.4 var(--f-body);margin:0}
+[id="01-lab-1"] .g1a-btns{display:flex;flex-wrap:wrap;gap:8px}
+[id="01-lab-1"] .g1a-btns button{flex:1 1 140px}
+[id="01-lab-1"] .g1a-fb{border-radius:8px;padding:10px 12px;font:500 .92rem/1.45 var(--f-display);margin:0}
+[id="01-lab-1"] .g1a-fb.ok{background:var(--good-soft);border-left:4px solid var(--good)}
+[id="01-lab-1"] .g1a-fb.no{background:var(--warm-soft);border-left:4px solid var(--warm)}
+[id="01-lab-1"] .g1a-fb small{display:block;color:var(--muted);margin-top:4px}
+[id="01-lab-1"] .g1a-tira{display:grid;grid-template-columns:repeat(20,minmax(0,1fr));gap:3px}
+[id="01-lab-1"] .g1a-tira button{padding:0;height:26px;border-radius:5px;font:600 .68rem var(--f-mono);border:1px solid var(--line);background:var(--card);color:var(--muted)}
+[id="01-lab-1"] .g1a-tira button.r{background:var(--good);border-color:var(--good);color:var(--card)}
+[id="01-lab-1"] .g1a-tira button.v{background:var(--warm);border-color:var(--warm);color:var(--card)}
+[id="01-lab-1"] .g1a-tira button.act{outline:2px solid var(--ink);outline-offset:1px}
+[id="01-lab-1"] .g1a-barras{display:grid;gap:8px}
+[id="01-lab-1"] .g1a-fila{display:grid;grid-template-columns:110px minmax(0,1fr) 44px;gap:8px;align-items:center;font:500 .86rem var(--f-display)}
+[id="01-lab-1"] .g1a-track{height:18px;background:var(--paper);border:1px solid var(--line);border-radius:5px;overflow:hidden}
+[id="01-lab-1"] .g1a-track i{display:block;height:100%;transition:width .4s ease}
+[id="01-lab-1"] .g1a-fila output{font-family:var(--f-mono);text-align:right}
+@media (prefers-reduced-motion: reduce){[id="01-lab-1"] .g1a-track i{transition:none}}
+@media (max-width:560px){[id="01-lab-1"] .g1a-tira{grid-template-columns:repeat(10,minmax(0,1fr))}[id="01-lab-1"] .g1a-fila{grid-template-columns:70px minmax(0,1fr) 36px}}
+</style>
+<div class="g1a-tira" id="g1a-tira" aria-label="Los veinte reclamos: verde, a distancia; rojo, visita; vacío, sin responder"></div>
+<div class="g1a-tarjeta">
+  <span class="g1a-num" id="g1a-num"></span>
+  <p class="g1a-texto" id="g1a-texto"></p>
+  <div class="g1a-btns">
+    <button type="button" id="g1a-rem">A distancia, por la red</button>
+    <button type="button" id="g1a-vis">Hace falta una visita</button>
+  </div>
+  <p class="g1a-fb" id="g1a-fb" aria-live="polite" hidden></p>
+  <div class="btns">
+    <button type="button" id="g1a-ant">← Anterior</button>
+    <button type="button" class="primary" id="g1a-sig">Siguiente →</button>
+    <button type="button" id="g1a-rei">Empezar de nuevo</button>
+  </div>
+</div>
+<div class="g1a-barras" aria-hidden="true">
+  <div class="g1a-fila"><span>Sin ACS</span><span class="g1a-track"><i id="g1a-b-sin" style="background:var(--warm)"></i></span><output id="g1a-o-sin"></output></div>
+  <div class="g1a-fila"><span>Con ACS</span><span class="g1a-track"><i id="g1a-b-con" style="background:var(--good)"></i></span><output id="g1a-o-con"></output></div>
+</div>
+<div class="readout texto" id="g1a-out" aria-live="polite"></div></div></section>
+<section><h2>Quién lo usa y para qué</h2><div class="prose"><p>Un ACS no es una herramienta del área técnica. En un operador mediano, la usan a diario personas de casi todas las áreas, cada una con su propia ventana y sus propios permisos:</p><ul><li><b>Atención al cliente</b> (el primer nivel, quienes atienden la llamada): ve la ficha del equipo, cambia el nombre y la clave del Wi-Fi, reinicia. Su meta es resolver en la primera llamada.</li><li><b>Soporte técnico</b> (el segundo nivel): corre diagnósticos, lee parámetros avanzados, reaplica la configuración de un equipo que quedó mal.</li><li><b>El NOC</b> (<i>Network Operations Center</i>, centro de operaciones de red): mira la flota entera. Si cientos de equipos de un barrio dejan de llamar al mismo tiempo, hay una falla en la red, no en las casas.</li><li><b>Campo</b> (los técnicos que instalan y reparan): confirma desde el celular que el equipo recién instalado ya se presentó al ACS y recibió su configuración, antes de irse.</li><li><b>Ventas</b>: si el ACS muestra que el Wi-Fi no llega a toda la casa, hay una razón concreta para ofrecer un punto de malla, y si el cliente sube de plan, de 200 a 500 Mbps por ejemplo, el ACS ayuda a ver si su equipo puede con esa velocidad.</li><li><b>Finanzas</b>: sabe cuántos equipos hay en la calle, de qué modelo, cuáles están en casas de clientes dados de baja y cuántas visitas se evitaron.</li><li><b>Ingeniería</b>: prepara las configuraciones por modelo, las actualizaciones de firmware y los cambios masivos.</li></ul></div><figure class="fig fig-esquema" id="01-diagrama-4"><div class="lienzo"><svg viewBox="0 0 900 470" style="min-width:720px" role="img" aria-label="Quién usa el ACS: en el centro el ACS; a la izquierda atención, soporte y campo, que actúan sobre un equipo a la vez; a la derecha NOC, ventas y finanzas, que solo ven; abajo ingeniería, que puede cambiar la flota completa">
+  <defs>
+    <symbol id="f4-srv" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="7" rx="1.5"/><rect x="4" y="14" width="16" height="7" rx="1.5"/><path d="M8 6.5h.01M8 17.5h.01M12 6.5h5M12 17.5h5"/></g></symbol>
+  </defs>
+
+  
+  <g class="ln" style="stroke-width:1.6">
+    <path d="M300 64C330 64 320 196 350 196"/>
+    <path d="M300 232C325 232 325 220 350 220"/>
+    <path d="M300 400C330 400 320 246 350 246"/>
+    <path d="M600 64C570 64 580 196 550 196"/>
+    <path d="M600 232C575 232 575 220 550 220"/>
+    <path d="M600 400C570 400 580 246 550 246"/>
+    <path d="M450 262V350"/>
+  </g>
+
+  
+  <rect x="350" y="176" width="200" height="86" rx="12" class="c-apl" style="stroke-width:2"/>
+  <use href="#f4-srv" x="366" y="198" width="40" height="40" class="ico"/>
+  <text x="418" y="214" class="t t-b">ACS</text>
+  <text x="418" y="233" class="t t-s">un solo lugar,</text>
+  <text x="418" y="248" class="t t-s">muchas ventanas</text>
+
+  
+  <rect x="20" y="16" width="280" height="96" rx="10" class="caja"/>
+  <text x="34" y="40" class="t t-b">Atención · primer nivel</text>
+  <text x="34" y="60" class="t t-s">Ve la ficha, cambia el Wi-Fi, reinicia.</text>
+  <text x="34" y="75" class="t t-s">Meta: resolver en la primera llamada.</text>
+  <rect x="34" y="84" width="92" height="20" rx="10" class="d-casa"/><text x="80" y="98" text-anchor="middle" class="t t-xs t-b k-casa">UN EQUIPO</text>
+
+  <rect x="20" y="184" width="280" height="96" rx="10" class="caja"/>
+  <text x="34" y="208" class="t t-b">Soporte · segundo nivel</text>
+  <text x="34" y="228" class="t t-s">Diagnósticos y parámetros avanzados;</text>
+  <text x="34" y="243" class="t t-s">reaplica la configuración de un equipo.</text>
+  <rect x="34" y="252" width="92" height="20" rx="10" class="d-casa"/><text x="80" y="266" text-anchor="middle" class="t t-xs t-b k-casa">UN EQUIPO</text>
+
+  <rect x="20" y="352" width="280" height="96" rx="10" class="caja"/>
+  <text x="34" y="376" class="t t-b">Campo · técnicos</text>
+  <text x="34" y="396" class="t t-s">Confirma desde el celular que el equipo</text>
+  <text x="34" y="411" class="t t-s">nuevo ya recibió su configuración.</text>
+  <rect x="34" y="420" width="92" height="20" rx="10" class="d-casa"/><text x="80" y="434" text-anchor="middle" class="t t-xs t-b k-casa">UN EQUIPO</text>
+
+  
+  <rect x="600" y="16" width="280" height="96" rx="10" class="caja"/>
+  <text x="614" y="40" class="t t-b">NOC · operaciones de red</text>
+  <text x="614" y="60" class="t t-s">Mira la flota: si un barrio entero deja</text>
+  <text x="614" y="75" class="t t-s">de llamar, la falla es de la red.</text>
+  <rect x="614" y="84" width="60" height="20" rx="10" class="d-inet"/><text x="644" y="98" text-anchor="middle" class="t t-xs t-b k-inet">VER</text>
+
+  <rect x="600" y="184" width="280" height="96" rx="10" class="caja"/>
+  <text x="614" y="208" class="t t-b">Ventas</text>
+  <text x="614" y="228" class="t t-s">Ve si el Wi-Fi alcanza toda la casa y</text>
+  <text x="614" y="243" class="t t-s">si el equipo aguanta el plan nuevo.</text>
+  <rect x="614" y="252" width="60" height="20" rx="10" class="d-inet"/><text x="644" y="266" text-anchor="middle" class="t t-xs t-b k-inet">VER</text>
+
+  <rect x="600" y="352" width="280" height="96" rx="10" class="caja"/>
+  <text x="614" y="376" class="t t-b">Finanzas</text>
+  <text x="614" y="396" class="t t-s">Equipos en comodato, equipos por</text>
+  <text x="614" y="411" class="t t-s">recuperar y visitas evitadas.</text>
+  <rect x="614" y="420" width="60" height="20" rx="10" class="d-inet"/><text x="644" y="434" text-anchor="middle" class="t t-xs t-b k-inet">VER</text>
+
+  
+  <rect x="330" y="352" width="240" height="96" rx="10" class="caja" style="stroke-width:2"/>
+  <text x="344" y="376" class="t t-b">Ingeniería</text>
+  <text x="344" y="396" class="t t-s">Configuraciones por modelo,</text>
+  <text x="344" y="411" class="t t-s">firmware y cambios masivos.</text>
+  <rect x="344" y="420" width="88" height="20" rx="10" class="d-sis"/><text x="388" y="434" text-anchor="middle" class="t t-xs t-b k-sis">LA FLOTA</text>
+</svg></div><figcaption><b>Quién usa el ACS.</b> En el centro, el ACS; alrededor, las siete áreas que lo usan, cada una con lo que hace. La etiqueta de abajo de cada recuadro es su permiso: <b>ver</b> (solo lee), <b>un equipo</b> (puede actuar sobre un equipo a la vez) o <b>la flota</b> (puede cambiar miles a la vez). Cuanto más alcance tiene un permiso, menos personas lo tienen: un error de atención afecta a una casa, uno de ingeniería, a cien mil.</figcaption></figure><div class="prose"><p>El reparto de permisos no es burocracia. Un ACS es la herramienta más poderosa del operador sobre la casa del cliente: con un clic se cambia la configuración de un equipo, y con otro, la de todos. Por eso cada área ve solo lo que necesita, y todo queda registrado: quién cambió qué, cuándo y en qué equipo. Los capítulos 12 y 14 vuelven sobre esto.</p></div><div class="ml"><b>En la práctica</b><p>Antes de agendar una visita, un agente con ACS puede revisar en un minuto: ¿cuándo llamó el equipo por última vez?, ¿qué dice la OLT de la luz?, ¿cuántos dispositivos hay conectados y con qué señal?, ¿el firmware es el vigente? Si las cuatro respuestas están bien y el problema sigue, la visita sale con un diagnóstico en la orden de trabajo, y el técnico llega sabiendo qué buscar.</p></div></section>
+<section><h2>Las cuentas que cambian</h2><div class="prose"><p>La gestión remota se justifica con tres cuentas que cualquier área de finanzas puede seguir.</p><p><b>Visitas evitadas.</b> Una visita técnica, que en la industria se llama <i>truck roll</i> («hacer rodar el camión»), cuesta horas de técnico, vehículo, combustible, coordinación y, muchas veces, una segunda visita si el cliente no estaba. Cada reclamo que se resuelve por la red es una visita que no se paga. La cuenta es una multiplicación: equipos × reclamos que terminarían en visita × porcentaje que el ACS resuelve × costo de una visita.</p><p><b>Llamadas más cortas y que no se repiten.</b> Con la ficha del equipo en pantalla, el agente no adivina. Baja el <b>tiempo medio de atención</b> (<i>Average Handle Time</i>, AHT) y sube la <b>resolución en el primer contacto</b> (<i>First Contact Resolution</i>, FCR), el porcentaje de casos que se cierran sin que el cliente tenga que volver a llamar.</p><p><b>Clientes que no se van.</b> Esperar dos días por una visita para un problema que se arreglaba en seis minutos es una buena razón para cambiar de operador. Los operadores miden la <b>tasa de bajas</b> (<i>churn</i>), el porcentaje de clientes que se van cada mes, y la satisfacción con encuestas como el <b>NPS</b> (<i>Net Promoter Score</i>, índice de recomendación neta). Los reclamos mal resueltos se notan en los dos.</p></div><figure class="fig fig-comparacion" id="01-diagrama-5"><div class="lienzo"><svg viewBox="0 0 900 300" style="min-width:720px" role="img" aria-label="El mismo reclamo por dos caminos. Con visita: llamada de 15 minutos, espera de agenda de unos 2 días, traslado de 40 minutos, 45 minutos en la casa y 10 minutos de cierre, con cuatro personas y un vehículo. A distancia: una llamada de 8 minutos, con una persona y ningún vehículo">
+  
+  <text x="20" y="72" class="t t-b">Con visita</text>
+  <text x="20" y="90" class="t t-s t-m">≈ 2 días y 2 horas</text>
+  <rect x="150" y="56" width="60" height="32" rx="4" class="c-apl"/>
+  <rect x="214" y="56" width="220" height="32" rx="4" class="d-inet"/>
+  <path d="M316 52l8 10-8 10 8 10-8 10" class="ln" style="stroke:var(--card);stroke-width:5"/>
+  <path d="M316 52l8 10-8 10 8 10-8 10" class="ln" style="stroke-width:1.4"/>
+  <text x="268" y="76" text-anchor="middle" class="t t-xs t-b k-inet">ESPERA</text>
+  <text x="378" y="76" text-anchor="middle" class="t t-xs t-b k-inet">≈ 2 DÍAS</text>
+  <rect x="438" y="56" width="90" height="32" rx="4" class="c-fis"/>
+  <rect x="532" y="56" width="100" height="32" rx="4" class="d-sis"/>
+  <rect x="636" y="56" width="40" height="32" rx="4" class="c-red"/>
+  <g class="t t-s" text-anchor="middle">
+    <text x="180" y="108">llamada</text><text x="180" y="123" class="t-m">15 min</text>
+    <text x="324" y="108">agenda</text><text x="324" y="123" class="t-m">días, no minutos</text>
+    <text x="483" y="108">traslado</text><text x="483" y="123" class="t-m">40 min</text>
+    <text x="582" y="108">en la casa</text><text x="582" y="123" class="t-m">45 min</text>
+    <text x="656" y="108">cierre</text><text x="656" y="123" class="t-m">10 min</text>
+  </g>
+  <rect x="700" y="40" width="190" height="96" rx="10" class="caja"/>
+  <text x="714" y="62" class="t t-xs t-b t-m">QUIÉN Y QUÉ</text>
+  <text x="714" y="82" class="t t-s">4 personas: agente,</text>
+  <text x="714" y="97" class="t t-s">coordinación, técnico</text>
+  <text x="714" y="112" class="t t-s">y cierre de la orden</text>
+  <text x="714" y="127" class="t t-s t-b">1 vehículo</text>
+
+  <line x1="20" y1="156" x2="880" y2="156" class="ln ln-d"/>
+
+  
+  <text x="20" y="198" class="t t-b">A distancia</text>
+  <text x="20" y="216" class="t t-s t-m">≈ 8 minutos</text>
+  <rect x="150" y="182" width="40" height="32" rx="4" class="c-apl"/>
+  <text x="200" y="203" class="t t-s">la llamada termina con el problema resuelto</text>
+  <g class="t t-s" text-anchor="middle">
+    <text x="170" y="234">llamada</text><text x="170" y="249" class="t-m">8 min</text>
+  </g>
+  <rect x="700" y="170" width="190" height="80" rx="10" class="caja"/>
+  <text x="714" y="192" class="t t-xs t-b t-m">QUIÉN Y QUÉ</text>
+  <text x="714" y="212" class="t t-s">1 persona: el agente,</text>
+  <text x="714" y="227" class="t t-s">con el ACS</text>
+  <text x="714" y="242" class="t t-s t-b">0 vehículos</text>
+
+  <text x="20" y="285" class="t t-s t-m">Las barras no están a escala: la espera se cuenta en días; todo lo demás, en minutos. Tiempos de ejemplo.</text>
+</svg></div><figcaption><b>El mismo reclamo, dos caminos.</b> Arriba, con visita: la llamada, la espera de la agenda (que se cuenta en días y por eso la barra se corta), el viaje del técnico, el trabajo en la casa y el cierre de la orden. Abajo, a distancia: una sola llamada. A la derecha, cuántas personas y qué recursos intervienen en cada camino. Los tiempos son de ejemplo; en cada operador cambian, pero la proporción entre días y minutos se repite.</figcaption></figure><div class="prose"><p>Las cuentas tienen también una columna de costos: el ACS se paga, sea en licencias de una plataforma comercial o en servidores y personas si se usa una de <b>código abierto</b> (<i>open source</i>), cuyo código es público, como GenieACS. Hay que integrarlo con los demás sistemas, preparar configuraciones por modelo y entrenar a las áreas. Mueve los números y mira cuándo se recupera.</p></div><div class="lab" id="01-lab-2"><div class="lab-title"><span class="tag">Laboratorio</span><h3>Calculadora de visitas evitadas</h3></div><p class="hint">Mueve el número de equipos, cuántos reclamos terminan hoy en visita, el porcentaje que se resolvería a distancia, el costo de una visita y lo que cuesta el ACS: su puesta en marcha, que se paga una vez, y su operación de cada año. Las barras muestran el ahorro acumulado mes a mes durante dos años; la línea, lo gastado en el ACS. Donde las barras alcanzan a la línea, el ACS se pagó.</p><div class="ctls">
+  <label class="ctl">Equipos en casas de clientes <output id="g1b-eq-o"></output>
+    <input id="g1b-eq" type="range" min="10000" max="500000" step="10000" value="100000"></label>
+  <label class="ctl">Reclamos que hoy terminan en visita, por cada 100 equipos al año <output id="g1b-rc-o"></output>
+    <input id="g1b-rc" type="range" min="2" max="60" step="1" value="20"></label>
+  <label class="ctl">De esos, % que el ACS resolvería a distancia <output id="g1b-pc-o"></output>
+    <input id="g1b-pc" type="range" min="0" max="80" step="5" value="50"></label>
+  <label class="ctl">Costo de una visita (USD) <output id="g1b-cv-o"></output>
+    <input id="g1b-cv" type="range" min="10" max="100" step="5" value="30"></label>
+  <label class="ctl">Puesta en marcha del ACS, una vez (USD) <output id="g1b-pm-o"></output>
+    <input id="g1b-pm" type="range" min="0" max="500000" step="10000" value="150000"></label>
+  <label class="ctl">Operación del ACS al año (USD) <output id="g1b-ca-o"></output>
+    <input id="g1b-ca" type="range" min="0" max="400000" step="10000" value="60000"></label>
+</div>
+<canvas id="g1b-c" role="img" aria-label="Ahorro acumulado mes a mes frente al costo acumulado del ACS durante dos años"></canvas>
+<div class="legend"><span><i style="background:var(--good)"></i>ahorro acumulado por visitas evitadas</span><span><i style="background:var(--warm)"></i>costo acumulado del ACS</span></div>
+<div class="readout" id="g1b-out" aria-live="polite"></div>
+<p class="hint">Cifras de ejemplo, no de un operador real. La puesta en marcha incluye integrar el ACS con los demás sistemas y preparar las configuraciones; la operación, licencias o servidores y las personas que lo atienden.</p></div><div class="prose"><p>Hay un efecto que la calculadora no muestra y que a veces pesa más: la <b>cola de visitas</b>. Los técnicos son pocos y su agenda tiene un límite. Si llegan más reclamos que requieren visita de los que las cuadrillas pueden atender, la espera crece día tras día. Sacar de la cola los casos que se resuelven a distancia no solo ahorra esas visitas: acorta la espera de todos los demás, los que sí necesitan a alguien en la casa.</p></div><div class="lab" id="01-lab-4"><div class="lab-title"><span class="tag">Laboratorio</span><h3>La cola de visitas</h3></div><p class="hint">Elige cuántos reclamos que piden visita llegan por día, cuántos técnicos hay y qué porcentaje resuelve el ACS a distancia. Aprieta «Reproducir el mes» y mira crecer, o vaciarse, la cola de visitas pendientes. La línea gris es el mismo mes sin ACS.</p><div class="ctls">
+  <label class="ctl">Reclamos que piden visita, por día <output id="g1d-dem-o"></output>
+    <input id="g1d-dem" type="range" min="10" max="120" step="2" value="60"></label>
+  <label class="ctl">Técnicos en la calle (5 visitas cada uno por día) <output id="g1d-tec-o"></output>
+    <input id="g1d-tec" type="range" min="2" max="20" step="1" value="10"></label>
+  <label class="ctl">% que el ACS resuelve a distancia <output id="g1d-pc-o"></output>
+    <input id="g1d-pc" type="range" min="0" max="80" step="5" value="30"></label>
+</div>
+<div class="btns">
+  <button type="button" class="primary" id="g1d-play">Reproducir el mes</button>
+  <button type="button" id="g1d-fin">Ver el mes completo</button>
+</div>
+<canvas id="g1d-c" role="img" aria-label="Visitas pendientes en la cola, día a día durante treinta días, con y sin ACS"></canvas>
+<div class="legend"><span><i style="background:var(--accent)"></i>visitas pendientes con ACS</span><span><i style="background:var(--muted)"></i>el mismo mes sin ACS</span><span><i style="background:var(--good)"></i>capacidad de los técnicos por día</span></div>
+<div class="readout" id="g1d-out" aria-live="polite"></div></div><div class="caso"><b>Un caso real</b><p>En un operador FTTH de la región, la gestión remota empezó como una herramienta del área técnica, usada por pocas personas. El cambio grande llegó cuando la abrieron a atención al cliente, con una pantalla simple y pocos botones: ver la ficha, cambiar el Wi-Fi, reiniciar, correr una prueba. Las visitas por problemas de Wi-Fi bajaron de forma notoria y la agenda de los técnicos quedó libre para instalaciones, que son las que traen ingresos. La lección que suelen repetir estos operadores es que el valor no está en tener el servidor, sino en ponerlo en manos de quien atiende la llamada, con permisos acotados y un registro de cada cambio.</p></div></section>
+<section><h2>El operador que recorre este curso</h2><div class="prose"><p>Para que las ideas no queden en el aire, todo el curso sigue a un mismo operador, inventado: <b>Fibra Ejemplo</b>. Sus datos son ficticios, elegidos para que las cuentas sean fáciles:</p><ul><li><b>Cien mil clientes</b> de fibra hasta el hogar, en tres ciudades.</li><li><b>Equipos de tres marcas</b>, que llamaremos A, B y C: ONT con router y Wi-Fi de la marca A en la mayoría de las casas, equipos de malla de la marca B para las casas grandes y un lote antiguo de la marca C que todavía habla un modelo de datos viejo.</li><li><b>Un ACS</b> en <code>acs.ejemplo.com</code>, conectado al CRM (<i>Customer Relationship Management</i>, gestión de la relación con el cliente), donde vive la ficha de cada cliente, al inventario de equipos y a la mesa de ayuda.</li><li><b>Planes de ejemplo</b> de 200 y 500 Mbps, y una línea de voz opcional.</li></ul></div><figure class="fig fig-esquema" id="01-diagrama-6"><div class="lienzo"><svg viewBox="0 0 900 260" style="min-width:720px" role="img" aria-label="Fibra Ejemplo a lo largo del curso, en seis paradas: el mapa; cómo conversan el equipo y el ACS; el modelo de datos; el trabajo de todos los días; cambiar miles de equipos; seguro, a escala y lo que viene">
+  <line x1="75" y1="66" x2="825" y2="66" class="ln" style="stroke-width:3"/>
+  <g class="t t-xs t-b t-m" text-anchor="middle">
+    <text x="75" y="24">PARTE 1</text><text x="225" y="24">PARTE 2</text><text x="375" y="24">PARTE 3</text>
+    <text x="525" y="24">PARTE 4</text><text x="675" y="24">PARTE 5</text><text x="825" y="24">PARTE 6</text>
+  </g>
+  <circle cx="75" cy="66" r="22" class="c-apl" style="stroke-width:2.5"/>
+  <circle cx="225" cy="66" r="22" class="caja" style="stroke-width:2"/>
+  <circle cx="375" cy="66" r="22" class="caja" style="stroke-width:2"/>
+  <circle cx="525" cy="66" r="22" class="caja" style="stroke-width:2"/>
+  <circle cx="675" cy="66" r="22" class="caja" style="stroke-width:2"/>
+  <circle cx="825" cy="66" r="22" class="caja" style="stroke-width:2"/>
+  <g class="t t-b" text-anchor="middle">
+    <text x="75" y="71">1</text><text x="225" y="71">2</text><text x="375" y="71">3</text>
+    <text x="525" y="71">4</text><text x="675" y="71">5</text><text x="825" y="71">6</text>
+  </g>
+  <g class="t t-b" text-anchor="middle">
+    <text x="75" y="116">El mapa</text>
+    <text x="225" y="116">Cómo conversan el</text><text x="225" y="133">equipo y el ACS</text>
+    <text x="375" y="116">El modelo</text><text x="375" y="133">de datos</text>
+    <text x="525" y="116">El trabajo de</text><text x="525" y="133">todos los días</text>
+    <text x="675" y="116">Cambiar miles</text><text x="675" y="133">de equipos</text>
+    <text x="825" y="116">Seguro, a escala</text><text x="825" y="133">y lo que viene</text>
+  </g>
+  <g class="t t-s t-m" text-anchor="middle">
+    <text x="75" y="160">entiende qué se</text><text x="75" y="176">arregla sin ir y</text><text x="75" y="192">quién hace qué</text>
+    <text x="225" y="160">escucha a sus</text><text x="225" y="176">equipos hablar</text><text x="225" y="192">con el ACS</text>
+    <text x="375" y="160">ordena el árbol</text><text x="375" y="176">de datos de</text><text x="375" y="192">tres marcas</text>
+    <text x="525" y="160">instala, atiende</text><text x="525" y="176">y cuida el Wi-Fi</text><text x="525" y="192">sin visitas</text>
+    <text x="675" y="160">cambia cien mil</text><text x="675" y="176">equipos sin</text><text x="675" y="192">romper ninguno</text>
+    <text x="825" y="160">sobrevive al día</text><text x="825" y="176">en que todos</text><text x="825" y="192">llaman a la vez</text>
+  </g>
+  <text x="450" y="240" text-anchor="middle" class="t t-s">Fibra Ejemplo: un operador FTTH inventado, con cien mil clientes y equipos de tres marcas.</text>
+</svg></div><figcaption><b>Fibra Ejemplo a lo largo del curso.</b> Las seis paradas son las seis partes del curso, de izquierda a derecha. Debajo de cada una, lo que le pasa a Fibra Ejemplo en esa parte: entender el mapa, escuchar la conversación entre el equipo y el ACS, ordenar el árbol de datos de tres marcas, instalar y atender sin visitas, cambiar cien mil equipos sin romper ninguno y sobrevivir al día en que todos llaman a la vez.</figcaption></figure><div class="prose"><p>En el capítulo 2, Fibra Ejemplo pone orden entre sus sistemas: quién configura qué. En los capítulos 3 y 4 escuchamos a sus equipos conversar con el ACS. En la parte 3, sus ingenieros pelean con tres marcas que entienden la norma cada una a su manera. En la parte 4, instala sin tocar, atiende llamadas y cuida el Wi-Fi de sus clientes. En la parte 5, actualiza el firmware de toda la flota. Y en la parte 6, después de un corte eléctrico, cien mil equipos llaman al ACS en el mismo minuto.</p><p>Si los términos de redes de este capítulo (dirección IP, NAT, puerta de enlace) te resultan nuevos, el curso de <a href="https://aaramirez.github.io/redes-de-computadoras/temario.html" target="_blank" rel="noopener">Redes de computadoras</a> los explica desde cero, y <a href="https://aaramirez.github.io/telco/" target="_blank" rel="noopener">Cómo funciona un telco</a> muestra el viaje completo de la fibra a Internet.</p><p>La regla con la que Fibra Ejemplo trabaja, y con la que termina este capítulo, es simple: <b>todo lo que se puede resolver por la red se resuelve por la red; la visita queda para lo físico.</b></p></div><div class="quiz"><h3>Pruébate</h3><details><summary>¿Qué es un CPE y qué aparatos lo forman en una casa con fibra?</summary><p>Es el equipo en las instalaciones del cliente: la ONT (muchas veces con router y Wi-Fi), los puntos de Wi-Fi adicionales o de malla, el decodificador de TV y el puerto o adaptador de voz.</p></details><details><summary>¿Por qué el equipo de la casa suele ser del operador y no del cliente?</summary><p>Porque el operador responde por el servicio hasta el Wi-Fi, porque equipos uniformes se pueden gestionar en masa y porque necesita actualizar equipos vulnerables. Se entrega en comodato y se recupera en la baja.</p></details><details><summary>¿Cuáles son los cinco verbos de la gestión remota?</summary><p>Configurar, cambiar el Wi-Fi, reiniciar, actualizar el firmware y diagnosticar; detrás de todos está «saber» qué equipo hay en cada casa y cómo está.</p></details><details><summary>Un equipo no llama al ACS desde hace dos días. ¿Qué sistema conviene mirar y qué puede decir?</summary><p>La OLT. Si dice LOS (pérdida de señal), el problema es la fibra y hace falta visita; si registró un dying gasp, el equipo se quedó sin energía; si ve luz, el problema está en la gestión y se revisa a distancia.</p></details><details><summary>¿Por qué no todas las áreas tienen los mismos permisos en el ACS?</summary><p>Porque el alcance de un error crece con el permiso: un cambio sobre un equipo afecta a una casa, uno sobre la flota puede afectar a todas. Cada área ve y hace solo lo que necesita, y todo queda registrado.</p></details><details><summary>Además de ahorrar las visitas que evita, ¿qué otro efecto tiene la gestión remota sobre las visitas?</summary><p>Acorta la cola: los técnicos quedan libres para los casos que sí son físicos, y la espera de esos clientes baja.</p></details></div><div class="investiga"><h3>Para investigar</h3><p class="hint">Estas preguntas no se responden en el capítulo: búscalas por tu cuenta.</p><ol><li>¿Quién reparte los prefijos de fabricante de las direcciones MAC y cómo se obtiene uno?<small>Pista: busca «IEEE Registration Authority OUI».</small></li><li>¿Cómo se gestiona a distancia un cablemódem en una red de cable coaxial (DOCSIS), y en qué se parece y en qué no a un ACS?<small>Pista: busca «DOCSIS configuration file CMTS».</small></li><li>¿Por qué muchos decodificadores de TV se gestionan desde la plataforma de televisión (el <i>middleware</i>) y no siempre desde el ACS?<small>Pista: busca «IPTV middleware set-top box management».</small></li><li>¿Cómo se calcula el NPS y qué críticas se le hacen como medida de satisfacción?</li><li>¿Qué dice el regulador de telecomunicaciones de tu país sobre el equipo que el operador entrega en comodato: quién paga si se daña y si el cliente puede usar el suyo?<small>Pista: busca el reglamento de servicios o de protección al usuario de tu regulador.</small></li></ol></div><div class="vids"><span>Para saber más</span><a class="vid" href="https://aaramirez.github.io/telco/28-gestionar-el-equipo-en-casa-del-cliente.html" target="_blank" rel="noopener">Gestionar el equipo en casa del cliente, capítulo 28 de Cómo funciona un telco <small>lectura</small></a><a class="vid" href="https://www.broadband-forum.org/pdfs/tr-069-1-6-1.pdf" target="_blank" rel="noopener">TR-069: CPE WAN Management Protocol (Broadband Forum, inglés) <small>norma</small></a><a class="vid" href="https://usp.technology/" target="_blank" rel="noopener">USP, TR-369 (Broadband Forum, inglés) <small>lectura</small></a><a class="vid" href="https://github.com/genieacs/genieacs" target="_blank" rel="noopener">GenieACS, un ACS de código abierto: código y documentación (inglés) <small>referencia</small></a></div></section>
+<label class="got"><input type="checkbox" id="got"> Lo tengo claro</label>
+<nav class="pager" id="pager" aria-label="Capítulo anterior y siguiente"></nav>
+</main>
+</div>
+<footer><span>Curso abierto de aaramirez.github.io.</span><span>Sitio publicado: <a href="https://github.com/aaramirez/gestion-remota-de-equipos" target="_blank" rel="noopener">github.com/aaramirez/gestion-remota-de-equipos</a></span></footer>
+</div>
+<script src="assets/lab.js"></script>
+<script>
+(function(){
+  const {$}=window.Lab;
+  const quieto=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const X={ag:56,acs:180,eq:304};
+  const ESC={
+    sano:{llama:true,ult:'hace 3 min',fw:'5.2 (vigente)',fwOk:true,canal:'6 (2 redes vecinas)',canalOk:true,disp:7,ssid:'Casa-1203',nota:'Todo en orden: el equipo llama al ACS y responde cada orden en segundos.'},
+    canal:{llama:true,ult:'hace 2 min',fw:'5.2 (vigente)',fwOk:true,canal:'6 (12 redes vecinas)',canalOk:false,disp:9,ssid:'Casa-1203',nota:'El equipo está bien, pero su Wi-Fi comparte el canal con doce redes del edificio.'},
+    firm:{llama:true,ult:'hace 9 min',fw:'4.8 (con falla)',fwOk:false,canal:'11 (3 redes vecinas)',canalOk:true,disp:5,ssid:'Casa-1203',nota:'Esta versión de firmware tiene una falla conocida que reinicia el equipo varias veces al día.'},
+    fibra:{llama:false,ult:'hace 2 días',fw:'5.2 (vigente)',fwOk:true,canal:'6',canalOk:true,disp:'—',ssid:'Casa-1203',olt:'LOS: no le llega luz',nota:'La OLT marca pérdida de señal (LOS) desde hace dos días.'},
+    luz:{llama:false,ult:'hace 40 min',fw:'5.2 (vigente)',fwOk:true,canal:'6',canalOk:true,disp:'—',ssid:'Casa-1203',olt:'último aviso de energía (dying gasp)',nota:'Antes de callar, la ONT avisó a la OLT que se quedaba sin energía.'}
+  };
+  let s, t=0, corriendo=false, turno=0;
+  const espera=ms=>new Promise(r=>setTimeout(r,quieto?0:ms));
+  function ficha(){
+    const f=[['Cliente','1203 · plan 500 Mbps'],['Equipo','ONT con Wi-Fi · marca A'],['Firmware',s.fw,s.fwOk?'':'mal'],
+      ['Última llamada al ACS',s.ult,s.llama?'bien':'mal'],['Wi-Fi',s.ssid],['Canal',s.canal,s.canalOk?'':'mal'],['Dispositivos conectados',String(s.disp)]];
+    if(s.olt)f.push(['La OLT dice',s.olt,'mal']);
+    $('#g1c-ficha').innerHTML=f.map(([k,v,c])=>'<div><span>'+k+'</span><b class="'+(c||'')+'">'+v+'</b></div>').join('');
+    $('#g1c-eqbox').setAttribute('class','nodo'+(s.llama?'':' caido'));
+  }
+  function log(txt,cls){const li=document.createElement('li');if(cls)li.className=cls;li.innerHTML='<i>'+t.toFixed(1).replace('.',',')+' s</i><span>'+txt+'</span>';const ol=$('#g1c-log');ol.appendChild(li);ol.scrollTop=ol.scrollHeight;}
+  function reloj(){$('#g1c-reloj').textContent='tiempo simulado: '+(t<120?t.toFixed(1).replace('.',',')+' s':(t/60).toFixed(1).replace('.',',')+' min');}
+  function viaje(de,a,txt,seg,opt){
+    opt=opt||{};const mio=turno;
+    return new Promise(res=>{
+      const p=$('#g1c-pkt');p.setAttribute('class','pkt'+(opt.cr?' cr':''));
+      $('#g1c-lbl').textContent=X[a]<X[de]?'← '+txt:txt+' →';
+      const x0=X[de],x1=opt.falla?(X[a]-66):X[a],dur=quieto?0:900,ini=performance.now();
+      p.setAttribute('opacity','1');
+      // setTimeout y no requestAnimationFrame: así la animación termina aunque la pestaña quede en segundo plano
+      function paso(){
+        if(mio!==turno)return res(false);
+        const k=dur?Math.min(1,(performance.now()-ini)/dur):1;
+        p.setAttribute('cx',x0+(x1-x0)*k);
+        if(k<1)setTimeout(paso,25);
+        else{p.setAttribute('opacity',opt.falla?'.25':'0');t+=seg;reloj();res(true);}
+      }
+      paso();
+    });
+  }
+  const RPC={
+    leer:{rpc:'GetParameterValues',resp:'GetParameterValuesResponse',fin:()=>'Leíste el estado: firmware '+s.fw+', canal '+s.canal+', '+s.disp+' dispositivos.'},
+    clave:{rpc:'SetParameterValues · KeyPassphrase',resp:'estado 0: aplicado',fin:()=>'Clave cambiada. Los dispositivos de la casa tendrán que conectarse con la clave nueva.'},
+    canal:{rpc:'SetParameterValues · Channel = 1',resp:'estado 0: aplicado',fx:()=>{s.canal='1 (2 redes vecinas)';s.canalOk=true;},fin:()=>'El Wi-Fi pasó al canal 1, que casi nadie usa en el edificio. Reclamo resuelto sin visita.'},
+    reboot:{rpc:'Reboot',resp:'RebootResponse',reinicio:true,fin:()=>'El equipo se reinició y volvió a llamar con el evento 1 BOOT.'+(s.fwOk?'':' Pero con este firmware volverá a reiniciarse solo: el problema de fondo es la versión.')},
+    firm:{rpc:'Download · firmware 5.2',resp:'DownloadResponse',descarga:true,fx:()=>{s.fw='5.2 (vigente)';s.fwOk=true;},fin:()=>'Firmware actualizado a 5.2. El equipo avisó con 7 TRANSFER COMPLETE. Se acabaron los reinicios.'},
+    ping:{rpc:'diagnóstico de ping',resp:'resultado: 0 % de pérdida, 9 ms',fin:()=>'El equipo llega sin problemas a Internet: si el cliente nota lentitud, hay que mirar su Wi-Fi.'}
+  };
+  async function accion(a){
+    if(corriendo)return;corriendo=true;const mio=++turno;
+    $('#g1c-log').innerHTML='';t=0;reloj();$('#g1c-x').setAttribute('opacity','0');$('#g1c-out').innerHTML='<span>En curso…</span>';
+    document.querySelectorAll('#g1c-acc button').forEach(b=>b.disabled=true);
+    const r=RPC[a];
+    const ok=async(...q)=>{const v=await viaje(...q);if(mio!==turno)throw 0;return v;};
+    try{
+      log('Pides «'+r.rpc+'» al ACS');
+      await ok('ag','acs','orden pendiente',0.3);
+      log('El ACS toca el timbre del equipo (Connection Request)');
+      if(!s.llama){
+        await ok('acs','eq','Connection Request',1.5,{cr:true,falla:true});
+        $('#g1c-x').setAttribute('opacity','1');
+        for(let k=0;k<3;k++){await espera(350);t+=10;reloj();log('… sin respuesta ('+(k+1)+'.º intento)','err');}
+        await ok('acs','ag','el equipo no responde',0.3);
+        log('El ACS avisa: el equipo no llama desde '+s.ult.replace('hace ',''),'err');
+        $('#g1c-out').innerHTML='<span class="warn">El ACS no puede hacer nada: solo habla con equipos que lo llaman.</span><span>'+s.nota+'</span><span>'+
+          (s.olt.startsWith('LOS')?'Veredicto: <b>visita</b>. El problema es la fibra, y ninguna orden la arregla.':'Veredicto: <b>llamar al cliente</b>. Lo más probable es que se haya ido la luz o que desenchufaran el equipo.')+'</span>';
+        return;
+      }
+      await ok('acs','eq','Connection Request',0.4,{cr:true});
+      await ok('eq','acs','Inform · 6 CONNECTION REQUEST',0.6);
+      log('El equipo llama y se presenta con un Inform');
+      await ok('acs','eq',r.rpc,0.4);
+      log('El ACS manda la orden: '+r.rpc);
+      if(r.descarga){
+        await ok('eq','acs','DownloadResponse',0.3);log('El equipo acepta y empieza a descargar el archivo');
+        await espera(500);t+=90;reloj();log('Descarga e instalación (unos 90 s)');
+        await espera(400);t+=60;reloj();log('El equipo se reinicia con el firmware nuevo (unos 60 s)');
+        await ok('eq','acs','Inform · 1 BOOT, 7 TRANSFER COMPLETE',0.6);log('Vuelve a llamar: «terminé la descarga»','ok');
+      }else if(r.reinicio){
+        await ok('eq','acs','RebootResponse',0.3);log('El equipo confirma y se reinicia');
+        await espera(500);t+=60;reloj();log('Reinicio (unos 60 s): por un minuto la casa no tiene Internet');
+        await ok('eq','acs','Inform · 1 BOOT',0.6);log('Vuelve a llamar con el evento 1 BOOT','ok');
+      }else{
+        await ok('eq','acs',r.resp,a==='ping'?3:0.4);log('El equipo responde: '+r.resp,'ok');
+      }
+      if(r.fx)r.fx();
+      await ok('acs','ag','resultado',0.3);
+      ficha();
+      $('#g1c-out').innerHTML='<span class="ok">'+r.fin()+'</span><span>Tiempo total: '+(t<120?t.toFixed(1).replace('.',',')+' segundos':(t/60).toFixed(1).replace('.',',')+' minutos')+'. Una visita habría tardado días.</span>';
+    }catch(e){}
+    finally{if(mio===turno){corriendo=false;document.querySelectorAll('#g1c-acc button').forEach(b=>b.disabled=false);}}
+  }
+  function escenario(){
+    turno++;corriendo=false;
+    s=Object.assign({},ESC[$('#g1c-esc').value]);
+    $('#g1c-log').innerHTML='';t=0;reloj();$('#g1c-lbl').textContent='';$('#g1c-pkt').setAttribute('opacity','0');$('#g1c-x').setAttribute('opacity','0');
+    document.querySelectorAll('#g1c-acc button').forEach(b=>b.disabled=false);
+    ficha();
+    $('#g1c-out').innerHTML='<span>'+s.nota+'</span><span>Elige una acción.</span>';
+  }
+  $('#g1c-acc').addEventListener('click',ev=>{const b=ev.target.closest('button');if(b)accion(b.dataset.a);});
+  $('#g1c-esc').addEventListener('change',escenario);
+  escenario();
+})();
+</script>
+<script>
+(function(){
+  const {$}=window.Lab;
+  // r: se resuelve por la red; g: sin ACS, el cliente podría hacerlo solo con instrucciones por teléfono (o lo hace otro sistema)
+  const R=[
+    {t:'«Olvidé la clave del Wi-Fi.»',r:1,g:0,p:'El ACS cambia la clave (SetParameterValues sobre Device.WiFi) mientras el cliente espera en la línea. Sin ACS, habría que guiarlo a entrar a la configuración del equipo, y pocos tienen la clave de administrador.'},
+    {t:'«El Internet anda lento solo de noche, en el cuarto del fondo.»',r:1,g:0,p:'El ACS muestra la señal de cada dispositivo y el canal del Wi-Fi. Cambiar de canal o de banda se hace a distancia; si la casa es grande, el diagnóstico justifica ofrecer un punto de malla.'},
+    {t:'«Se cayó un poste y desde entonces la luz roja del equipo parpadea.»',r:0,g:0,p:'Luz roja y un poste caído: la fibra está cortada. El equipo no puede llamar al ACS, y la OLT marca pérdida de señal (LOS). Es una visita, quizás a toda la calle.'},
+    {t:'«Quiero cambiarle el nombre a mi red.»',r:1,g:0,p:'Es un parámetro del árbol (Device.WiFi.SSID.1.SSID). El ACS lo cambia en segundos.'},
+    {t:'«El equipo no enciende: ninguna luz, nada.»',r:0,g:0,p:'Si después de probar otro enchufe sigue sin luces, el equipo o su fuente están dañados. Un equipo apagado no llama: hay que llevar uno nuevo.'},
+    {t:'«Pasé del plan de 200 al de 500 Mbps y sigo navegando a 200.»',r:1,g:1,p:'A distancia, pero no por el ACS: la velocidad del plan la aplican RADIUS y el BNG en la sesión del cliente. El ACS ayuda a confirmar que el equipo soporta la velocidad nueva. Lo vemos en el capítulo 2.'},
+    {t:'«Creo que un vecino está usando mi Wi-Fi.»',r:1,g:0,p:'El ACS lista los dispositivos conectados (Device.Hosts). Si hay intrusos, se cambia la clave a distancia.'},
+    {t:'«Me mudo a otra casa el mes que viene.»',r:0,g:0,p:'Hay que llevar la fibra a la casa nueva: es una instalación. En el ACS, el equipo cambia de dirección y de ficha, pero alguien tiene que ir.'},
+    {t:'«La consola de juegos dice que mi NAT es estricto.»',r:1,g:0,p:'El ACS puede activar la apertura automática de puertos o crear una regla (AddObject en la tabla de reenvío de puertos). Sin ACS, pocos clientes se animan a hacerlo solos.'},
+    {t:'«Movimos el mueble y el cable fino del equipo quedó doblado detrás.»',r:0,g:0,p:'Un cable de fibra doblado deja pasar poca luz: la potencia óptica cae y la conexión se corta a ratos. Se ve desde la OLT, pero se arregla con las manos.'},
+    {t:'«El teléfono fijo no tiene tono.»',r:1,g:0,p:'Primero a distancia: el ACS revisa si la línea de voz del equipo está registrada y vuelve a cargar su cuenta. Solo si el problema es el cableado interno hace falta ir.'},
+    {t:'«Desde la mañana no hay Internet en todo el edificio.»',r:0,g:0,p:'Muchos equipos de un mismo lugar dejaron de llamar a la vez: es una avería de la red, no de las casas. Va una cuadrilla a la red (la fibra o la OLT), no a cada departamento. El NOC lo ve primero.'},
+    {t:'«El Wi-Fi no llega al tercer piso de mi casa.»',r:0,g:0,p:'El ACS confirma el diagnóstico (señal débil en los dispositivos del tercer piso), pero ningún ajuste atraviesa tres losas: hace falta un punto de malla o un cable. Visita, con el diagnóstico hecho.'},
+    {t:'«El equipo se reinicia solo varias veces al día.»',r:1,g:0,p:'El ACS registra cada reinicio (el evento 1 BOOT) y la versión de firmware. Si es una falla conocida de esa versión, se actualiza a distancia.'},
+    {t:'«Quiero activar el control parental para mis hijos.»',r:1,g:0,p:'Es configuración del equipo: horarios y sitios bloqueados se escriben como parámetros. Muchos operadores lo ofrecen además en su aplicación, que por detrás usa el ACS.'},
+    {t:'«Hubo una gotera y el equipo se mojó.»',r:0,g:0,p:'Agua y electricidad: el equipo se reemplaza. Ninguna orden lo seca.'},
+    {t:'«Me llegó un aviso de que mi equipo tiene una falla de seguridad.»',r:1,g:0,p:'Se instala un firmware nuevo a distancia con la orden Download. Es uno de los motivos por los que el equipo es del operador: hay que poder actualizarlo.'},
+    {t:'«La televisión se congela y el decodificador dice "sin señal".»',r:1,g:1,p:'Se diagnostica y se reinicia el decodificador a distancia. Reiniciarlo es algo que el cliente también puede hacer con instrucciones por teléfono.'},
+    {t:'«Cambiamos el equipo de cuarto y ahora no conecta.»',r:0,g:0,p:'Al mover la ONT se suele forzar o desconectar la fibra. Sin luz, el equipo no llama. Visita, y una buena explicación de dónde no mover el equipo.'},
+    {t:'«No puedo entrar a la página del banco; las demás sí abren.»',r:1,g:0,p:'Desde el ACS se ve qué servidor de nombres (DNS) usa el equipo y se puede pedir una prueba desde el propio equipo. Casi siempre se resuelve sin ir.'}
+  ];
+  const N=R.length; let i=0; const resp=new Array(N).fill(null);
+  function tira(){
+    $('#g1a-tira').innerHTML=R.map((x,k)=>{const a=resp[k];const c=a===null?'':(x.r?'r':'v');
+      return '<button type="button" data-k="'+k+'" class="'+c+(k===i?' act':'')+'" aria-label="Reclamo '+(k+1)+(a===null?', sin responder':'')+'">'+(k+1)+'</button>';}).join('');
+  }
+  function pintar(){
+    const x=R[i],a=resp[i];
+    $('#g1a-num').textContent='Reclamo '+(i+1)+' de '+N;
+    $('#g1a-texto').textContent=x.t;
+    $('#g1a-rem').setAttribute('aria-pressed',a===1?'true':'false');
+    $('#g1a-vis').setAttribute('aria-pressed',a===0?'true':'false');
+    const fb=$('#g1a-fb');
+    if(a===null){fb.hidden=true;}
+    else{fb.hidden=false;const bien=a===x.r;fb.className='g1a-fb '+(bien?'ok':'no');
+      fb.innerHTML='<b>'+(bien?'Correcto: ':'No: ')+(x.r?'se resuelve por la red.':'hace falta ir.')+'</b> '+x.p;}
+    $('#g1a-ant').disabled=i===0;
+    $('#g1a-sig').disabled=i===N-1;
+    tira();resumen();
+  }
+  function resumen(){
+    const hechas=resp.filter(v=>v!==null).length;
+    const aciertos=resp.filter((v,k)=>v!==null&&v===R[k].r).length;
+    // visitas reales en los reclamos ya respondidos
+    let sin=0,con=0;
+    R.forEach((x,k)=>{if(resp[k]===null)return; if(!x.r){sin++;con++;} else if(!x.g){sin++;}});
+    const max=Math.max(1,hechas);
+    $('#g1a-b-sin').style.width=(sin/max*100)+'%';$('#g1a-b-con').style.width=(con/max*100)+'%';
+    $('#g1a-o-sin').textContent=sin;$('#g1a-o-con').textContent=con;
+    if(!hechas){$('#g1a-out').innerHTML='<span>Responde el primer reclamo. Las barras cuentan cuántas visitas habría, entre los reclamos que ya clasificaste, sin ACS y con ACS.</span>';return;}
+    let h='<span>Respondiste '+hechas+' de '+N+' · aciertos: <b>'+aciertos+'</b></span>'+
+      '<span>Visitas sin ACS: <b class="warn">'+sin+'</b> · con ACS: <b class="ok">'+con+'</b> · ahorradas: <b>'+(sin-con)+'</b></span>';
+    if(hechas===N){
+      h+='<span>De cada '+N+' reclamos de este juego, el ACS evita '+(sin-con)+' visitas: '+Math.round((sin-con)/N*100)+' %. Las '+con+' que quedan son físicas: fibra, energía, agua, ubicación. Sin ACS, solo los casos que el cliente puede resolver siguiendo instrucciones por teléfono, o que resuelve otro sistema, se salvan de la visita.</span>';
+    }
+    $('#g1a-out').innerHTML=h;
+  }
+  function elegir(v){resp[i]=v;pintar();}
+  $('#g1a-rem').addEventListener('click',()=>elegir(1));
+  $('#g1a-vis').addEventListener('click',()=>elegir(0));
+  $('#g1a-ant').addEventListener('click',()=>{if(i>0){i--;pintar();}});
+  $('#g1a-sig').addEventListener('click',()=>{if(i<N-1){i++;pintar();}});
+  $('#g1a-rei').addEventListener('click',()=>{resp.fill(null);i=0;pintar();});
+  $('#g1a-tira').addEventListener('click',ev=>{const b=ev.target.closest('button');if(b){i=+b.dataset.k;pintar();}});
+  pintar();
+})();
+</script>
+<script>
+(function(){
+  const {$,tok,canvasWidget}=window.Lab;
+  const MESES=24;
+  const miles=n=>Math.round(n).toLocaleString('es');
+  const usd=n=>(n<0?'−':'')+'USD '+miles(Math.abs(n));
+  const v=id=>+$(id).value;
+  function datos(){
+    const eq=v('#g1b-eq'),rc=v('#g1b-rc'),pc=v('#g1b-pc'),cv=v('#g1b-cv'),pm=v('#g1b-pm'),ca=v('#g1b-ca');
+    const visitas=eq/100*rc, evitadas=visitas*pc/100, ahorro=evitadas*cv;
+    const ahorroMes=ahorro/12, costoMes=ca/12;
+    const ganaMes=ahorroMes-costoMes;
+    const cruce=ganaMes>0?Math.max(0,pm/ganaMes):Infinity;
+    return {eq,rc,pc,cv,pm,ca,visitas,evitadas,ahorro,ahorroMes,costoMes,cruce};
+  }
+  const dibujar=canvasWidget($('#g1b-c'),w=>w<520?0.8:0.42,(ctx,w,h)=>{
+    const d=datos();
+    const L=w<520?54:70,R=12,T=14,B=30,pw=w-L-R,ph=h-T-B;
+    const tope=Math.max(d.ahorroMes*MESES,d.pm+d.costoMes*MESES,1)*1.08;
+    const Y=y=>T+ph-y/tope*ph;
+    ctx.clearRect(0,0,w,h);
+    ctx.font='11px '+tok('--f-mono');ctx.textBaseline='middle';
+    const paso=[1e4,2e4,5e4,1e5,2e5,5e5,1e6,2e6,5e6,1e7,2e7,5e7].find(s=>tope/s<=5)||1e8;
+    for(let y=0;y<=tope;y+=paso){ctx.strokeStyle=tok('--grid');ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(L,Y(y));ctx.lineTo(w-R,Y(y));ctx.stroke();
+      ctx.fillStyle=tok('--muted');ctx.textAlign='right';ctx.fillText(y>=1e6?(y/1e6).toLocaleString('es')+' M':(y/1e3)+' mil',L-6,Y(y));}
+    const bw=pw/MESES;
+    for(let m=1;m<=MESES;m++){
+      const a=d.ahorroMes*m,x=L+(m-1)*bw;
+      ctx.fillStyle=tok('--good');ctx.globalAlpha=m<=d.cruce?.45:.9;ctx.fillRect(x+bw*.14,Y(a),bw*.72,T+ph-Y(a));ctx.globalAlpha=1;
+      if(m%(w<520?6:3)===0){ctx.fillStyle=tok('--muted');ctx.textAlign='center';ctx.fillText(String(m),x+bw/2,T+ph+12);}
+    }
+    ctx.fillStyle=tok('--muted');ctx.textAlign='left';ctx.fillText('mes',L,T+ph+24);
+    ctx.strokeStyle=tok('--warm');ctx.lineWidth=2.5;ctx.beginPath();
+    for(let m=0;m<=MESES;m++){const x=L+m*bw,y=Y(d.pm+d.costoMes*m);m?ctx.lineTo(x,y):ctx.moveTo(x,y);}ctx.stroke();
+    if(d.cruce<=MESES){
+      const x=L+d.cruce*bw,y=Y(d.pm+d.costoMes*d.cruce);
+      ctx.strokeStyle=tok('--ink');ctx.setLineDash([3,3]);ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x,T);ctx.lineTo(x,T+ph);ctx.stroke();ctx.setLineDash([]);
+      ctx.beginPath();ctx.arc(x,y,5,0,7);ctx.fillStyle=tok('--ink');ctx.fill();
+    }
+  });
+  function leer(){
+    const d=datos();
+    $('#g1b-eq-o').textContent=miles(d.eq);$('#g1b-rc-o').textContent=d.rc;$('#g1b-pc-o').textContent=d.pc+' %';
+    $('#g1b-cv-o').textContent=usd(d.cv);$('#g1b-pm-o').textContent=usd(d.pm);$('#g1b-ca-o').textContent=usd(d.ca);
+    const neto1=d.ahorro-d.pm-d.ca, neto2=2*d.ahorro-d.pm-2*d.ca;
+    let h='<span>Visitas al año sin ACS: '+miles(d.visitas)+' · con ACS: '+miles(d.visitas-d.evitadas)+'</span>'+
+      '<span class="big">Visitas evitadas: '+miles(d.evitadas)+' al año → '+usd(d.ahorro)+' que no se gastan</span>'+
+      '<span>Por cada equipo: '+(d.ahorro/d.eq).toFixed(2).replace('.',',')+' USD al año</span>'+
+      '<span>Resultado neto: primer año '+usd(neto1)+' · segundo año acumulado '+usd(neto2)+'</span>';
+    if(d.cruce===Infinity) h+='<span class="warn">El ahorro de cada mes no alcanza a pagar la operación del ACS: con estos números no se recupera nunca solo con visitas evitadas. Faltaría sumar las llamadas más cortas y los clientes que no se van.</span>';
+    else if(d.cruce>MESES) h+='<span class="warn">Se recupera en el mes '+Math.ceil(d.cruce)+', fuera del gráfico: más de dos años.</span>';
+    else h+='<span class="ok">El ACS se paga en el mes '+Math.max(1,Math.ceil(d.cruce))+': ahí el ahorro acumulado alcanza a lo gastado (la línea punteada).</span>';
+    $('#g1b-out').innerHTML=h;
+    dibujar();
+  }
+  ['#g1b-eq','#g1b-rc','#g1b-pc','#g1b-cv','#g1b-pm','#g1b-ca'].forEach(s=>$(s).addEventListener('input',leer));
+  leer();
+})();
+</script>
+<script>
+(function(){
+  const {$,tok,canvasWidget}=window.Lab;
+  const DIAS=30, POR_TEC=5;
+  const quieto=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let hasta=DIAS, timer=null;
+  // variación fija por día: más reclamos los lunes, menos los domingos
+  const FACT=[1.25,1.1,1.0,0.95,1.0,0.85,0.6];
+  function simular(pc){
+    const dem=+$('#g1d-dem').value;
+    let cola=0;const serie=[0];
+    for(let d=0;d<DIAS;d++){
+      const llegan=Math.round(dem*FACT[d%7]*(1-pc/100));
+      const atiende=Math.min(cola+llegan,Math.round(+$('#g1d-tec').value*POR_TEC*(d%7===6?0.4:1)));
+      cola=cola+llegan-atiende;serie.push(cola);
+    }
+    return serie;
+  }
+  const dibujar=canvasWidget($('#g1d-c'),w=>w<520?0.75:0.4,(ctx,w,h)=>{
+    const pc=+$('#g1d-pc').value, con=simular(pc), sin=simular(0);
+    const cap=+$('#g1d-tec').value*POR_TEC;
+    const L=w<520?40:48,R=12,T=12,B=28,pw=w-L-R,ph=h-T-B;
+    const tope=Math.max(10,...sin,...con,cap)*1.1;
+    const X=d=>L+d/DIAS*pw, Y=v=>T+ph-v/tope*ph;
+    ctx.clearRect(0,0,w,h);ctx.font='11px '+tok('--f-mono');ctx.textBaseline='middle';
+    const paso=[5,10,20,50,100,200,500,1000,2000,5000].find(s=>tope/s<=6)||10000;
+    for(let v=0;v<=tope;v+=paso){ctx.strokeStyle=tok('--grid');ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(L,Y(v));ctx.lineTo(w-R,Y(v));ctx.stroke();
+      ctx.fillStyle=tok('--muted');ctx.textAlign='right';ctx.fillText(String(v),L-6,Y(v));}
+    ctx.textAlign='center';
+    for(let d=0;d<=DIAS;d+=5)ctx.fillText(String(d),X(d),T+ph+12);
+    ctx.textAlign='left';ctx.fillText('día',L,T+ph+24);
+    // capacidad
+    ctx.strokeStyle=tok('--good');ctx.setLineDash([5,4]);ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(L,Y(cap));ctx.lineTo(w-R,Y(cap));ctx.stroke();ctx.setLineDash([]);
+    // sin ACS
+    ctx.strokeStyle=tok('--muted');ctx.lineWidth=2;ctx.beginPath();
+    for(let d=0;d<=hasta;d++){d?ctx.lineTo(X(d),Y(sin[d])):ctx.moveTo(X(d),Y(sin[d]));}ctx.stroke();
+    // con ACS (área)
+    ctx.beginPath();ctx.moveTo(X(0),Y(0));
+    for(let d=0;d<=hasta;d++)ctx.lineTo(X(d),Y(con[d]));
+    ctx.lineTo(X(hasta),Y(0));ctx.closePath();ctx.fillStyle=tok('--accent');ctx.globalAlpha=.18;ctx.fill();ctx.globalAlpha=1;
+    ctx.strokeStyle=tok('--accent');ctx.lineWidth=2.5;ctx.beginPath();
+    for(let d=0;d<=hasta;d++){d?ctx.lineTo(X(d),Y(con[d])):ctx.moveTo(X(d),Y(con[d]));}ctx.stroke();
+    ctx.beginPath();ctx.arc(X(hasta),Y(con[hasta]),4.5,0,7);ctx.fillStyle=tok('--accent');ctx.fill();
+  });
+  function leer(){
+    const pc=+$('#g1d-pc').value, dem=+$('#g1d-dem').value, tec=+$('#g1d-tec').value;
+    $('#g1d-dem-o').textContent=dem;$('#g1d-tec-o').textContent=tec;$('#g1d-pc-o').textContent=pc+' %';
+    const con=simular(pc), sin=simular(0), cap=tec*POR_TEC;
+    const diaCon=con[hasta], diaSin=sin[hasta];
+    const espera=c=>c/cap;
+    const fmt=x=>x<0.05?'menos de un día':(x.toFixed(1).replace('.',',')+' días');
+    let h='<span>Día '+hasta+' de '+DIAS+'</span>'+
+      '<span class="big">Visitas pendientes con ACS: '+diaCon+' → espera de '+fmt(espera(diaCon))+'</span>'+
+      '<span>Sin ACS: '+diaSin+' pendientes → espera de '+fmt(espera(diaSin))+'</span>'+
+      '<span>Llegan unas '+Math.round(dem*(1-pc/100))+' visitas por día con ACS y '+dem+' sin ACS; los técnicos atienden hasta '+cap+' (menos los domingos).</span>';
+    if(hasta===DIAS){
+      const crece=con[DIAS]>con[DIAS-7]+2;
+      h+=crece?'<span class="warn">La cola con ACS sigue creciendo: llegan más visitas de las que se atienden. Faltan técnicos o falta resolver más a distancia.</span>'
+              :'<span class="ok">La cola con ACS se mantiene a raya. Cada caso resuelto a distancia es un hueco en la agenda para quien sí necesita a un técnico.</span>';
+    }
+    $('#g1d-out').innerHTML=h;
+    dibujar();
+  }
+  function parar(){if(timer){clearInterval(timer);timer=null;}$('#g1d-play').textContent='Reproducir el mes';}
+  $('#g1d-play').addEventListener('click',()=>{
+    if(timer){parar();return;}
+    if(quieto){hasta=DIAS;leer();return;}
+    hasta=0;leer();$('#g1d-play').textContent='Pausa';
+    timer=setInterval(()=>{hasta++;leer();if(hasta>=DIAS)parar();},220);
+  });
+  $('#g1d-fin').addEventListener('click',()=>{parar();hasta=DIAS;leer();});
+  ['#g1d-dem','#g1d-tec','#g1d-pc'].forEach(s=>$(s).addEventListener('input',()=>{if(!timer)hasta=DIAS;leer();}));
+  leer();
+})();
+</script>
+</body>
+</html>

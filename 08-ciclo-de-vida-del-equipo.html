@@ -1,0 +1,470 @@
+<!doctype html>
+<html lang="es">
+<head>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-KX76XF8R');</script>
+<!-- End Google Tag Manager -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ciclo de vida del equipo · Gestión remota de equipos (ACS) · Gestión remota de equipos (ACS)</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Cómo un operador configura, actualiza y diagnostica a distancia los equipos que tiene en casa de sus clientes: TR-069 y TR-369 a fondo, el modelo de datos TR-181, el aprovisionamiento sin visita, los cambios masivos, el firmware, los diagnósticos, la seguridad y la escala de un ACS.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400;1,8..60,600&display=swap">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KX76XF8R"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+<div class="wrap" data-page="ciclo-de-vida-del-equipo">
+<header class="topbar"><a class="brand" href="index.html">Gestión <b>remota</b> de equipos</a><span class="eyebrow">Curso visual e interactivo · Industrias y finanzas</span><a class="al-sitio" href="https://aaramirez.github.io/">← Todos los cursos</a></header>
+<div class="layout">
+<nav class="toc" id="toc" aria-label="Ruta de aprendizaje"></nav>
+<main>
+<header class="page-head"><span class="num">CAPÍTULO 08 DE 16</span><h1>Del alta a la baja: el equipo en los procesos del negocio</h1><p class="lede">Un equipo pasa años en una casa: cambia de plan, se daña, se muda, se corta, se reconecta y un día vuelve al almacén. Este capítulo sigue esa vida y muestra qué hace el ACS en cada momento y qué espera de los demás sistemas.</p></header>
+<section><div class="prose"><p>En el capítulo 7 vimos cómo un equipo de Fibra Ejemplo llega en blanco a una casa, se presenta al ACS con un <code>0 BOOTSTRAP</code> y recibe su plan sin que el técnico toque una pantalla. Esa es la primera hora de su vida. Le quedan, con suerte, cinco o seis años más. En este capítulo seguimos a uno de ellos, el de la casa 1207, que empezó con el plan de 200 Mbps.</p><p>En ese tiempo, la clienta va a subir de plan, un rayo va a quemar la fuente del equipo, su hija va a tomar el servicio a su nombre, la familia se va a mudar dos calles más allá, un mes se le va a olvidar pagar y, algún día, va a darse de baja. Cada uno de esos momentos nace en un sistema del negocio (el CRM, la facturación, el inventario) y termina, o no, en el equipo de la casa.</p><p>Este capítulo sigue esa vida completa. La pregunta en cada parada es la misma: <b>¿qué tiene que pasar en el equipo, quién lo ordena y qué dato necesita el ACS de los demás para hacerlo bien?</b> El capítulo 2 repartió el trabajo entre sistemas; aquí lo vemos moverse en el tiempo.</p></div></section>
+<section><h2>El ciclo de vida: alta, operación, cambio, reemplazo y baja</h2><div class="analogia"><b>Imagínalo así</b><p>Piensa en un auto de una empresa de alquiler a largo plazo. Sale del concesionario, se entrega a un cliente, recibe sus revisiones, a veces cambia de conductor o de ciudad, a veces se avería y se reemplaza por otro igual mientras lo reparan, y al final del contrato vuelve, se limpia por dentro, se revisa y se alquila de nuevo. La empresa lleva una ficha de cada auto y una de cada cliente, y lo importante es que las dos fichas siempre digan lo mismo.</p></div><div class="prose"><p>El equipo de la casa vive el mismo recorrido. En la industria se le dice <b>ciclo de vida</b> (<i>lifecycle</i>) y tiene cinco etapas grandes:</p><ol class="steps"><li><span><b>Alta</b> (<i>activation</i>): el equipo sale del almacén, se instala y se asocia a un cliente. Es el aprovisionamiento del capítulo 7.</span></li><li><span><b>Operación</b> (<i>in service</i>): el día a día. El equipo llama al ACS cada tanto, atención le cambia la clave del Wi-Fi, soporte corre un diagnóstico.</span></li><li><span><b>Cambio</b> (<i>modify</i>): algo del contrato se mueve: el plan, el titular, la dirección o los servicios contratados.</span></li><li><span><b>Reemplazo</b> (<i>swap</i>): el equipo se daña o queda viejo y otro toma su lugar, con la misma configuración del cliente.</span></li><li><span><b>Baja</b> (<i>deactivation</i>): el cliente se va, el equipo se recupera, se borra y vuelve al almacén para empezar otra vida.</span></li></ol><p>Hay además un estado que no es una etapa sino una pausa: la <b>suspensión</b> por falta de pago, que va y vuelve dentro de la operación.</p></div><figure class="fig fig-esquema" id="08-diagrama-1"><div class="lienzo"><svg viewBox="0 0 940 470" style="min-width:760px" role="img" aria-label="Ciclo de vida del equipo: del almacén al alta, a la operación; desde la operación, cambios de plan, titular o dirección que vuelven a la operación; suspensión por falta de pago que vuelve con el pago; reemplazo cuando el equipo se daña; baja cuando el cliente se va, y reacondicionamiento que devuelve el equipo al almacén">
+  <defs>
+    <marker id="f8a-fl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--muted)"/></marker>
+    <marker id="f8a-fl-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--c-red)"/></marker>
+    <marker id="f8a-fl-apl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--c-apl)"/></marker>
+  </defs>
+
+  
+  <rect x="30" y="40" width="170" height="64" rx="12" class="d-sis"/>
+  <text x="115" y="66" text-anchor="middle" class="t t-b">Almacén</text>
+  <text x="115" y="86" text-anchor="middle" class="t t-s t-m">manda: inventario</text>
+
+  <rect x="270" y="40" width="170" height="64" rx="12" class="c-apl"/>
+  <text x="355" y="66" text-anchor="middle" class="t t-b">Alta</text>
+  <text x="355" y="86" text-anchor="middle" class="t t-s">manda: ACS (cap. 7)</text>
+
+  <rect x="510" y="40" width="170" height="64" rx="12" class="c-apl" style="stroke-width:2.4"/>
+  <text x="595" y="66" text-anchor="middle" class="t t-b">Operación</text>
+  <text x="595" y="86" text-anchor="middle" class="t t-s">manda: ACS</text>
+
+  <rect x="750" y="40" width="170" height="64" rx="12" class="d-sis"/>
+  <text x="835" y="66" text-anchor="middle" class="t t-b">Cambio</text>
+  <text x="835" y="86" text-anchor="middle" class="t t-s t-m">nace en el CRM</text>
+
+  <rect x="580" y="200" width="150" height="64" rx="12" class="c-red"/>
+  <text x="655" y="226" text-anchor="middle" class="t t-b">Suspensión</text>
+  <text x="655" y="246" text-anchor="middle" class="t t-s">manda: RADIUS</text>
+
+  <rect x="765" y="200" width="160" height="64" rx="12" class="caja" style="stroke-dasharray:6 4"/>
+  <text x="845" y="226" text-anchor="middle" class="t t-b">Reemplazo</text>
+  <text x="845" y="246" text-anchor="middle" class="t t-s t-m">otro equipo, misma config.</text>
+
+  <rect x="420" y="350" width="170" height="64" rx="12" class="d-sis"/>
+  <text x="505" y="376" text-anchor="middle" class="t t-b">Baja</text>
+  <text x="505" y="396" text-anchor="middle" class="t t-s t-m">nace en el CRM</text>
+
+  <rect x="150" y="350" width="170" height="64" rx="12" class="d-oper"/>
+  <text x="235" y="376" text-anchor="middle" class="t t-b">Reacondicionado</text>
+  <text x="235" y="396" text-anchor="middle" class="t t-s t-m">taller e inventario</text>
+
+  
+  <line x1="200" y1="72" x2="266" y2="72" class="ln" style="stroke-width:2" marker-end="url(#f8a-fl)"/>
+  <text x="233" y="32" text-anchor="middle" class="t t-s">instalación</text>
+  <line x1="440" y1="72" x2="506" y2="72" class="ln s-apl" style="stroke-width:2" marker-end="url(#f8a-fl-apl)"/>
+  <text x="473" y="32" text-anchor="middle" class="t t-s">plan cargado</text>
+
+  <line x1="680" y1="60" x2="746" y2="60" class="ln" style="stroke-width:2" marker-end="url(#f8a-fl)"/>
+  <line x1="750" y1="90" x2="684" y2="90" class="ln s-apl" style="stroke-width:2" marker-end="url(#f8a-fl-apl)"/>
+  <text x="715" y="24" text-anchor="middle" class="t t-s">plan, titular,</text>
+  <text x="715" y="37" text-anchor="middle" class="t t-s">mudanza</text>
+  <text x="738" y="122" class="t t-s t-m">ACS ajusta</text>
+
+  <line x1="625" y1="104" x2="625" y2="196" class="ln s-red" style="stroke-width:2" marker-end="url(#f8a-fl-red)"/>
+  <line x1="690" y1="200" x2="690" y2="108" class="ln s-red" style="stroke-width:2" marker-end="url(#f8a-fl-red)"/>
+  <text x="619" y="150" text-anchor="end" class="t t-s">corte</text>
+  <text x="619" y="164" text-anchor="end" class="t t-s t-m">(sin pago)</text>
+  <text x="698" y="150" class="t t-s">pago:</text>
+  <text x="698" y="164" class="t t-s">reconexión</text>
+
+  <path d="M680 100 L790 196" class="ln" style="stroke-width:2;stroke-dasharray:6 4" marker-end="url(#f8a-fl)"/>
+  <path d="M900 196 L900 108" class="ln s-apl" style="stroke-width:2;stroke-dasharray:6 4" marker-end="url(#f8a-fl-apl)"/>
+  <text x="792" y="150" class="t t-s">se daña</text>
+  <text x="908" y="150" class="t t-s" transform="rotate(-90 908 150)" text-anchor="middle">vuelve</text>
+
+  <line x1="545" y1="104" x2="545" y2="346" class="ln" style="stroke-width:2" marker-end="url(#f8a-fl)"/>
+  <text x="537" y="300" text-anchor="end" class="t t-s">el cliente</text>
+  <text x="537" y="314" text-anchor="end" class="t t-s">se va</text>
+  <line x1="640" y1="264" x2="586" y2="350" class="ln s-red" style="stroke-width:2" marker-end="url(#f8a-fl-red)"/>
+  <text x="626" y="314" class="t t-s">deuda sin pagar</text>
+
+  <line x1="420" y1="382" x2="324" y2="382" class="ln" style="stroke-width:2" marker-end="url(#f8a-fl)"/>
+  <text x="372" y="436" text-anchor="middle" class="t t-s">recuperar</text>
+  <text x="372" y="450" text-anchor="middle" class="t t-s">y borrar</text>
+  <path d="M190 350 L120 108" class="ln" style="stroke-width:2" marker-end="url(#f8a-fl)"/>
+  <text x="166" y="240" class="t t-s">firmware al día,</text>
+  <text x="166" y="254" class="t t-s">ficha limpia</text>
+
+  
+  <g class="t t-s">
+    <rect x="620" y="428" width="14" height="14" rx="3" class="c-apl"/><text x="640" y="439">el ACS actúa</text>
+    <rect x="732" y="428" width="14" height="14" rx="3" class="c-red"/><text x="752" y="439">RADIUS</text>
+    <rect x="818" y="428" width="14" height="14" rx="3" class="d-sis"/><text x="838" y="439">negocio</text>
+  </g>
+</svg></div><figcaption><b>El ciclo de vida del equipo.</b> Las cajas son los estados por los que pasa un equipo; las flechas, los eventos del negocio que lo hacen pasar de uno a otro. El ciclo empieza arriba a la izquierda, en el almacén, y se cierra cuando el equipo reacondicionado vuelve a él. Debajo del nombre de cada caja está el sistema que manda en ese estado: el inventario en el almacén, el ACS en el alta y la operación, RADIUS en la suspensión. La caja punteada de abajo a la derecha es el reemplazo: el equipo dañado sale del ciclo hacia reparación y otro entra en su lugar sin que el cliente pierda su configuración.</figcaption></figure><div class="prose"><p>Detrás del dibujo hay una regla de oro: <b>el equipo tiene dos dueños de datos y los dos tienen que estar de acuerdo</b>. El inventario sabe qué número de serie está en qué casa; el CRM sabe qué contrató cada cliente. El ACS no inventa ninguna de las dos cosas: las recibe y actúa. Si el inventario dice que la serie ZYX123 está en la casa 1207 pero en realidad está en la 1204, el ACS le cargará a un vecino el Wi-Fi de otro. Por eso cada evento del ciclo empieza por corregir esas fichas, y solo después llega al equipo.</p><p>Recorre tú la vida de un equipo durante tres años y mira quién trabaja en cada momento.</p></div><div class="lab" id="08-lab-1"><div class="lab-title"><span class="tag">Laboratorio</span><h3>Línea de vida de un equipo</h3></div><p class="hint">Avanza por los diez eventos de tres años de la casa 1207, con los botones o tocando cada punto de la línea. En cada evento se encienden los sistemas que actúan y se atenúan los que solo se enteran. Lleva la cuenta: ¿en cuántos eventos trabaja el ACS y en cuántos no lo necesitan?</p><style>
+[id="08-lab-1"] .g8a-linea{width:100%;height:auto;display:block;font-family:var(--f-display)}
+[id="08-lab-1"] .g8a-linea .eje{stroke:var(--line);stroke-width:3}
+[id="08-lab-1"] .g8a-linea .hecho{stroke:var(--accent);stroke-width:3}
+[id="08-lab-1"] .g8a-linea .mk circle{fill:var(--card);stroke:var(--muted);stroke-width:2;cursor:pointer}
+[id="08-lab-1"] .g8a-linea .mk.visto circle{stroke:var(--accent)}
+[id="08-lab-1"] .g8a-linea .mk.acs circle{fill:var(--c-apl-s)}
+[id="08-lab-1"] .g8a-linea .mk.actual circle{fill:var(--accent);stroke:var(--accent)}
+[id="08-lab-1"] .g8a-linea .mk:focus{outline:none}
+[id="08-lab-1"] .g8a-linea .mk:focus circle{stroke:var(--ink);stroke-width:3}
+[id="08-lab-1"] .g8a-linea .num{fill:var(--ink);font:700 12px var(--f-mono);pointer-events:none}
+[id="08-lab-1"] .g8a-linea .mk.actual .num{fill:var(--card)}
+[id="08-lab-1"] .g8a-linea .mes{fill:var(--muted);font:500 11px var(--f-mono)}
+[id="08-lab-1"] .g8a-sis{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,150px),1fr));gap:8px}
+[id="08-lab-1"] .g8a-sis div{border:1.5px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--paper);opacity:.45;transition:opacity .25s}
+[id="08-lab-1"] .g8a-sis div b{display:block;font:700 .86rem var(--f-display)}
+[id="08-lab-1"] .g8a-sis div span{display:block;font:500 .8rem var(--f-body);color:var(--muted);margin-top:2px}
+[id="08-lab-1"] .g8a-sis div.actua{opacity:1;border-color:var(--accent);background:var(--accent-soft)}
+[id="08-lab-1"] .g8a-sis div.actua span{color:var(--ink)}
+[id="08-lab-1"] .g8a-sis div.sabe{opacity:.8;border-style:dashed}
+[id="08-lab-1"] .g8a-sis div.g8a-acs.actua{border-color:var(--c-apl);background:var(--c-apl-s)}
+@media (prefers-reduced-motion: reduce){[id="08-lab-1"] .g8a-sis div{transition:none}}
+</style>
+<svg class="g8a-linea" id="g8a-svg" viewBox="0 0 640 74" role="group" aria-label="Línea de tiempo de tres años con diez eventos; cada punto se puede elegir"></svg>
+<div class="btns">
+  <button type="button" id="g8a-ant">← Evento anterior</button>
+  <button type="button" id="g8a-sig" class="primary">Evento siguiente →</button>
+  <button type="button" id="g8a-rei">Volver al inicio</button>
+</div>
+<div class="readout texto" id="g8a-ev" aria-live="polite"></div>
+<div class="g8a-sis" id="g8a-sis"></div>
+<div class="legend"><span><i style="background:var(--accent)"></i>actúa en este evento</span><span><i style="background:var(--c-apl)"></i>el ACS actúa</span><span><i style="background:var(--line)"></i>solo se entera o no participa</span></div>
+<div class="readout" id="g8a-cuenta" aria-live="polite"></div></div></section>
+<section><h2>Cambio de plan: lo que cambia en la red y lo que cambia en el equipo</h2><div class="prose"><p>La clienta de la casa 1207 pasa de 200 a 500 Mbps. Para ventas es un clic en el CRM. Para la red son varias piezas que se mueven, y el orden importa.</p><p><b>Lo que cambia en la red.</b> La velocidad del plan no la pone el equipo de la casa, la pone la red. RADIUS guarda el perfil del cliente y el <b>BNG</b> (<i>Broadband Network Gateway</i>, puerta de enlace de banda ancha), el equipo que atiende las sesiones de los clientes, aplica el límite. Para que el cambio valga sin cortar la conexión, RADIUS le manda al BNG un <b>CoA</b> (<i>Change of Authorization</i>, cambio de autorización), el mismo mensaje del corte suave del capítulo 2, ahora para subir la velocidad. En algunas redes también cambia el perfil de ancho de banda que la OLT reserva para esa ONT en la fibra compartida. Todo eso ocurre en segundos y sin el ACS.</p><p><b>Lo que cambia en el equipo.</b> A veces nada. Pero muchas veces hay ajustes que sí son del ACS:</p><ul><li><b>Revisar que el equipo pueda.</b> Un equipo viejo con Wi-Fi de una sola banda o puertos de 100 Mbps nunca entregará 500 Mbps. El ACS sabe qué modelo y qué firmware hay en la casa, y por eso el CRM le pregunta antes de vender el plan.</li><li><b>Ajustar el Wi-Fi.</b> Para que 500 Mbps lleguen al celular hace falta la banda de 5 GHz con canales anchos. Si el plan anterior dejaba el equipo con ajustes conservadores, el ACS los cambia (el capítulo 10 los explica).</li><li><b>Cambiar límites locales.</b> Algunos operadores aplican parte de la <b>calidad de servicio</b> (<i>Quality of Service</i>, QoS), las reglas que priorizan unos tráficos sobre otros, dentro del propio equipo. Si es así, el ACS las actualiza.</li><li><b>Verificar.</b> Al final, el ACS le pide al equipo una prueba de velocidad hacia un servidor del operador. Si mide 480 Mbps, el cambio quedó; si mide 190, algo no se aplicó. El capítulo 9 muestra cómo se hace esa prueba.</li></ul><p><b>El orden.</b> Primero la red, después el equipo, al final la verificación. Si el ACS verifica antes de que el BNG suba el límite, la prueba de velocidad dará el plan viejo y el sistema creerá que falló. Y si el equipo no puede con el plan nuevo, se descubre antes de vender, no después.</p></div><figure class="fig fig-flujo" id="08-diagrama-2"><div class="lienzo"><svg viewBox="0 0 1060 620" style="min-width:780px" role="img" aria-label="Flujo del cambio de plan de 200 a 500 Mbps: el CRM pregunta al ACS si el equipo puede; el CRM pide el perfil nuevo a RADIUS; RADIUS manda un CoA al BNG; si hace falta, la OLT amplía el perfil; el equipo llama con un Inform y el ACS ajusta el Wi-Fi; el ACS pide una prueba de velocidad, el equipo devuelve el resultado y el ACS confirma al CRM">
+  <defs>
+    <marker id="f8b-fl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--muted)"/></marker>
+    <marker id="f8b-fl-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--c-red)"/></marker>
+    <marker id="f8b-fl-apl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--c-apl)"/></marker>
+  </defs>
+
+  
+  <rect x="18" y="14" width="124" height="52" rx="10" class="d-sis"/><text x="80" y="37" text-anchor="middle" class="t t-b">CRM</text><text x="80" y="54" text-anchor="middle" class="t t-s t-m">la orden</text>
+  <rect x="168" y="14" width="124" height="52" rx="10" class="c-red"/><text x="230" y="37" text-anchor="middle" class="t t-b">RADIUS</text><text x="230" y="54" text-anchor="middle" class="t t-s">el perfil</text>
+  <rect x="318" y="14" width="124" height="52" rx="10" class="c-red"/><text x="380" y="37" text-anchor="middle" class="t t-b">BNG</text><text x="380" y="54" text-anchor="middle" class="t t-s">el límite</text>
+  <rect x="468" y="14" width="124" height="52" rx="10" class="caja"/><text x="530" y="37" text-anchor="middle" class="t t-b">OLT</text><text x="530" y="54" text-anchor="middle" class="t t-s t-m">la fibra</text>
+  <rect x="618" y="14" width="124" height="52" rx="10" class="c-apl"/><text x="680" y="37" text-anchor="middle" class="t t-b">ACS</text><text x="680" y="54" text-anchor="middle" class="t t-s">el equipo</text>
+  <rect x="768" y="14" width="124" height="52" rx="10" class="caja"/><text x="830" y="37" text-anchor="middle" class="t t-b">Equipo</text><text x="830" y="54" text-anchor="middle" class="t t-s t-m">casa 1207</text>
+  <line x1="80" y1="66" x2="80" y2="575" class="vida"/>
+  <line x1="230" y1="66" x2="230" y2="575" class="vida"/>
+  <line x1="380" y1="66" x2="380" y2="575" class="vida"/>
+  <line x1="530" y1="66" x2="530" y2="575" class="vida"/>
+  <line x1="680" y1="66" x2="680" y2="575" class="vida"/>
+  <line x1="830" y1="66" x2="830" y2="575" class="vida"/>
+
+  
+  <line x1="80" y1="112" x2="677" y2="112" class="ln s-apl" style="stroke-width:2" marker-end="url(#f8b-fl-apl)"/>
+  <text x="92" y="104" class="t t-s">① ¿el equipo de la casa 1207 puede con 500 Mbps?</text>
+  <line x1="680" y1="160" x2="83" y2="160" class="ln s-apl" style="stroke-width:2" marker-end="url(#f8b-fl-apl)"/>
+  <text x="392" y="152" class="t t-s">② sí: modelo con Wi-Fi de dos bandas, firmware vigente</text>
+
+  
+  <line x1="80" y1="214" x2="227" y2="214" class="ln" style="stroke-width:2" marker-end="url(#f8b-fl)"/>
+  <text x="90" y="206" class="t t-s">③ perfil 500</text>
+  <line x1="230" y1="262" x2="377" y2="262" class="ln s-red" style="stroke-width:2.4" marker-end="url(#f8b-fl-red)"/>
+  <text x="240" y="254" class="t t-s">④ <tspan class="t-mono t-b">CoA</tspan></text>
+  <text x="240" y="280" class="t t-s t-m">límite nuevo en segundos</text>
+  <line x1="80" y1="314" x2="527" y2="314" class="ln ln-d" style="stroke-width:2" marker-end="url(#f8b-fl)"/>
+  <text x="250" y="306" class="t t-s">⑤ si hace falta: más reserva en la fibra</text>
+
+  
+  <line x1="830" y1="362" x2="683" y2="362" class="ln s-apl" style="stroke-width:2.4" marker-end="url(#f8b-fl-apl)"/>
+  <text x="696" y="354" class="t t-s">⑥ <tspan class="t-mono t-b">Inform</tspan></text>
+  <text x="696" y="380" class="t t-s t-mono t-m">2 PERIODIC</text>
+  <line x1="680" y1="410" x2="827" y2="410" class="ln s-apl" style="stroke-width:2.4" marker-end="url(#f8b-fl-apl)"/>
+  <text x="690" y="402" class="t t-s">⑦ <tspan class="t-mono t-b">SetParameterValues</tspan></text>
+  <text x="690" y="428" class="t t-s t-m">5 GHz con canal de 80 MHz</text>
+
+  
+  <line x1="680" y1="458" x2="827" y2="458" class="ln s-apl" style="stroke-width:2" marker-end="url(#f8b-fl-apl)"/>
+  <text x="690" y="450" class="t t-s">⑧ prueba de velocidad</text>
+  <line x1="830" y1="506" x2="683" y2="506" class="ln s-apl" style="stroke-width:2" marker-end="url(#f8b-fl-apl)"/>
+  <text x="696" y="498" class="t t-s">⑨ midió 486 Mbps</text>
+  <line x1="680" y1="554" x2="83" y2="554" class="ln s-apl" style="stroke-width:2" marker-end="url(#f8b-fl-apl)"/>
+  <text x="392" y="546" class="t t-s">⑩ plan verificado: listo</text>
+
+  
+  <g class="t t-xs t-b">
+    <path d="M920 96v76" class="ln s-apl" style="stroke-width:3"/><text x="930" y="130" class="k-apl">REVISIÓN</text><text x="930" y="144" class="t-m">antes de vender</text>
+    <path d="M920 196v130" class="ln s-red" style="stroke-width:3"/><text x="930" y="256" class="k-red">RED</text><text x="930" y="270" class="t-m">sin el ACS,</text><text x="930" y="284" class="t-m">en segundos</text>
+    <path d="M920 344v84" class="ln s-apl" style="stroke-width:3"/><text x="930" y="382" class="k-apl">EQUIPO</text><text x="930" y="396" class="t-m">próxima sesión</text>
+    <path d="M920 442v124" class="ln s-apl" style="stroke-width:3"/><text x="930" y="500" class="k-apl">VERIFICACIÓN</text><text x="930" y="514" class="t-m">al final, siempre</text>
+  </g>
+  <text x="14" y="330" class="t t-xs t-m" transform="rotate(-90 14 330)">EL TIEMPO CORRE HACIA ABAJO ↓</text>
+  <text x="530" y="604" text-anchor="middle" class="t t-s t-m">Primero la red, después el equipo y al final la verificación: si se invierte el orden, la prueba mide el plan viejo.</text>
+</svg></div><figcaption><b>Cambio de plan de 200 a 500 Mbps.</b> Cinco participantes: el CRM, RADIUS con el BNG, la OLT, el ACS y el equipo de la casa; el tiempo corre hacia abajo. En la fase de revisión (① y ②) el CRM le pregunta al ACS si el modelo de la casa puede con 500 Mbps. En la de red (③ a ⑤) el CRM pide el cambio, RADIUS sube el límite con un CoA al BNG y la OLT, si hace falta, amplía lo que le reserva a esa ONT. En la de equipo (⑥ y ⑦) el ACS ajusta el Wi-Fi en la próxima sesión. En la de verificación (⑧ a ⑩) el equipo mide la velocidad y el ACS le confirma al CRM que el plan quedó. Las flechas azules son de la red; las rosadas, del ACS; las grises, avisos entre sistemas.</figcaption></figure><div class="ml"><b>En la práctica</b><p>El error más común en un cambio de plan es venderlo antes de mirar el equipo. El cliente paga 500 Mbps, la red se los entrega hasta la ONT, y su Wi-Fi de una sola banda de 2,4 GHz le muestra 90 Mbps en el celular. El reclamo llega al día siguiente. Los operadores que lo evitan hacen que el CRM consulte al ACS antes de ofrecer el plan: si el modelo no alcanza, el cambio de plan viene con un cambio de equipo. El capítulo 43 de <a href="https://aaramirez.github.io/telco/43-cambio-de-plan.html" target="_blank" rel="noopener">Cómo funciona un telco</a> cuenta el mismo proceso visto desde el negocio.</p></div></section>
+<section><h2>Reemplazo de equipo: llevarse la configuración al equipo nuevo</h2><div class="prose"><p>Una tormenta quema la fuente del equipo de la casa 1207. El técnico llega con un equipo nuevo, y Fibra Ejemplo ya no compra la marca A para ese tipo de casa: el que trae es de la marca B. El cliente solo quiere una cosa: que su Wi-Fi se llame igual, tenga la misma clave y que la consola de su hijo siga funcionando. Si el equipo nuevo arranca con la red <code>MarcaB-4F2A</code> y la clave impresa en la etiqueta, cada dispositivo de la casa (celulares, televisores, cámaras, la impresora) habrá que conectarlo de nuevo. Para el cliente, eso es empezar de cero.</p><p>El reemplazo bien hecho tiene tres pasos que se encadenan:</p><ol class="steps"><li><span><b>Las fichas primero.</b> El técnico escanea con su aplicación el número de serie del equipo que se lleva y el del que deja. El inventario cambia la asociación: la serie nueva queda en la casa 1207 y la vieja pasa a «en reparación». El gestor de OLT autoriza la ONT nueva en el puerto de la fibra.</span></li><li><span><b>El equipo nuevo se presenta.</b> Arranca, llama al ACS con un <code>0 BOOTSTRAP</code> y el ACS, al ver una serie que el inventario ya asoció al cliente 1207, sabe de quién es.</span></li><li><span><b>El ACS le pone la vida del anterior.</b> Aplica el plan del cliente y además todo lo que se fue cambiando en estos años: el nombre y la clave del Wi-Fi, la red de invitados, el puerto abierto para la consola. Si el equipo nuevo es de otra marca, la capa de perfiles del capítulo 6 traduce cada cosa a los parámetros de esa marca.</span></li></ol></div><figure class="fig fig-flujo" id="08-diagrama-3"><div class="lienzo"><svg viewBox="0 0 1000 600" style="min-width:800px" role="img" aria-label="Flujo del reemplazo de un equipo: el técnico escanea las dos series, el inventario cambia la asociación y avisa al gestor de OLT, que autoriza la ONT nueva; el equipo nuevo llama con 0 BOOTSTRAP; el ACS consulta el inventario y lo reconoce; traduce la configuración del cliente al perfil de la marca B, la escribe, la vuelve a leer y avisa al técnico que está listo">
+  <defs>
+    <marker id="f8c-fl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--muted)"/></marker>
+    <marker id="f8c-fl-apl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--c-apl)"/></marker>
+    <marker id="f8c-fl-fis" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--c-fis)"/></marker>
+  </defs>
+
+  <rect x="20" y="14" width="140" height="52" rx="10" class="caja"/><text x="90" y="37" text-anchor="middle" class="t t-b">App del técnico</text><text x="90" y="54" text-anchor="middle" class="t t-s t-m">en la casa</text>
+  <rect x="190" y="14" width="140" height="52" rx="10" class="d-sis"/><text x="260" y="37" text-anchor="middle" class="t t-b">Inventario</text><text x="260" y="54" text-anchor="middle" class="t t-s t-m">qué serie, qué casa</text>
+  <rect x="360" y="14" width="140" height="52" rx="10" class="c-fis"/><text x="430" y="37" text-anchor="middle" class="t t-b">Gestor de OLT</text><text x="430" y="54" text-anchor="middle" class="t t-s">la fibra</text>
+  <rect x="530" y="14" width="140" height="52" rx="10" class="c-apl"/><text x="600" y="37" text-anchor="middle" class="t t-b">ACS</text><text x="600" y="54" text-anchor="middle" class="t t-s">acs.ejemplo.com</text>
+  <rect x="700" y="14" width="140" height="52" rx="10" class="caja"/><text x="770" y="37" text-anchor="middle" class="t t-b">Equipo nuevo</text><text x="770" y="54" text-anchor="middle" class="t t-s t-m">marca B</text>
+  <line x1="90" y1="66" x2="90" y2="555" class="vida"/>
+  <line x1="260" y1="66" x2="260" y2="555" class="vida"/>
+  <line x1="430" y1="66" x2="430" y2="555" class="vida"/>
+  <line x1="600" y1="66" x2="600" y2="555" class="vida"/>
+  <line x1="770" y1="66" x2="770" y2="555" class="vida"/>
+
+  
+  <line x1="90" y1="112" x2="257" y2="112" class="ln" style="stroke-width:2" marker-end="url(#f8c-fl)"/>
+  <text x="100" y="104" class="t t-s">① sale ZYX123, entra QRS456</text>
+  <line x1="260" y1="160" x2="427" y2="160" class="ln" style="stroke-width:2" marker-end="url(#f8c-fl)"/>
+  <text x="270" y="152" class="t t-s">② autorizar QRS456</text>
+  <line x1="430" y1="208" x2="767" y2="208" class="ln s-fis" style="stroke-width:2" marker-end="url(#f8c-fl-fis)"/>
+  <text x="440" y="200" class="t t-s">③ OMCI: ONT autorizada, gestión lista</text>
+
+  
+  <line x1="770" y1="262" x2="603" y2="262" class="ln s-apl" style="stroke-width:2.4" marker-end="url(#f8c-fl-apl)"/>
+  <text x="612" y="254" class="t t-s">④ <tspan class="t-mono t-b">Inform</tspan></text>
+  <text x="612" y="280" class="t t-s t-mono t-m">0 BOOTSTRAP · QRS456</text>
+  <line x1="600" y1="314" x2="263" y2="314" class="ln s-apl" style="stroke-width:2" marker-start="url(#f8c-fl-apl)" marker-end="url(#f8c-fl-apl)"/>
+  <text x="276" y="306" class="t t-s">⑤ ¿de quién es QRS456? → de la casa 1207</text>
+
+  
+  <rect x="520" y="336" width="160" height="50" rx="8" class="c-apl"/>
+  <text x="600" y="356" text-anchor="middle" class="t t-s t-b">⑥ traducir la config.</text>
+  <text x="600" y="372" text-anchor="middle" class="t t-s">de 1207 a la marca B</text>
+  <line x1="680" y1="412" x2="767" y2="412" class="ln s-apl" style="stroke-width:2.4" marker-end="url(#f8c-fl-apl)"/>
+  <text x="690" y="404" class="t t-s">⑦ <tspan class="t-mono t-b">Set…</tspan> y <tspan class="t-mono t-b">AddObject</tspan></text>
+  <text x="690" y="430" class="t t-s t-m">Wi-Fi, invitados, puerto</text>
+  <line x1="770" y1="462" x2="603" y2="462" class="ln s-apl" style="stroke-width:2" marker-end="url(#f8c-fl-apl)"/>
+  <text x="612" y="454" class="t t-s">⑧ leído de vuelta: coincide</text>
+
+  <line x1="600" y1="520" x2="93" y2="520" class="ln s-apl" style="stroke-width:2" marker-end="url(#f8c-fl-apl)"/>
+  <text x="200" y="512" class="t t-s">⑨ «listo: la casa 1207 tiene su Wi-Fi de siempre»</text>
+
+  <g class="t t-xs t-b">
+    <path d="M870 96v124" class="ln" style="stroke-width:3"/><text x="880" y="150" class="t-m">FICHAS</text><text x="880" y="164" class="t-m">antes que</text><text x="880" y="178" class="t-m">el equipo</text>
+    <path d="M870 244v84" class="ln s-apl" style="stroke-width:3"/><text x="880" y="284" class="k-apl">PRESENTACIÓN</text><text x="880" y="298" class="t-m">el ACS lo</text><text x="880" y="312" class="t-m">reconoce</text>
+    <path d="M870 336v136" class="ln s-apl" style="stroke-width:3"/><text x="880" y="396" class="k-apl">RESTAURACIÓN</text><text x="880" y="410" class="t-m">escribir y</text><text x="880" y="424" class="t-m">volver a leer</text>
+    <path d="M870 500v36" class="ln s-apl" style="stroke-width:3"/><text x="880" y="516" class="k-apl">CIERRE</text><text x="880" y="530" class="t-m">antes de irse</text>
+  </g>
+  <text x="14" y="320" class="t t-xs t-m" transform="rotate(-90 14 320)">EL TIEMPO CORRE HACIA ABAJO ↓</text>
+  <text x="480" y="586" text-anchor="middle" class="t t-s t-m">Si el inventario no se actualiza en ①, en ⑤ el ACS no sabe de quién es el equipo y lo deja en blanco.</text>
+</svg></div><figcaption><b>Reemplazo de un equipo dañado por uno de otra marca.</b> Cinco participantes: la aplicación del técnico, el inventario, el gestor de OLT, el ACS y el equipo nuevo. En la fase de fichas (① a ③) el técnico escanea las dos series, el inventario cambia la asociación y avisa al gestor de OLT, que autoriza la ONT nueva. En la de presentación (④ y ⑤) el equipo nuevo llama con un <code>0 BOOTSTRAP</code> y el ACS, después de consultar el inventario, lo reconoce como el de la casa 1207. En la de restauración (⑥ a ⑧) el ACS traduce la configuración guardada del cliente al perfil de la marca B, la escribe y la vuelve a leer para comprobarla. En ⑨ la aplicación del técnico muestra «listo» antes de que se vaya de la casa.</figcaption></figure><div class="prose"><p>La pregunta clave es: <b>¿qué guardó el ACS del equipo anterior?</b> No todo se traslada igual. Lo que el operador configuró a través del ACS se puede llevar a cualquier marca. Lo que el cliente cambió por su cuenta en la página del equipo, si el ACS nunca se enteró, se pierde con la fuente quemada. Y algunas cosas no conviene copiarlas: el canal del Wi-Fi que era el mejor con el equipo viejo, con otra antena y otra potencia, puede no serlo con el nuevo.</p></div><div class="lab" id="08-lab-2"><div class="lab-title"><span class="tag">Laboratorio</span><h3>Reemplazo: qué se traslada y qué se pierde</h3></div><p class="hint">El equipo de la casa 1207 era de la marca A. Elige la marca del equipo nuevo y cómo guardaba Fibra Ejemplo la configuración del cliente. La tabla muestra, para cada ajuste de esa casa, si pasa solo al equipo nuevo, si alguien tiene que rehacerlo o si se pierde. Prueba la marca C, que todavía habla el modelo de datos viejo TR-098.</p><style>
+[id="08-lab-2"] .g8b-tabla{width:100%;border-collapse:collapse;font:500 .84rem var(--f-display)}
+[id="08-lab-2"] .g8b-tabla th{font:600 .72rem var(--f-display);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:left;padding:6px 8px;border-bottom:1.5px solid var(--line)}
+[id="08-lab-2"] .g8b-tabla td{padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+[id="08-lab-2"] .g8b-tabla td small{display:block;color:var(--muted);font:500 .74rem var(--f-mono);overflow-wrap:anywhere;margin-top:2px}
+[id="08-lab-2"] .g8b-est{display:inline-block;padding:2px 8px;border-radius:99px;font:700 .74rem var(--f-display);white-space:nowrap}
+[id="08-lab-2"] .g8b-est.si{background:var(--good-soft);color:var(--good)}
+[id="08-lab-2"] .g8b-est.re{background:var(--accent-soft);color:var(--accent)}
+[id="08-lab-2"] .g8b-est.no{background:var(--warm-soft);color:var(--warm)}
+[id="08-lab-2"] .g8b-chk{display:flex;gap:8px;align-items:flex-start;font:500 .86rem var(--f-display)}
+@media (max-width:560px){[id="08-lab-2"] .g8b-tabla .g8b-orig{display:none}}
+</style>
+<div class="opciones">
+  <label>Equipo nuevo
+    <select id="g8b-marca">
+      <option value="A">Marca A, mismo modelo</option>
+      <option value="B" selected>Marca B, otro fabricante</option>
+      <option value="C">Marca C, antigua (TR-098)</option>
+    </select></label>
+  <label>Respaldo que usaba Fibra Ejemplo
+    <select id="g8b-resp">
+      <option value="nada">Sin respaldo</option>
+      <option value="archivo">Archivo del fabricante</option>
+      <option value="deseada" selected>Configuración deseada</option>
+    </select></label>
+</div>
+<label class="g8b-chk"><input type="checkbox" id="g8b-notif"> Notificación activa sobre la tabla de reenvío de puertos: el equipo avisa al ACS cuando el cliente la cambia (capítulo 4)</label>
+<div class="tbl"><table class="g8b-tabla">
+  <thead><tr><th>Ajuste de la casa 1207</th><th class="g8b-orig">Quién lo hizo</th><th>En el equipo nuevo</th></tr></thead>
+  <tbody id="g8b-body"></tbody>
+</table></div>
+<div class="readout" id="g8b-out" aria-live="polite"></div>
+<p class="hint">Las marcas, los modelos y las extensiones son de ejemplo. Los nombres de parámetros de la norma son reales; los que empiezan con <code>X_</code> son extensiones inventadas de cada fabricante.</p></div></section>
+<section><h2>Mudanza y cambio de titular: el equipo se queda, el cliente cambia</h2><div class="prose"><p>Hay eventos en los que el equipo no cambia pero lo que lo rodea sí. Son los que más errores de datos producen, porque cada sistema se entera por un camino distinto.</p><p><b>Mudanza</b> (<i>relocation</i>). La familia se va a otra casa y se lleva el equipo. Para el ACS es el mismo equipo, con el mismo número de serie, la misma configuración y la misma clave del Wi-Fi: la familia llega, lo enchufa y su celular se conecta solo. Lo que cambia está fuera del ACS: la fibra llega a otra caja, la ONT queda en otro puerto de otra OLT, el inventario cambia la dirección y la zona. Hay dos cosas que el ACS sí debe hacer: actualizar sus <b>etiquetas</b> (<i>tags</i>), las marcas con que agrupa a los equipos por zona, porque de ellas dependen los cambios masivos y los diagnósticos por zona; y revisar el Wi-Fi, porque los vecinos de la casa nueva usan otros canales.</p><p><b>Cambio de titular</b> (<i>change of ownership</i>). La clienta le pasa el servicio a su hija, que vive en la misma casa. El equipo no se mueve, la fibra tampoco, pero el contrato es nuevo: otra persona, otra cuenta de facturación, a veces otro plan. Aquí aparece la privacidad. Si el titular nuevo es otra familia (por ejemplo, alguien que compró la casa con el servicio instalado), el equipo guarda cosas de los anteriores: el nombre y la clave del Wi-Fi, la lista de dispositivos conocidos, el historial de diagnósticos. Lo correcto es que el ACS le aplique una configuración limpia, con el plan del titular nuevo y una clave nueva, y que el historial del titular anterior quede separado del nuevo.</p><p>En los dos casos, la regla del capítulo 2 se cumple al pie de la letra: el cambio nace en el CRM; el inventario y el ACS se enteran después. Nunca al revés.</p></div></section>
+<section><h2>Corte y reconexión por falta de pago</h2><div class="prose"><p>El capítulo 2 lo dejó claro: <b>el corte lo hace RADIUS, no el ACS</b>. Facturación marca la deuda, RADIUS le pide al BNG que cierre la sesión o la limite al portal de pago, y el equipo de la casa conserva su configuración intacta. Al pagar, RADIUS levanta la restricción y el servicio vuelve en segundos, sin nada que reconfigurar. El capítulo 44 de <a href="https://aaramirez.github.io/telco/44-corte-y-reconexion.html" target="_blank" rel="noopener">Cómo funciona un telco</a> cuenta el proceso desde el negocio.</p><p>Entonces, ¿qué hace el ACS mientras el cliente está suspendido? Tres cosas, ninguna de ellas el corte:</p><ul><li><b>Avisar dentro de la casa, si el operador lo decidió.</b> Algunos equipos permiten mostrar un aviso en su página o cambiar el comportamiento de una luz, casi siempre con parámetros propios del fabricante (las extensiones <code>X_…</code> del capítulo 5). Es un complemento: si el equipo no lo soporta, el corte funciona igual.</li><li><b>Marcar al equipo como suspendido.</b> Una etiqueta en el ACS evita que una campaña masiva o una actualización de firmware se ensañe con equipos que, por estar limitados, quizás no llegan al servidor de archivos. Y evita que un agente de soporte pierda tiempo diagnosticando un «no tengo Internet» que en realidad es una factura impaga.</li><li><b>No tocar nada más.</b> Nada de volver el equipo a fábrica ni de borrar el Wi-Fi como castigo. Si el cliente paga a las tres horas, tiene que volver a navegar como estaba.</li></ul></div><div class="caso"><b>Un caso real</b><p>Un operador FTTH de la región probó, en sus inicios, a cortar el servicio desde el ACS: una orden que desactivaba la conexión de Internet del equipo. Funcionó hasta que los clientes descubrieron que, al volver el equipo a fábrica con el botón de atrás, el equipo se presentaba de nuevo, recibía su plan completo y navegaba. Además, la reconexión dependía de que el equipo llamara al ACS, y algunos clientes que ya habían pagado esperaban hasta la próxima sesión. Pasaron el corte a RADIUS y dejaron al ACS solo para el aviso en la casa. La lección es la del capítulo 2: lo que se controla en la red no se puede saltar desde la casa.</p></div></section>
+<section><h2>Baja y recuperación del equipo</h2><div class="prose"><p>La clienta se va. En el CRM es una orden de baja; en el resto de los sistemas, una cadena de tareas que conviene hacer en orden:</p><ol class="steps"><li><span><b>Facturación y RADIUS</b> cierran la cuenta: se emite la última factura y la cuenta de acceso deja de autorizar.</span></li><li><span><b>El gestor de OLT</b> desautoriza la ONT en su puerto, para que ese lugar quede libre para otro cliente.</span></li><li><span><b>El ACS</b> hace un último respaldo de la configuración (por si el cliente se arrepiente en una semana) y marca el equipo como «por recuperar».</span></li><li><span><b>El inventario</b> abre la tarea de recuperación: el equipo es un <b>activo</b> (<i>asset</i>) del operador y está en una casa ajena.</span></li></ol><p>La recuperación tiene un costo y el ACS ayuda a decidir si vale la pena. Sabe qué modelo es (un equipo de cinco años quizás no justifica una visita), cuándo llamó por última vez y en qué estado estaba. Muchos operadores piden al cliente que lo devuelva en una tienda y mandan a recogerlo solo los modelos que valen.</p><p>Cuando el equipo vuelve, se <b>reacondiciona</b> (<i>refurbish</i>):</p><ul><li><b>Se borra.</b> Un <code>FactoryReset</code> elimina el Wi-Fi, la clave, los dispositivos conocidos y cualquier dato del cliente anterior. Se hace en el taller y no a distancia antes de recuperarlo: un equipo borrado en la casa pierde la configuración con la que llamaba al ACS, y con ella la única pista de si sigue encendido.</li><li><b>Se actualiza.</b> Se le instala el firmware vigente antes de que salga, para que no empiece su segunda vida con una falla ya corregida.</li><li><b>Se limpia su ficha.</b> En el ACS, el historial del cliente anterior se separa del equipo. En el inventario, vuelve a estar «disponible» con el estado «reacondicionado».</li></ul><p>Y el ciclo se cierra: ese equipo será, quizás, el próximo <code>0 BOOTSTRAP</code> de otra casa.</p></div></section>
+<section><h2>Respaldo de la configuración de cada equipo</h2><div class="prose"><p>Todo el capítulo descansa en una pieza silenciosa: el ACS sabe qué configuración tiene cada casa. Hay dos formas de saberlo, y la diferencia importa.</p><p><b>Copia del archivo del fabricante.</b> TR-069 tiene una orden <code>Upload</code> que le pide al equipo que suba un archivo a un servidor, y uno de los tipos de archivo que define es <code>1 Vendor Configuration File</code>: el archivo de configuración completo, en el formato propio del fabricante. Para devolverlo existe la orden <code>Download</code> con el tipo <code>3 Vendor Configuration File</code>. Es rápido y lo guarda todo, incluso lo que el ACS no conoce. Pero tiene dos límites: solo sirve para el mismo modelo, y a veces para el mismo firmware; y es una caja cerrada, porque nadie puede leerla para saber qué clave tenía el Wi-Fi.</p><p><b>Configuración deseada</b> (<i>desired state</i>). En vez de guardar el archivo, el ACS guarda una lista de lo que esa casa debe tener, escrita en el idioma del negocio: «plan 500 Mbps, Wi-Fi <code>Casa-1207</code> con tal clave, red de invitados activa, puerto 3074 abierto hacia la consola». Cada vez que un agente cambia algo a través del ACS, esa lista se actualiza. Cuando llega un equipo nuevo, de cualquier marca, la capa de perfiles traduce la lista a sus parámetros. Lo que no está en la lista, como un cambio que el cliente hizo en la página del equipo, se pierde, a menos que el ACS se haya enterado gracias a una notificación activa (capítulo 4).</p></div><figure class="fig fig-comparacion" id="08-diagrama-4"><div class="lienzo"><svg viewBox="0 0 900 420" style="min-width:720px" role="img" aria-label="Comparación entre respaldar con el archivo de configuración del fabricante y con la configuración deseada del ACS: qué guarda, si sirve para otra marca, si se puede leer, qué se pierde y cómo se hace">
+  
+  <rect x="270" y="16" width="300" height="56" rx="10" class="caja"/>
+  <text x="420" y="40" text-anchor="middle" class="t t-b">Archivo del fabricante</text>
+  <text x="420" y="58" text-anchor="middle" class="t t-s t-m t-mono">Upload · Download</text>
+  <rect x="582" y="16" width="300" height="56" rx="10" class="c-apl"/>
+  <text x="732" y="40" text-anchor="middle" class="t t-b">Configuración deseada</text>
+  <text x="732" y="58" text-anchor="middle" class="t t-s">una lista en el ACS</text>
+
+  
+  <g class="t t-b">
+    <text x="20" y="114">Qué guarda</text>
+    <text x="20" y="182">¿Sirve para otra marca?</text>
+    <text x="20" y="250">¿Se puede leer?</text>
+    <text x="20" y="318">Lo que se pierde</text>
+    <text x="20" y="386">Cuándo se actualiza</text>
+  </g>
+
+  <rect x="270" y="86" width="300" height="56" rx="8" class="c-enl"/>
+  <text x="282" y="110" class="t t-s">Todo el equipo, incluso lo que el</text><text x="282" y="126" class="t t-s">ACS no conoce</text>
+  <rect x="582" y="86" width="300" height="56" rx="8" class="c-fis"/>
+  <text x="594" y="110" class="t t-s">Solo lo que el operador cambió</text><text x="594" y="126" class="t t-s">a través del ACS, más el plan</text>
+
+  <rect x="270" y="154" width="300" height="56" rx="8" class="c-fis"/>
+  <text x="282" y="178" class="t t-s">No: solo el mismo modelo, y a</text><text x="282" y="194" class="t t-s">veces el mismo firmware</text>
+  <rect x="582" y="154" width="300" height="56" rx="8" class="c-enl"/>
+  <text x="594" y="178" class="t t-s">Sí: la capa de perfiles la traduce</text><text x="594" y="194" class="t t-s">a cada marca (capítulo 6)</text>
+
+  <rect x="270" y="222" width="300" height="56" rx="8" class="c-fis"/>
+  <text x="282" y="246" class="t t-s">No: es una caja cerrada, en el</text><text x="282" y="262" class="t t-s">formato propio del fabricante</text>
+  <rect x="582" y="222" width="300" height="56" rx="8" class="c-enl"/>
+  <text x="594" y="246" class="t t-s">Sí: «Wi-Fi Casa-1207, invitados</text><text x="594" y="262" class="t t-s">activa, puerto 3074 abierto»</text>
+
+  <rect x="270" y="290" width="300" height="56" rx="8" class="c-fis"/>
+  <text x="282" y="314" class="t t-s">Todo, si el equipo nuevo es de</text><text x="282" y="330" class="t t-s">otra marca o modelo</text>
+  <rect x="582" y="290" width="300" height="56" rx="8" class="c-fis"/>
+  <text x="594" y="314" class="t t-s">Lo que el cliente cambió en la página</text><text x="594" y="330" class="t t-s">del equipo sin que el ACS se enterara</text>
+
+  <rect x="270" y="358" width="300" height="56" rx="8" class="caja"/>
+  <text x="282" y="382" class="t t-s">Cuando el ACS pide una copia</text><text x="282" y="398" class="t t-s">(por ejemplo, una vez por semana)</text>
+  <rect x="582" y="358" width="300" height="56" rx="8" class="caja"/>
+  <text x="594" y="382" class="t t-s">Con cada cambio que se hace</text><text x="594" y="398" class="t t-s">por el ACS, al instante</text>
+</svg></div><figcaption><b>Dos formas de respaldar un equipo.</b> En la columna de la izquierda, la copia del archivo del fabricante: una caja cerrada que se sube con <code>Upload</code> y se devuelve con <code>Download</code>, completa pero atada a una marca y un firmware. En la de la derecha, la configuración deseada: una lista legible, en el idioma del negocio, que el ACS traduce a cualquier marca. Las filas comparan qué guarda cada una, si sirve para otra marca, si se puede leer y qué se pierde; el verde marca la ventaja y el naranja, el límite. Muchos operadores usan las dos: la lista como fuente de verdad y el archivo como seguro adicional para el mismo modelo.</figcaption></figure><div class="prose"><p>GenieACS, el ACS de código abierto que usamos como ejemplo del mercado, está construido sobre la segunda idea. Míralo por dentro.</p></div><div class="practica"><div class="practica-title"><span class="tag">En el navegador</span><h3>Cómo declara un ACS la configuración deseada</h3></div><p>Vas a leer cómo GenieACS describe lo que un equipo debe tener, en lugar de dar órdenes sueltas. Solo se lee: no hace falta instalar nada.</p><ol class="steps"><li><span>Abre la página de <a href="https://docs.genieacs.com/en/latest/provisions.html" target="_blank" rel="noopener">Provisions de GenieACS</a> (en inglés; el traductor del navegador ayuda).</span></li><li><span>Lee la descripción de la función <code>declare()</code> y su ejemplo, que pone como nombre del Wi-Fi el número de serie del equipo.</span></li><li><span>Busca la nota que dice que las operaciones que cambian el modelo de datos son <b>idempotentes</b> (<i>idempotent</i>) y que el guion se repite hasta llegar a un estado estable.</span></li><li><span>Mira el ejemplo de la función <code>clear()</code> y en qué evento recomienda aplicarlo.</span></li></ol><p><b>Qué observar:</b> <code>declare()</code> no dice «escribe este valor ahora», dice «este parámetro debe valer esto». El ACS compara con lo que el equipo informó y solo escribe si hay diferencia; por eso se puede aplicar mil veces sin daño, que es lo que significa idempotente. Es la configuración deseada de este capítulo. El ejemplo de <code>clear()</code> se aplica en el evento <code>0 BOOTSTRAP</code>: cuando un equipo vuelve a fábrica, lo que el ACS creía saber de él ya no vale y hay que leerlo de nuevo, justo lo que pasa en un reemplazo o un reacondicionamiento.</p></div><div class="prose"><p>Con la configuración deseada, el reemplazo deja de ser una visita de una hora reconectando dispositivos y se vuelve un trámite de cinco minutos. Por eso el capítulo termina con su idea central: <b>cada evento del negocio dispara una acción en el equipo, y el respaldo de la configuración hace que cambiar de equipo no sea empezar de cero.</b></p></div><div class="quiz"><h3>Pruébate</h3><details><summary>¿Cuáles son las cinco etapas del ciclo de vida de un equipo y qué estado aparece como pausa dentro de la operación?</summary><p>Alta, operación, cambio, reemplazo y baja. La suspensión por falta de pago es una pausa que va y vuelve dentro de la operación.</p></details><details><summary>En un cambio de plan de 200 a 500 Mbps, ¿por qué se ajusta primero la red y se verifica al final?</summary><p>Porque la velocidad la limita el BNG, no el equipo. Si el ACS verifica antes de que RADIUS mande el CoA, la prueba de velocidad mide el plan viejo y el cambio parece fallido.</p></details><details><summary>¿Por qué el ACS debe opinar antes de vender un plan más rápido?</summary><p>Porque conoce el modelo y el firmware de la casa. Si el equipo no puede entregar la velocidad nueva (Wi-Fi de una banda, puertos lentos), el cambio de plan tiene que incluir un cambio de equipo.</p></details><details><summary>En un reemplazo por un equipo de otra marca, ¿qué ajustes se pierden aunque el operador use configuración deseada?</summary><p>Los que el cliente hizo por su cuenta en la página del equipo sin que el ACS se enterara, y las funciones que el modelo nuevo no tiene. El canal del Wi-Fi conviene recalcularlo en lugar de copiarlo.</p></details><details><summary>¿Por qué el borrado de un equipo dado de baja se hace en el taller y no a distancia antes de recuperarlo?</summary><p>Porque un equipo vuelto a fábrica en la casa pierde la configuración con la que llamaba al ACS, y con ella la única pista de si sigue encendido y dónde.</p></details><details><summary>¿Qué hace el ACS durante una suspensión por falta de pago?</summary><p>No corta: eso lo hace RADIUS. Puede mostrar un aviso en la casa si el equipo lo soporta, etiqueta al equipo como suspendido para excluirlo de campañas y no toca nada más, para que la reconexión sea inmediata.</p></details></div><div class="investiga"><h3>Para investigar</h3><p class="hint">Estas preguntas no se responden en el capítulo: búscalas por tu cuenta.</p><ol><li>¿Cómo se registra y se deprecia contablemente un equipo entregado en comodato?<small>Pista: busca «depreciación de equipos en comodato» y «CPE capitalization telecom».</small></li><li>¿Qué norma internacional se usa para borrar de forma segura los datos de un dispositivo antes de reutilizarlo?<small>Pista: busca «NIST SP 800-88 media sanitization».</small></li><li>¿Qué es la portabilidad numérica y qué pasa con la línea de voz del equipo cuando el cliente se lleva su número a otro operador?</li><li>¿Cómo calcula un operador si le conviene recuperar un equipo de una baja o darlo por perdido?<small>Pista: busca «CPE recovery cost reverse logistics telecom».</small></li><li>¿Qué ley de protección de datos personales rige en tu país y qué dice sobre los datos que un operador guarda de un cliente que se dio de baja?<small>Pista: busca la ley de tu país y el «derecho de supresión».</small></li></ol></div><div class="vids"><span>Para saber más</span><a class="vid" href="https://aaramirez.github.io/telco/43-cambio-de-plan.html" target="_blank" rel="noopener">Cambio de plan, capítulo 43 de Cómo funciona un telco <small>lectura</small></a><a class="vid" href="https://aaramirez.github.io/telco/44-corte-y-reconexion.html" target="_blank" rel="noopener">Corte y reconexión, capítulo 44 de Cómo funciona un telco <small>lectura</small></a><a class="vid" href="https://docs.genieacs.com/en/latest/provisions.html" target="_blank" rel="noopener">GenieACS: Provisions (inglés) <small>referencia</small></a><a class="vid" href="https://www.broadband-forum.org/pdfs/tr-069-1-6-1.pdf" target="_blank" rel="noopener">TR-069: CPE WAN Management Protocol, con las órdenes Upload y Download (Broadband Forum, inglés) <small>norma</small></a></div></section>
+<label class="got"><input type="checkbox" id="got"> Lo tengo claro</label>
+<nav class="pager" id="pager" aria-label="Capítulo anterior y siguiente"></nav>
+</main>
+</div>
+<footer><span>Curso abierto de aaramirez.github.io.</span><span>Sitio publicado: <a href="https://github.com/aaramirez/gestion-remota-de-equipos" target="_blank" rel="noopener">github.com/aaramirez/gestion-remota-de-equipos</a></span></footer>
+</div>
+<script src="assets/lab.js"></script>
+<script>
+(function(){
+  const {$}=window.Lab;
+  const SIS=[['crm','CRM'],['fac','Facturación'],['inv','Inventario'],['olt','Gestor de OLT'],['rad','RADIUS y BNG'],['acs','ACS'],['cam','Campo']];
+  // a: actúa (texto), s: se entera (texto)
+  const EV=[
+    {m:0,t:'Alta del servicio',d:'La clienta contrata 200 Mbps. El técnico conecta la ONT y se va: el equipo se presenta solo (capítulo 7).',
+     a:{crm:'crea la orden de instalación',inv:'asigna la serie ZYX123 a la casa 1207',olt:'autoriza la ONT en su puerto',rad:'crea la cuenta con el perfil 200',acs:'recibe el 0 BOOTSTRAP y carga el plan',cam:'tiende la fibra y conecta'},s:{fac:'empieza a facturar'}},
+    {m:2,t:'«Olvidé la clave del Wi-Fi»',d:'Una llamada de seis minutos: el agente cambia la clave desde su pantalla.',
+     a:{acs:'SetParameterValues con la clave nueva; la guarda en la configuración deseada'},s:{crm:'registra el contacto'}},
+    {m:7,t:'Cambio de plan: de 200 a 500 Mbps',d:'Primero la red, después el equipo y al final la verificación.',
+     a:{crm:'pregunta al ACS si el equipo puede, y crea la orden',rad:'perfil 500 y CoA al BNG',olt:'amplía la reserva en la fibra, si hace falta',acs:'ajusta el Wi-Fi a 5 GHz y mide la velocidad'},s:{fac:'factura el plan nuevo desde el día del cambio'}},
+    {m:11,t:'Corte por falta de pago',d:'La factura venció. El corte se hace en la red, no en el equipo.',
+     a:{fac:'marca la deuda',rad:'limita la sesión al portal de pago'},s:{acs:'etiqueta el equipo como suspendido; no toca la configuración',crm:'ve el estado «suspendido»'}},
+    {m:11.3,t:'Reconexión',d:'La clienta paga a los tres días. Vuelve a navegar en segundos, como estaba.',
+     a:{fac:'registra el pago',rad:'levanta la restricción con un CoA'},s:{acs:'quita la etiqueta de suspendido',crm:'ve el estado «activo»'}},
+    {m:16,t:'Un rayo quema el equipo: reemplazo',d:'El técnico deja un equipo de la marca B. La clienta no tiene que reconectar nada.',
+     a:{inv:'cambia ZYX123 por QRS456 en la casa 1207',olt:'autoriza la ONT nueva',acs:'reconoce la serie nueva y le aplica la configuración deseada',cam:'cambia el equipo y escanea las dos series'},s:{crm:'registra la visita'}},
+    {m:22,t:'Cambio de titular',d:'La hija toma el servicio a su nombre. Misma casa, mismo equipo, contrato nuevo.',
+     a:{crm:'cierra un contrato y abre otro',fac:'cuenta de facturación nueva',acs:'separa el historial y, si lo piden, aplica clave nueva'},s:{inv:'cambia el titular asociado al equipo',rad:'la cuenta de acceso pasa a la titular nueva'}},
+    {m:27,t:'Mudanza a otra calle',d:'La familia se lleva el equipo. El Wi-Fi viaja con ellos; la fibra no.',
+     a:{crm:'cambia la dirección',inv:'cambia la dirección y la zona del equipo',olt:'desautoriza el puerto viejo y autoriza el nuevo',acs:'actualiza las etiquetas de zona y revisa el canal del Wi-Fi',cam:'tiende la fibra en la casa nueva'},s:{rad:'sin cambios: la cuenta es la misma'}},
+    {m:34,t:'Baja',d:'La familia se va de la ciudad. Cuatro sistemas cierran, en orden.',
+     a:{crm:'orden de baja',fac:'última factura',rad:'cierra la cuenta de acceso',olt:'libera el puerto',acs:'último respaldo y etiqueta «por recuperar»',inv:'abre la recuperación del activo'}},
+    {m:36,t:'Recuperación y reacondicionamiento',d:'El equipo vuelve, se borra en el taller, se actualiza y queda listo para otra casa.',
+     a:{inv:'lo marca «reacondicionado» y «disponible»',acs:'separa el historial; firmware vigente instalado en el taller',cam:'lo recoge o lo recibe en la tienda'}}
+  ];
+  let i=0; const visto=new Set([0]);
+  const svg=$('#g8a-svg'), NS='http://www.w3.org/2000/svg';
+  const X=m=>28+m/36*584;
+  function linea(){
+    let h='<line x1="28" y1="30" x2="612" y2="30" class="eje"/><line x1="28" y1="30" x2="'+X(EV[i].m)+'" y2="30" class="hecho"/>';
+    [0,12,24,36].forEach(m=>{h+='<text x="'+X(m)+'" y="66" text-anchor="middle" class="mes">'+(m?('año '+m/12):'inicio')+'</text>';});
+    EV.forEach((e,k)=>{
+      const usa=!!e.a.acs, x=X(e.m)+(k===4?13:0)-(k===3?9:0);
+      h+='<g class="mk'+(visto.has(k)?' visto':'')+(usa?' acs':'')+(k===i?' actual':'')+'" data-k="'+k+'" tabindex="0" role="button" aria-label="Evento '+(k+1)+': '+e.t+'"><circle cx="'+x+'" cy="30" r="13"/><text x="'+x+'" y="34" text-anchor="middle" class="num">'+(k+1)+'</text></g>';
+    });
+    svg.innerHTML=h;
+  }
+  function pintar(){
+    const e=EV[i];
+    linea();
+    const mes=e.m<1?'mes 0':(Number.isInteger(e.m)?'mes '+e.m:'mes '+Math.floor(e.m)+', tres días después');
+    $('#g8a-ev').innerHTML='<span><b>'+(i+1)+'. '+e.t+'</b> · '+mes+'</span><span>'+e.d+'</span>';
+    $('#g8a-sis').innerHTML=SIS.map(([k,n])=>{
+      const a=e.a[k], s=e.s&&e.s[k];
+      return '<div class="'+(k==='acs'?'g8a-acs ':'')+(a?'actua':(s?'sabe':''))+'"><b>'+n+'</b><span>'+(a||s||'no participa')+'</span></div>';
+    }).join('');
+    const vis=[...visto];
+    const conAcs=vis.filter(k=>EV[k].a.acs).length;
+    const sinAcs=vis.length-conAcs;
+    let h='<span>Eventos recorridos: '+vis.length+' de '+EV.length+'</span><span class="big">El ACS actuó en '+conAcs+' · no hizo falta en '+sinAcs+'</span>';
+    if(!e.a.acs)h+='<span class="warn">En este evento el ACS no actúa: '+(e.s&&e.s.acs?'solo se entera ('+e.s.acs+').':'no participa.')+'</span>';
+    else h+='<span class="ok">El ACS: '+e.a.acs+'.</span>';
+    if(vis.length===EV.length)h+='<span>Recorriste la vida completa. Fíjate que el ACS nunca empieza un evento: siempre lo dispara el CRM, la facturación o el campo, y el ACS actúa después.</span>';
+    $('#g8a-cuenta').innerHTML=h;
+    $('#g8a-ant').disabled=i===0; $('#g8a-sig').disabled=i===EV.length-1;
+  }
+  function ir(k){i=Math.max(0,Math.min(EV.length-1,k));visto.add(i);pintar();}
+  svg.addEventListener('click',ev=>{const g=ev.target.closest('.mk');if(g)ir(+g.dataset.k);});
+  svg.addEventListener('keydown',ev=>{const g=ev.target.closest('.mk');if(g&&(ev.key==='Enter'||ev.key===' ')){ev.preventDefault();ir(+g.dataset.k);const n=svg.querySelector('.mk[data-k="'+i+'"]');if(n)n.focus();}});
+  $('#g8a-ant').addEventListener('click',()=>ir(i-1));
+  $('#g8a-sig').addEventListener('click',()=>ir(i+1));
+  $('#g8a-rei').addEventListener('click',()=>{visto.clear();visto.add(0);ir(0);});
+  pintar();
+})();
+</script>
+<script>
+(function(){
+  const {$}=window.Lab;
+  const RAIZ={A:'Device.',B:'Device.',C:'InternetGatewayDevice.'};
+  const IT=[
+    {n:'Cuenta de Internet y plan de 500 Mbps',o:'plan',p:{A:'Device.PPP.Interface.1.Username',B:'Device.PPP.Interface.1.Username',C:'…WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.Username'}},
+    {n:'Línea de voz',o:'plan',p:{A:'Device.Services.VoiceService.1.…',B:'Device.Services.VoiceService.1.…',C:'InternetGatewayDevice.Services.VoiceService.1.…'}},
+    {n:'Nombre y clave del Wi-Fi «Casa-1207»',o:'acs',wifi:true,p:{A:'Device.WiFi.SSID.1.SSID',B:'Device.WiFi.SSID.1.SSID',C:'…LANDevice.1.WLANConfiguration.1.SSID'}},
+    {n:'Red de invitados',o:'acs',p:{A:'Device.WiFi.SSID.3 (AddObject)',B:'Device.WiFi.SSID.3 (AddObject)',C:'…LANDevice.1.WLANConfiguration.2'}},
+    {n:'Puerto 3074 abierto hacia la consola',o:'acs',p:{A:'Device.NAT.PortMapping.1',B:'Device.NAT.PortMapping.1',C:'…WANPPPConnection.1.PortMapping.1'}},
+    {n:'Dirección fija para la impresora',o:'acs',p:{A:'Device.DHCPv4.Server.Pool.1.StaticAddress.1',B:'Device.DHCPv4.Server.Pool.1.StaticAddress.1',C:'X_C_DHCPReservation.1'}},
+    {n:'Control parental con horarios',o:'acs',ext:true,p:{A:'X_A_ParentalControl.…',B:'X_B_Schedule.… (traducido)',C:null}},
+    {n:'Canal 44 fijado por soporte',o:'acs',canal:true,p:{A:'Device.WiFi.Radio.2.Channel',B:'Device.WiFi.Radio.2.AutoChannelEnable = true',C:'…WLANConfiguration.1.AutoChannelEnable = true'}},
+    {n:'Reenvío de puertos de la cámara, creado por el cliente en la página del equipo',o:'local',p:{A:'Device.NAT.PortMapping.2',B:'Device.NAT.PortMapping.2',C:'…WANPPPConnection.1.PortMapping.2'}},
+    {n:'Punto de malla del segundo piso',o:'hw',p:{A:'emparejar de nuevo',B:'emparejar de nuevo',C:'emparejar de nuevo'}}
+  ];
+  const ORIG={plan:'el plan',acs:'atención o soporte, por el ACS',local:'el cliente, en la página',hw:'el técnico, en la casa'};
+  function estado(it,m,r,notif){
+    const conocido=it.o==='acs'||(it.o==='local'&&notif);
+    if(it.o==='hw')return['re','hay que rehacer','el punto de malla tiene que emparejarse con el equipo nuevo'];
+    if(it.o==='plan')return['si','se traslada','sale de la plantilla del plan'];
+    if(r==='archivo'&&m==='A')return it.canal?['si','se traslada','copiado tal cual: quizás no es el mejor canal para el equipo nuevo']:['si','se traslada','el archivo lo trae todo'];
+    if(r==='deseada'&&conocido){
+      if(it.ext&&m==='C')return['no','se pierde','el modelo C no tiene control parental'];
+      if(it.canal&&m!=='A')return['re','se recalcula','el ACS lo deja en automático y revisa a los vecinos'];
+      return['si','se traslada',m==='A'?'mismo parámetro':'traducido por el perfil de la marca '+m];
+    }
+    if(it.o==='local'&&r==='deseada')return['no','se pierde','el ACS nunca se enteró de ese cambio'];
+    return['no','se pierde',r==='archivo'?'el archivo de la marca A no sirve en la marca '+m:'no había copia'];
+  }
+  function pintar(){
+    const m=$('#g8b-marca').value,r=$('#g8b-resp').value,notif=$('#g8b-notif').checked;
+    let c={si:0,re:0,no:0},wifiPerdido=false;
+    $('#g8b-body').innerHTML=IT.map(it=>{
+      const [k,t,por]=estado(it,m,r,notif);c[k]++;
+      if(it.wifi&&k==='no')wifiPerdido=true;
+      const p=it.p[m];
+      return '<tr><td>'+it.n+(k!=='no'&&p?'<small>'+p+'</small>':'')+'</td><td class="g8b-orig">'+ORIG[it.o]+'</td><td><span class="g8b-est '+k+'">'+t+'</span><small>'+por+'</small></td></tr>';
+    }).join('');
+    let h='<span class="big">Se trasladan '+c.si+' · hay que rehacer '+c.re+' · se pierden '+c.no+'</span>';
+    if(r==='archivo'&&m!=='A')h+='<span class="warn">El archivo del fabricante A es una caja cerrada en su propio formato: el equipo de la marca '+m+' no lo entiende.</span>';
+    if(wifiPerdido)h+='<span class="warn">El Wi-Fi vuelve al nombre y la clave de la etiqueta: la familia tendrá que reconectar sus 14 dispositivos. Es la llamada de reclamo de mañana.</span>';
+    else h+='<span class="ok">El Wi-Fi conserva su nombre y su clave: los 14 dispositivos de la casa se conectan solos.</span>';
+    if(r==='deseada'&&!notif)h+='<span>Activa la notificación de la tabla de reenvíos y mira qué pasa con el ajuste que hizo el cliente.</span>';
+    if(m==='C')h+='<span>La marca C habla TR-098: la raíz del árbol es <code>'+RAIZ.C+'</code> y no <code>Device.</code>. Lo que se traslada, se traslada traducido.</span>';
+    $('#g8b-out').innerHTML=h;
+  }
+  ['#g8b-marca','#g8b-resp','#g8b-notif'].forEach(s=>$(s).addEventListener('change',pintar));
+  pintar();
+})();
+</script>
+</body>
+</html>

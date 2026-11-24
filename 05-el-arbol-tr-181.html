@@ -1,0 +1,584 @@
+<!doctype html>
+<html lang="es">
+<head>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-KX76XF8R');</script>
+<!-- End Google Tag Manager -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>El árbol TR-181 · Gestión remota de equipos (ACS) · Gestión remota de equipos (ACS)</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Cómo un operador configura, actualiza y diagnostica a distancia los equipos que tiene en casa de sus clientes: TR-069 y TR-369 a fondo, el modelo de datos TR-181, el aprovisionamiento sin visita, los cambios masivos, el firmware, los diagnósticos, la seguridad y la escala de un ACS.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400;1,8..60,600&display=swap">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KX76XF8R"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+<div class="wrap" data-page="el-arbol-tr-181">
+<header class="topbar"><a class="brand" href="index.html">Gestión <b>remota</b> de equipos</a><span class="eyebrow">Curso visual e interactivo · Industrias y finanzas</span><a class="al-sitio" href="https://aaramirez.github.io/">← Todos los cursos</a></header>
+<div class="layout">
+<nav class="toc" id="toc" aria-label="Ruta de aprendizaje"></nav>
+<main>
+<header class="page-head"><span class="num">CAPÍTULO 05 DE 16</span><h1>TR-181: el árbol de parámetros del equipo</h1><p class="lede">Todo lo que el ACS puede leer o cambiar en un equipo tiene un nombre fijo dentro de un árbol. Este capítulo enseña a leer ese árbol: sus carpetas, sus fichas, sus números y sus dos versiones, la vieja y la nueva.</p></header>
+<section><div class="prose"><p>En la parte anterior escuchamos la conversación entre el equipo y el ACS: el equipo llama con un <i>Inform</i>, el ACS le da órdenes como <code>GetParameterValues</code> o <code>SetParameterValues</code>, y la sesión se cierra. Pero toda orden necesita decir <b>sobre qué</b> actúa. «Cambia la clave del Wi-Fi» no le sirve a una máquina: necesita la dirección exacta de ese dato dentro del equipo.</p><p>Una ingeniera de Fibra Ejemplo, el operador ficticio que recorre este curso, recibe un pedido del área de atención: «queremos ver en la pantalla del agente la potencia de la fibra de cada cliente». La pregunta que se hace no es de protocolo, es de geografía: <b>¿dónde vive ese dato?</b> La respuesta está en el <b>modelo de datos</b> (<i>data model</i>), el catálogo que dice cómo se llama cada dato del equipo, de qué tipo es y si se puede cambiar. El de hoy se llama <b>TR-181</b>, lo publica el <b>Broadband Forum</b> (el consorcio de la industria de banda ancha que también escribió TR-069) y este capítulo enseña a recorrerlo.</p></div><figure class="fig fig-esquema" id="05-diagrama-1"><div class="lienzo"><svg viewBox="0 0 940 520" style="min-width:780px" role="img" aria-label="Árbol TR-181 visto desde arriba: de la raíz Device salen siete ramas (DeviceInfo, ManagementServer, Optical, PPP e IP, WiFi, Hosts y Services.VoiceService), cada una con algunos de sus parámetros; las ramas X_ son del fabricante">
+  <defs>
+    <marker id="f51-fl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--muted)"/></marker>
+  </defs>
+
+  
+  <rect x="20" y="218" width="140" height="60" rx="12" class="caja" style="stroke-width:2"/>
+  <text x="90" y="244" text-anchor="middle" class="t t-b t-mono">Device.</text>
+  <text x="90" y="263" text-anchor="middle" class="t t-s t-m">la raíz: el equipo</text>
+
+  
+  <g class="ln" style="fill:none;stroke-width:1.5">
+    <path d="M160 248H195V44H228" marker-end="url(#f51-fl)"/>
+    <path d="M195 112H228" marker-end="url(#f51-fl)"/>
+    <path d="M195 180H228" marker-end="url(#f51-fl)"/>
+    <path d="M195 248H228" marker-end="url(#f51-fl)"/>
+    <path d="M195 316H228" marker-end="url(#f51-fl)"/>
+    <path d="M195 248V452H228" marker-end="url(#f51-fl)"/>
+    <path d="M195 384H228" marker-end="url(#f51-fl)"/>
+  </g>
+
+  
+  <rect x="230" y="20" width="220" height="48" rx="9" class="c-apl"/>
+  <text x="242" y="40" class="t t-b t-mono" style="font-size:12px">DeviceInfo.</text>
+  <text x="242" y="58" class="t t-s">identidad del equipo</text>
+
+  <rect x="230" y="88" width="220" height="48" rx="9" class="c-apl"/>
+  <text x="242" y="108" class="t t-b t-mono" style="font-size:12px">ManagementServer.</text>
+  <text x="242" y="126" class="t t-s">la gestión por TR-069</text>
+
+  <rect x="230" y="156" width="220" height="48" rx="9" class="c-fis"/>
+  <text x="242" y="176" class="t t-b t-mono" style="font-size:12px">Optical.Interface.{i}.</text>
+  <text x="242" y="194" class="t t-s">la fibra</text>
+
+  <rect x="230" y="224" width="220" height="48" rx="9" class="c-red"/>
+  <text x="242" y="244" class="t t-b t-mono" style="font-size:12px">PPP.  ·  IP.</text>
+  <text x="242" y="262" class="t t-s">la conexión a Internet</text>
+
+  <rect x="230" y="292" width="220" height="48" rx="9" class="c-enl"/>
+  <text x="242" y="312" class="t t-b t-mono" style="font-size:12px">WiFi.</text>
+  <text x="242" y="330" class="t t-s">radios, redes y seguridad</text>
+
+  <rect x="230" y="360" width="220" height="48" rx="9" class="c-enl"/>
+  <text x="242" y="380" class="t t-b t-mono" style="font-size:12px">Hosts.Host.{i}.</text>
+  <text x="242" y="398" class="t t-s">los dispositivos de la casa</text>
+
+  <rect x="230" y="428" width="220" height="48" rx="9" class="c-apl"/>
+  <text x="242" y="448" class="t t-b t-mono" style="font-size:12px">Services.VoiceService.{i}.</text>
+  <text x="242" y="466" class="t t-s">la línea de voz</text>
+
+  
+  <g class="ln" style="fill:none;stroke-width:1.2">
+    <path d="M450 44H480"/><path d="M450 112H480"/><path d="M450 180H480"/><path d="M450 248H480"/><path d="M450 316H480"/><path d="M450 384H480"/><path d="M450 452H480"/>
+  </g>
+  <g class="t t-s t-mono">
+    <text x="488" y="38">ModelName · SerialNumber</text>
+    <text x="488" y="56">SoftwareVersion · UpTime</text>
+    <text x="488" y="106">URL · PeriodicInformInterval</text>
+    <text x="488" y="124">ConnectionRequestURL</text>
+    <text x="488" y="174">OpticalSignalLevel</text>
+    <text x="488" y="192">TransmitOpticalLevel</text>
+    <text x="488" y="242">PPP.Interface.{i}.Username</text>
+    <text x="488" y="260">IP.Interface.{i}.IPv4Address.{i}.IPAddress</text>
+    <text x="488" y="310">Radio.{i}.Channel · SSID.{i}.SSID</text>
+    <text x="488" y="328">AccessPoint.{i}.Security.KeyPassphrase</text>
+    <text x="488" y="378">PhysAddress · HostName</text>
+    <text x="488" y="396">Active · InterfaceType</text>
+    <text x="488" y="446">Line.{i}.DirectoryNumber</text>
+    <text x="488" y="464">Line.{i}.Status</text>
+  </g>
+
+  
+  <rect x="772" y="196" width="154" height="112" rx="10" class="caja" style="stroke-dasharray:5 4"/>
+  <text x="784" y="218" class="t t-xs t-b t-m">FUERA DE LA NORMA</text>
+  <text x="784" y="240" class="t t-s t-b t-mono">X_…</text>
+  <text x="784" y="258" class="t t-s">ramas y fichas que</text>
+  <text x="784" y="274" class="t t-s">agrega cada fabricante;</text>
+  <text x="784" y="290" class="t t-s">cambian de marca a marca</text>
+
+  <text x="470" y="508" text-anchor="middle" class="t t-s t-m">Las carpetas con {i} se repiten: una instancia por radio, por red o por dispositivo. Solo se muestran algunas hojas.</text>
+</svg></div><figcaption><b>El árbol TR-181, visto desde arriba.</b> A la izquierda, la raíz <code>Device.</code>; de ella salen las ramas que más usa un operador, cada una con un color según la capa de red de la que habla: naranja para la fibra, verde para el enlace y la LAN, azul para la red IP, rosado para lo que es de aplicación o de gestión. Cada rama termina en algunas de sus hojas, los parámetros, en letra monoespaciada. Las marcas <code>{i}</code> indican que esa carpeta puede repetirse: una por banda de Wi-Fi, una por dispositivo conectado. A la derecha, el recuadro gris recuerda que las ramas <code>X_…</code> son del fabricante, no de la norma.</figcaption></figure></section>
+<section><h2>La analogía del archivero</h2><div class="analogia"><b>Imagínalo así</b><p>Piensa en el archivero de una oficina antigua. Tiene cajones con etiquetas («Personal», «Proveedores»), dentro de cada cajón hay carpetas («Contratos», «Facturas») y dentro de cada carpeta hay fichas, cada una con un solo dato escrito. Para pedirle a alguien un dato, no le dices «búscame lo de aquel proveedor»: le dices «cajón Proveedores, carpeta Facturas, ficha 2025». Si todos los archiveros de la empresa están ordenados igual, cualquier persona encuentra cualquier dato en cualquier oficina.</p></div><div class="prose"><p>El modelo de datos es ese archivero, y la norma garantiza que todos los equipos lo ordenen igual. Tiene dos tipos de piezas:</p><ul><li>Los <b>objetos</b> (<i>objects</i>) son los cajones y las carpetas. No guardan valores: agrupan. Su nombre termina en punto, como <code>Device.WiFi.</code> o <code>Device.DeviceInfo.</code>.</li><li>Los <b>parámetros</b> (<i>parameters</i>) son las fichas. Cada uno guarda un solo valor: un texto, un número, un sí o un no. Su nombre no termina en punto, como <code>Device.DeviceInfo.SoftwareVersion</code>.</li></ul><p>Todo cuelga de una sola <b>raíz</b> (<i>root</i>): <code>Device.</code> en TR-181. Por eso se habla de un <b>árbol</b> (<i>tree</i>): una raíz, ramas que se abren y hojas al final. Las hojas son los parámetros.</p><p>El árbol es la frontera de lo que se puede gestionar. Si un dato no tiene ficha en el archivero del equipo, el ACS no tiene cómo pedirlo ni cómo cambiarlo, por más que el equipo lo conozca por dentro.</p></div></section>
+<section><h2>Nombres con puntos: leer una ruta de izquierda a derecha</h2><div class="prose"><p>La dirección completa de un dato se llama <b>ruta</b> (<i>path name</i>): los nombres de cada nivel, separados por puntos, desde la raíz hasta la hoja. Se lee de izquierda a derecha, de lo general a lo particular, como una dirección postal al revés (primero el país, al final el número de la casa).</p><div class="tbl"><table><thead><tr><th>Pedazo</th><th>Qué es</th><th>En el archivero</th></tr></thead><tbody><tr><td><code>Device</code></td><td>La raíz: el equipo completo</td><td>El archivero</td></tr><tr><td><code>WiFi</code></td><td>Todo lo que tiene que ver con el Wi-Fi</td><td>El cajón</td></tr><tr><td><code>SSID</code></td><td>La tabla de redes Wi-Fi que el equipo anuncia</td><td>La carpeta de redes</td></tr><tr><td><code>1</code></td><td>La primera red de esa tabla</td><td>La primera subcarpeta</td></tr><tr><td><code>SSID</code></td><td>El nombre de esa red, el <b>SSID</b> (<i>Service Set Identifier</i>, identificador del conjunto de servicios)</td><td>La ficha</td></tr></tbody></table></div><p>Así, <code>Device.WiFi.SSID.1.SSID</code> es «el nombre de la primera red Wi-Fi del equipo». Que la palabra <code>SSID</code> aparezca dos veces no es un error: la primera es la carpeta (la tabla de redes) y la segunda, la ficha (el nombre de una de ellas).</p><p>Las rutas que terminan en punto tienen un uso práctico que viste en el capítulo 4: una <b>ruta parcial</b> (<i>partial path</i>) como <code>Device.WiFi.</code> le pide al equipo <b>toda</b> la rama de una vez. Es cómodo, pero puede devolver cientos de parámetros, y en una flota de cien mil equipos eso se nota en el ACS. Pedir solo las hojas necesarias es una buena costumbre.</p></div></section>
+<section><h2>Instancias numeradas: varias redes, varios puertos, varios dispositivos</h2><div class="prose"><p>Muchas carpetas del árbol pueden repetirse. Un equipo con Wi-Fi de dos bandas anuncia al menos dos redes; una casa tiene siete u ocho celulares y computadoras conectados; el router tiene cuatro puertos de red. Cada copia de una carpeta repetible es una <b>instancia</b> (<i>instance</i>), y se distingue por un número: <code>Device.WiFi.SSID.1.</code>, <code>Device.WiFi.SSID.2.</code>.</p><p>En la norma, esas carpetas se escriben con <code>{i}</code> en lugar del número, como <code>Device.Hosts.Host.{i}.</code>: «aquí va el número de instancia». Y cada tabla tiene a su lado un contador que dice cuántas filas hay, como <code>Device.Hosts.HostNumberOfEntries</code>.</p><p>Hay tres detalles que ahorran muchos errores:</p><ol class="steps"><li><span><b>Los números los pone el equipo</b>, no el ACS. Cuando el ACS crea una instancia con <code>AddObject</code> (capítulo 4), el equipo responde con el número que le asignó.</span></li><li><span><b>No siempre son consecutivos.</b> Si se borra la instancia 2, la tabla queda con 1 y 3, y la siguiente que se cree puede ser la 4. Contar «de 1 a N» falla.</span></li><li><span><b>El número no dice qué es.</b> En un equipo, la red de 5 GHz es <code>SSID.2</code>; en otro, <code>SSID.5</code>. Para saber cuál es cuál hay que leer sus parámetros, por ejemplo la banda de la radio a la que está conectada.</span></li></ol><p>Por eso los ACS permiten buscar instancias por su contenido en lugar de por su número. En GenieACS, un ACS de <b>código abierto</b> (<i>open source</i>, de código público), se puede escribir un comodín (<code>Host.*</code>) o un filtro como «la conexión cuya forma de obtener la dirección es DHCP» en lugar de un número fijo. El capítulo 6 muestra cómo se aprovecha esto para que una misma acción sirva en equipos de varias marcas.</p><h3>Las carpetas se apilan: la pila de interfaces</h3><p>TR-181 tiene una idea que el modelo anterior no tenía: las interfaces del equipo se <b>apilan</b> como las capas de la red. Cada interfaz tiene un parámetro <code>LowerLayers</code> que apunta a la interfaz de abajo. Así, en lugar de una gran carpeta «la conexión a Internet», el árbol tiene piezas pequeñas encadenadas.</p></div><figure class="fig fig-capas" id="05-diagrama-2"><div class="lienzo"><svg viewBox="0 0 900 470" style="min-width:740px" role="img" aria-label="Pila de interfaces TR-181 de una ONT con router. Lado WAN de abajo hacia arriba: interfaz óptica, enlace Ethernet, terminación de VLAN, interfaz PPP e interfaz IP con la dirección pública. Lado LAN: dos radios Wi-Fi y los puertos de cable, dos redes SSID, un puente y la interfaz IP de la casa. Cada flecha es un parámetro LowerLayers">
+  <defs>
+    <marker id="f52-fl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--muted)"/></marker>
+  </defs>
+
+  <text x="220" y="28" text-anchor="middle" class="t t-xs t-b k-oper">WAN · HACIA LA RED DEL OPERADOR</text>
+  <text x="670" y="28" text-anchor="middle" class="t t-xs t-b k-casa">LAN · LA RED DE LA CASA</text>
+  <line x1="440" y1="44" x2="440" y2="440" class="ln ln-d"/>
+
+  
+  <rect x="60" y="50" width="320" height="50" rx="9" class="c-red"/>
+  <text x="74" y="71" class="t t-b t-mono" style="font-size:12px">IP.Interface.2</text>
+  <text x="74" y="89" class="t t-s">dirección pública 203.0.113.25</text>
+  <text x="368" y="66" text-anchor="end" class="t t-xs k-red">RED</text>
+
+  <rect x="60" y="130" width="320" height="50" rx="9" class="c-enl"/>
+  <text x="74" y="151" class="t t-b t-mono" style="font-size:12px">PPP.Interface.1</text>
+  <text x="74" y="169" class="t t-s">la sesión: usuario y clave</text>
+  <text x="368" y="146" text-anchor="end" class="t t-xs k-enl">ENLACE</text>
+
+  <rect x="60" y="210" width="320" height="50" rx="9" class="c-enl"/>
+  <text x="74" y="231" class="t t-b t-mono" style="font-size:12px">Ethernet.VLANTermination.1</text>
+  <text x="74" y="249" class="t t-s">la etiqueta de VLAN de Internet</text>
+  <text x="368" y="226" text-anchor="end" class="t t-xs k-enl">ENLACE</text>
+
+  <rect x="60" y="290" width="320" height="50" rx="9" class="c-enl"/>
+  <text x="74" y="311" class="t t-b t-mono" style="font-size:12px">Ethernet.Link.1</text>
+  <text x="74" y="329" class="t t-s">la trama Ethernet sobre la fibra</text>
+  <text x="368" y="306" text-anchor="end" class="t t-xs k-enl">ENLACE</text>
+
+  <rect x="60" y="370" width="320" height="50" rx="9" class="c-fis"/>
+  <text x="74" y="391" class="t t-b t-mono" style="font-size:12px">Optical.Interface.1</text>
+  <text x="74" y="409" class="t t-s">la fibra: potencia recibida</text>
+  <text x="368" y="386" text-anchor="end" class="t t-xs k-fis">FÍSICA</text>
+
+  <g class="ln ln-d" style="fill:none;stroke-width:1.6">
+    <path d="M220 100V128" marker-end="url(#f52-fl)"/>
+    <path d="M220 180V208" marker-end="url(#f52-fl)"/>
+    <path d="M220 260V288" marker-end="url(#f52-fl)"/>
+    <path d="M220 340V368" marker-end="url(#f52-fl)"/>
+  </g>
+  <text x="228" y="118" class="t t-xs t-m">LOWERLAYERS</text>
+
+  
+  <rect x="460" y="50" width="420" height="50" rx="9" class="c-red"/>
+  <text x="474" y="71" class="t t-b t-mono" style="font-size:12px">IP.Interface.1</text>
+  <text x="474" y="89" class="t t-s">la red de la casa: 192.168.1.1</text>
+  <text x="868" y="66" text-anchor="end" class="t t-xs k-red">RED</text>
+
+  <rect x="460" y="210" width="420" height="50" rx="9" class="c-enl"/>
+  <text x="474" y="231" class="t t-b t-mono" style="font-size:12px">Bridging.Bridge.1</text>
+  <text x="474" y="249" class="t t-s">el puente que une Wi-Fi y cable en una sola red</text>
+  <text x="868" y="226" text-anchor="end" class="t t-xs k-enl">ENLACE</text>
+
+  <rect x="460" y="290" width="200" height="50" rx="9" class="c-enl"/>
+  <text x="472" y="311" class="t t-b t-mono" style="font-size:12px">WiFi.SSID.1</text>
+  <text x="472" y="329" class="t t-s">red «Casa-2207»</text>
+  <rect x="680" y="290" width="200" height="50" rx="9" class="c-enl"/>
+  <text x="692" y="311" class="t t-b t-mono" style="font-size:12px">WiFi.SSID.2</text>
+  <text x="692" y="329" class="t t-s">red «Casa-2207-5G»</text>
+
+  <rect x="460" y="370" width="130" height="50" rx="9" class="c-fis"/>
+  <text x="470" y="391" class="t t-b t-mono" style="font-size:12px">WiFi.Radio.1</text>
+  <text x="470" y="409" class="t t-s">2,4 GHz</text>
+  <rect x="605" y="370" width="130" height="50" rx="9" class="c-fis"/>
+  <text x="615" y="391" class="t t-b t-mono" style="font-size:12px">WiFi.Radio.2</text>
+  <text x="615" y="409" class="t t-s">5 GHz</text>
+  <rect x="750" y="370" width="130" height="50" rx="9" class="c-fis"/>
+  <text x="760" y="391" class="t t-b t-mono" style="font-size:12px">Ethernet.</text>
+  <text x="760" y="409" class="t t-s">Interface.1 a 4</text>
+
+  <g class="ln ln-d" style="fill:none;stroke-width:1.6">
+    <path d="M670 210V102" marker-end="url(#f52-fl)"/>
+    <path d="M560 290V262" marker-end="url(#f52-fl)"/>
+    <path d="M780 290V262" marker-end="url(#f52-fl)"/>
+    <path d="M525 370V342" marker-end="url(#f52-fl)"/>
+    <path d="M670 370L760 342" marker-end="url(#f52-fl)"/>
+    <path d="M815 370V300H860V262" marker-end="url(#f52-fl)"/>
+  </g>
+  <text x="680" y="160" class="t t-xs t-m">LOWERLAYERS</text>
+
+  <text x="450" y="458" text-anchor="middle" class="t t-s t-m">Se lee de abajo hacia arriba. Cada flecha: «esta interfaz está encima de aquella».</text>
+</svg></div><figcaption><b>La pila de interfaces de una ONT con router.</b> Se lee de abajo hacia arriba, como las capas de una red. A la izquierda, el lado de la fibra (WAN): la interfaz óptica, el enlace Ethernet, la etiqueta de VLAN, la sesión PPP y, arriba, la interfaz IP con la dirección pública. A la derecha, el lado de la casa (LAN): las dos radios Wi-Fi, sus redes, el puente que las une a los puertos de cable y la interfaz IP de la red de la casa. Cada flecha punteada es un parámetro <code>LowerLayers</code> que dice «estoy encima de esta otra». Los colores son los de las capas: naranja la física, verde el enlace, azul la red.</figcaption></figure><div class="prose"><p>Para el día a día alcanza con saber que la dirección pública del cliente no está en «la carpeta de la conexión», sino en <code>Device.IP.Interface.{i}.IPv4Address.{i}.IPAddress</code>, y que para saber cuál de las interfaces IP es la de Internet hay que seguir la cadena de <code>LowerLayers</code> hacia abajo. Un buen ACS hace ese recorrido por ti.</p></div></section>
+<section><h2>Tipos de dato, lectura o escritura, y unidades</h2><div class="prose"><p>Cada parámetro tiene en la norma una ficha técnica con tres datos que importan para gestionarlo.</p><p><b>El tipo</b> (<i>data type</i>) dice qué clase de valor guarda:</p><div class="tbl"><table><thead><tr><th>Tipo</th><th>Qué guarda</th><th>Ejemplo en el árbol</th></tr></thead><tbody><tr><td><code>string(:32)</code></td><td>Texto, aquí de hasta 32 caracteres</td><td><code>Device.WiFi.SSID.{i}.SSID</code></td></tr><tr><td><code>string(8:63)</code></td><td>Texto de entre 8 y 63 caracteres</td><td><code>…AccessPoint.{i}.Security.KeyPassphrase</code></td></tr><tr><td><code>unsignedInt</code></td><td>Número entero sin signo (cero o más)</td><td><code>Device.DeviceInfo.UpTime</code></td></tr><tr><td><code>int</code></td><td>Número entero que puede ser negativo</td><td><code>Device.Optical.Interface.{i}.OpticalSignalLevel</code></td></tr><tr><td><code>boolean</code></td><td>Sí o no (<code>true</code>/<code>false</code>, o <code>1</code>/<code>0</code>)</td><td><code>Device.Hosts.Host.{i}.Active</code></td></tr><tr><td><code>dateTime</code></td><td>Fecha y hora</td><td><code>Device.Hosts.Host.{i}.ActiveLastChange</code></td></tr><tr><td><code>hexBinary</code> y <code>base64</code></td><td>Datos binarios escritos como texto</td><td>Certificados, identificadores</td></tr></tbody></table></div><p>Muchos parámetros de texto son además una <b>enumeración</b> (<i>enumeration</i>): solo aceptan valores de una lista. <code>Device.WiFi.AccessPoint.{i}.Security.ModeEnabled</code>, por ejemplo, acepta <code>None</code>, <code>WPA2-Personal</code> o <code>WPA3-Personal</code>, entre otros, pero no «WPA2» a secas.</p><p><b>El acceso</b> dice si el ACS puede cambiarlo: <code>R</code> (<i>read-only</i>, solo lectura) o <code>W</code> (<i>writable</i>, lectura y escritura). La versión del firmware, el tiempo encendido o la lista de dispositivos conectados son <code>R</code>: los produce el equipo y nadie puede escribirlos desde afuera. El nombre y la clave del Wi-Fi son <code>W</code>. Si el ACS intenta escribir un parámetro de solo lectura, el equipo responde con la falla 9008 que viste en el capítulo 4.</p><p><b>La unidad</b> (<i>unit</i>) dice cómo leer el número, y es donde más se equivoca la gente. <code>UpTime</code> está en segundos: 86400 es un día. La potencia de la señal de la fibra, <code>OpticalSignalLevel</code>, está en <b>milésimas de dBm</b>: el equipo no dice −19,5, dice <code>-19500</code>. Una pantalla que muestra el valor crudo le hace creer al agente que el cliente tiene una señal absurda. Para comparar, el rango de trabajo de una ONT GPON de clase B+ va de −8 a −27 dBm (UIT-T G.984.2): −19,5 está bien; −28,4 ya está fuera.</p><p>Ahora recorre tú el árbol. Es un TR-181 de ejemplo, recortado, de una ONT con Wi-Fi de la marca A de Fibra Ejemplo.</p></div><div class="lab" id="05-lab-1"><div class="lab-title"><span class="tag">Laboratorio</span><h3>Explorador del árbol TR-181</h3></div><p class="hint">Abre las carpetas y toca cualquier parámetro para ver su ruta completa, su tipo, si se puede escribir y su unidad. Cumple las tres misiones de arriba: encontrar la clave del Wi-Fi, la lista de equipos conectados y la potencia óptica. En los parámetros que se pueden escribir, prueba un valor nuevo y mira si el equipo lo aceptaría o qué falla devolvería.</p><style>
+[id="05-lab-1"] .l51-mis{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+[id="05-lab-1"] .l51-mis li{padding:6px 10px;border-radius:8px;background:var(--paper);font-size:.9rem;border-left:4px solid var(--line)}
+[id="05-lab-1"] .l51-mis li.hecha{border-left-color:var(--good)}
+[id="05-lab-1"] .l51-mis li.hecha::before{content:"✓ ";color:var(--good);font-weight:700}
+[id="05-lab-1"] .l51-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;align-items:start}
+@media (max-width:640px){[id="05-lab-1"] .l51-grid{grid-template-columns:minmax(0,1fr)}}
+[id="05-lab-1"] .l51-arbol{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:8px;max-height:430px;overflow:auto;font:500 .85rem var(--f-mono)}
+[id="05-lab-1"] .l51-arbol ul{list-style:none;margin:0;padding-left:14px}
+[id="05-lab-1"] .l51-arbol>ul{padding-left:0}
+[id="05-lab-1"] .l51-arbol button{all:unset;cursor:pointer;display:block;padding:2px 6px;border-radius:5px;word-break:break-all;color:var(--ink)}
+[id="05-lab-1"] .l51-arbol button:focus-visible{outline:2px solid var(--accent)}
+[id="05-lab-1"] .l51-arbol button.obj{font-weight:700}
+[id="05-lab-1"] .l51-arbol button.obj::before{content:"▸ ";color:var(--muted)}
+[id="05-lab-1"] .l51-arbol button.obj[aria-expanded="true"]::before{content:"▾ "}
+[id="05-lab-1"] .l51-arbol button.par::before{content:"• ";color:var(--muted)}
+[id="05-lab-1"] .l51-arbol button.sel{background:var(--accent-soft);color:var(--accent)}
+[id="05-lab-1"] .l51-arbol .x{color:var(--warm)}
+[id="05-lab-1"] .l51-det{display:grid;gap:8px}
+[id="05-lab-1"] .l51-ruta{word-break:break-all}
+[id="05-lab-1"] .l51-esc{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+[id="05-lab-1"] .l51-esc input{flex:1 1 140px;min-width:0;font:500 .9rem var(--f-mono);padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--ink)}
+[id="05-lab-1"] pre.l51-xml{margin:0;font:500 .75rem/1.45 var(--f-mono);background:var(--paper);border-radius:8px;padding:10px;white-space:pre-wrap;word-break:break-all}
+</style>
+<p class="hint">Misiones:</p>
+<ul class="l51-mis" id="l51-mis">
+  <li data-m="clave">Encuentra dónde vive la clave del Wi-Fi.</li>
+  <li data-m="hosts">Encuentra la lista de dispositivos conectados y cuántos hay.</li>
+  <li data-m="opt">Encuentra la potencia óptica que recibe la ONT y léela en dBm.</li>
+</ul>
+<div class="l51-grid">
+  <div class="l51-arbol" id="l51-arbol" role="tree" aria-label="Árbol TR-181 de ejemplo"></div>
+  <div class="l51-det">
+    <div class="readout texto" id="l51-out" aria-live="polite"></div>
+    <div class="l51-esc" id="l51-esc" hidden>
+      <input id="l51-val" type="text" aria-label="Valor nuevo" autocomplete="off" spellcheck="false">
+      <button type="button" class="primary" id="l51-set">Enviar SetParameterValues</button>
+    </div>
+    <div class="readout texto" id="l51-res" aria-live="polite" hidden></div>
+    <pre class="l51-xml" id="l51-xml" hidden></pre>
+  </div>
+</div></div></section>
+<section><h2>De TR-098 a TR-181: por qué conviven dos árboles</h2><div class="prose"><p>TR-181 no fue el primero. En 2005, cuando casi todo el acceso a Internet era por cobre, el Broadband Forum publicó <b>TR-098</b>, un modelo pensado para el <b>gateway</b> (puerta de enlace) residencial de DSL: una caja con una conexión hacia afuera y una red local hacia adentro. Su raíz es <code>InternetGatewayDevice.</code> y su forma refleja ese mundo: cajones <code>WANDevice</code> y <code>LANDevice</code>, y dentro de la LAN una carpeta <code>WLANConfiguration</code> que mezcla en un solo lugar la radio, el nombre de la red y la seguridad.</p><p>Con los años aparecieron equipos que no encajaban en ese molde: ONT de fibra, routers con varias conexiones, mallas Wi-Fi, decodificadores, equipos con IPv6. En 2010 el Broadband Forum publicó la versión 2 de TR-181, con raíz <code>Device.</code> y la pila de interfaces de la sección anterior: piezas pequeñas que se combinan para describir cualquier equipo. Por eso su nombre formal es <i>Device:2</i>. Desde entonces es el modelo que se actualiza; TR-098 quedó para los equipos que ya lo hablaban.</p></div><figure class="fig fig-comparacion" id="05-diagrama-3"><div class="lienzo"><svg viewBox="0 0 1000 560" style="min-width:820px" role="img" aria-label="Comparación de rutas: el mismo dato en TR-098 y en TR-181. Nombre, clave y canal del Wi-Fi salen de WLANConfiguration.1 en TR-098 y se reparten entre SSID, AccessPoint y Radio en TR-181. Usuario PPPoE, dispositivo conectado y firmware tienen equivalentes; la potencia de la fibra solo existe en TR-098 como extensión del fabricante">
+  <defs>
+    <marker id="f53-fl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--muted)"/></marker>
+  </defs>
+  <text x="245" y="26" text-anchor="middle" class="t t-b">TR-098 · el modelo viejo</text>
+  <text x="755" y="26" text-anchor="middle" class="t t-b">TR-181 · el modelo actual</text>
+  <text x="245" y="44" text-anchor="middle" class="t t-s t-m t-mono">InternetGatewayDevice.</text>
+  <text x="755" y="44" text-anchor="middle" class="t t-s t-m t-mono">Device.</text>
+
+  
+  <text x="20" y="72" class="t t-xs t-b t-m">NOMBRE DEL WI-FI</text>
+  <rect x="20" y="78" width="450" height="42" rx="8" class="c-enl"/>
+  <text x="32" y="95" class="t t-s t-mono">IGD.LANDevice.1.<tspan class="t-b">WLANConfiguration.1.</tspan></text>
+  <text x="32" y="112" class="t t-s t-mono">SSID</text>
+  <rect x="530" y="78" width="450" height="42" rx="8" class="caja"/>
+  <text x="542" y="104" class="t t-s t-mono">Device.WiFi.<tspan class="t-b">SSID.1.</tspan>SSID</text>
+  <path d="M472 99H528" class="ln" style="stroke-width:1.6" marker-end="url(#f53-fl)"/>
+
+  
+  <text x="20" y="140" class="t t-xs t-b t-m">CLAVE DEL WI-FI</text>
+  <rect x="20" y="146" width="450" height="42" rx="8" class="c-enl"/>
+  <text x="32" y="163" class="t t-s t-mono">IGD.LANDevice.1.<tspan class="t-b">WLANConfiguration.1.</tspan></text>
+  <text x="32" y="180" class="t t-s t-mono">KeyPassphrase</text>
+  <rect x="530" y="146" width="450" height="42" rx="8" class="caja"/>
+  <text x="542" y="172" class="t t-s t-mono">Device.WiFi.<tspan class="t-b">AccessPoint.1.</tspan>Security.KeyPassphrase</text>
+  <path d="M472 167H528" class="ln" style="stroke-width:1.6" marker-end="url(#f53-fl)"/>
+
+  
+  <text x="20" y="208" class="t t-xs t-b t-m">CANAL DEL WI-FI</text>
+  <rect x="20" y="214" width="450" height="42" rx="8" class="c-enl"/>
+  <text x="32" y="231" class="t t-s t-mono">IGD.LANDevice.1.<tspan class="t-b">WLANConfiguration.1.</tspan></text>
+  <text x="32" y="248" class="t t-s t-mono">Channel</text>
+  <rect x="530" y="214" width="450" height="42" rx="8" class="caja"/>
+  <text x="542" y="240" class="t t-s t-mono">Device.WiFi.<tspan class="t-b">Radio.1.</tspan>Channel</text>
+  <path d="M472 235H528" class="ln" style="stroke-width:1.6" marker-end="url(#f53-fl)"/>
+
+  
+  <path d="M8 84V250" class="ln s-enl" style="stroke-width:3"/>
+  <text x="742" y="272" text-anchor="middle" class="t t-xs k-enl">UNA CARPETA EN TR-098 · TRES EN TR-181</text>
+
+  
+  <text x="20" y="298" class="t t-xs t-b t-m">USUARIO DE LA CONEXIÓN (PPPOE)</text>
+  <rect x="20" y="304" width="450" height="42" rx="8" class="caja"/>
+  <text x="32" y="321" class="t t-s t-mono">IGD.WANDevice.1.WANConnectionDevice.1.</text>
+  <text x="32" y="338" class="t t-s t-mono">WANPPPConnection.1.Username</text>
+  <rect x="530" y="304" width="450" height="42" rx="8" class="caja"/>
+  <text x="542" y="330" class="t t-s t-mono">Device.PPP.Interface.1.Username</text>
+  <path d="M472 325H528" class="ln" style="stroke-width:1.6" marker-end="url(#f53-fl)"/>
+
+  
+  <text x="20" y="366" class="t t-xs t-b t-m">DIRECCIÓN MAC DE UN DISPOSITIVO CONECTADO</text>
+  <rect x="20" y="372" width="450" height="42" rx="8" class="caja"/>
+  <text x="32" y="398" class="t t-s t-mono">IGD.LANDevice.1.Hosts.Host.3.MACAddress</text>
+  <rect x="530" y="372" width="450" height="42" rx="8" class="caja"/>
+  <text x="542" y="398" class="t t-s t-mono">Device.Hosts.Host.3.PhysAddress</text>
+  <path d="M472 393H528" class="ln" style="stroke-width:1.6" marker-end="url(#f53-fl)"/>
+
+  
+  <text x="20" y="434" class="t t-xs t-b t-m">VERSIÓN DE FIRMWARE</text>
+  <rect x="20" y="440" width="450" height="42" rx="8" class="caja"/>
+  <text x="32" y="466" class="t t-s t-mono">IGD.DeviceInfo.SoftwareVersion</text>
+  <rect x="530" y="440" width="450" height="42" rx="8" class="caja"/>
+  <text x="542" y="466" class="t t-s t-mono">Device.DeviceInfo.SoftwareVersion</text>
+  <path d="M472 461H528" class="ln" style="stroke-width:1.6" marker-end="url(#f53-fl)"/>
+
+  
+  <text x="20" y="502" class="t t-xs t-b t-m">POTENCIA DE LA FIBRA</text>
+  <rect x="20" y="508" width="450" height="42" rx="8" class="caja" style="stroke-dasharray:5 4"/>
+  <text x="32" y="525" class="t t-s t-mono">IGD.X_0A1B2C_GponInterface.RxPower</text>
+  <text x="32" y="542" class="t t-s t-m">no está en la norma: extensión del fabricante</text>
+  <rect x="530" y="508" width="450" height="42" rx="8" class="c-fis"/>
+  <text x="542" y="534" class="t t-s t-mono">Device.Optical.Interface.1.OpticalSignalLevel</text>
+  <path d="M472 529H528" class="ln ln-d" style="stroke-width:1.6" marker-end="url(#f53-fl)"/>
+</svg></div><figcaption><b>El mismo dato en los dos árboles.</b> Cada fila es un dato que un operador usa todos los días; a la izquierda, su ruta en TR-098 (<code>InternetGatewayDevice.</code>), a la derecha, en TR-181 (<code>Device.</code>). Para que las rutas quepan, «IGD» abrevia <code>InternetGatewayDevice</code>. Las flechas del medio unen los equivalentes. Fíjate en las tres filas del Wi-Fi: en TR-098 salen de la misma carpeta <code>WLANConfiguration.1</code>; en TR-181 se reparten entre <code>Radio</code>, <code>SSID</code> y <code>AccessPoint</code>. La última fila, la potencia de la fibra, no tiene equivalente en TR-098: los equipos que hablan el modelo viejo la ponen en una rama propia del fabricante.</figcaption></figure><div class="prose"><p>¿Por qué no se migra todo de una vez? Porque el modelo de datos vive en el firmware del equipo, no en el ACS. Un equipo instalado en 2016 que habla TR-098 lo seguirá hablando mientras no reciba un firmware nuevo con TR-181, y muchos fabricantes nunca lo publicaron para sus modelos viejos. Un equipo en casa de un cliente dura fácilmente cinco a ocho años. El resultado es que casi todo operador con historia tiene una flota mixta, y su ACS tiene que entender los dos árboles. Fibra Ejemplo lo vive con su lote de la marca C, que solo habla TR-098.</p><p>Hay incluso un caso curioso: el simulador de equipos de GenieACS, el que usaste en la práctica del capítulo 3, simula un equipo con TR-098. Si miras su árbol, verás <code>InternetGatewayDevice.</code> en todas las rutas.</p></div><div class="lab" id="05-lab-2"><div class="lab-title"><span class="tag">Laboratorio</span><h3>El mismo dato en TR-098 y en TR-181</h3></div><p class="hint">Elige un dato o escribe una ruta en cualquiera de los dos modelos y mira su equivalente en el otro, pedazo por pedazo. Busca los casos en que una carpeta del modelo viejo se reparte en varias del nuevo, y el dato que solo existe en una rama del fabricante.</p><style>
+[id="05-lab-2"] .l52-buscar{display:flex;flex-wrap:wrap;gap:6px}
+[id="05-lab-2"] .l52-buscar input{flex:1 1 200px;min-width:0;font:500 .88rem var(--f-mono);padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--ink)}
+[id="05-lab-2"] .l52-col{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
+@media (max-width:640px){[id="05-lab-2"] .l52-col{grid-template-columns:minmax(0,1fr)}}
+[id="05-lab-2"] .l52-lado{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px;display:grid;gap:8px;align-content:start}
+[id="05-lab-2"] .l52-lado h4{margin:0;font:700 .8rem var(--f-display);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+[id="05-lab-2"] .l52-ruta{display:flex;flex-wrap:wrap;gap:3px;font:500 .8rem var(--f-mono)}
+[id="05-lab-2"] .l52-ruta span{padding:2px 5px;border-radius:4px;background:var(--paper);word-break:break-all}
+[id="05-lab-2"] .l52-ruta span.k{background:var(--accent-soft);color:var(--accent);font-weight:700}
+[id="05-lab-2"] .l52-ruta span.x{background:var(--c-fis-s);color:var(--c-fis);font-weight:700}
+[id="05-lab-2"] .l52-ruta + .l52-ruta{margin-top:4px}
+[id="05-lab-2"] .l52-nada{font-size:.88rem;color:var(--muted)}
+[id="05-lab-2"] .l52-tabla{width:100%;border-collapse:collapse;font-size:.85rem}
+[id="05-lab-2"] .l52-tabla td{padding:4px 6px;border-top:1px solid var(--line);vertical-align:top}
+[id="05-lab-2"] .l52-tabla td:first-child{font-family:var(--f-mono);word-break:break-all;width:45%}
+</style>
+<div class="opciones">
+  <label>Elige un dato
+    <select id="l52-dato"></select></label>
+</div>
+<div class="l52-buscar">
+  <input id="l52-txt" type="text" aria-label="Escribe una ruta en cualquiera de los dos modelos" placeholder="o escribe una ruta: InternetGatewayDevice.LANDevice.1.WLANConfiguration.1.Channel" autocomplete="off" spellcheck="false">
+  <button type="button" id="l52-ir">Traducir</button>
+</div>
+<div class="l52-col">
+  <div class="l52-lado"><h4>TR-098 · InternetGatewayDevice.</h4><div id="l52-a"></div></div>
+  <div class="l52-lado"><h4>TR-181 · Device.</h4><div id="l52-b"></div></div>
+</div>
+<div class="readout texto" id="l52-out" aria-live="polite"></div>
+<table class="l52-tabla" id="l52-tab" aria-label="Pedazo por pedazo"></table></div></section>
+<section><h2>Las extensiones del fabricante: lo que no está en la norma</h2><div class="prose"><p>La norma no cubre todo. Un fabricante que agrega una función propia (un modo de ahorro de energía, un indicador de temperatura, una lista de bloqueo de su marca) necesita poner esos datos en algún lugar del árbol. Para eso TR-069 reserva un prefijo: todo nombre que no es de la norma empieza con <code>X_</code>, seguido de un identificador del fabricante y otro guion bajo. El identificador puede ser su <b>OUI</b> (<i>Organizationally Unique Identifier</i>, identificador único de organización), el código de seis caracteres que el IEEE le asigna a cada fabricante y que también abre las direcciones MAC, o su nombre de dominio con guiones en lugar de puntos.</p><p>Así, <code>Device.DeviceInfo.X_0A1B2C_Temperature</code> sería una ficha que agregó el fabricante con OUI <code>0A1B2C</code> (inventado para este ejemplo). Las extensiones pueden ser fichas sueltas dentro de una carpeta de la norma o carpetas completas, como <code>InternetGatewayDevice.X_0A1B2C_GponInterface.</code> en un equipo TR-098.</p><p>Las extensiones resuelven un problema y crean otro:</p><ul><li><b>Resuelven</b>: el operador puede gestionar funciones que la norma todavía no describe. Antes de que TR-181 tuviera <code>Device.Optical.</code>, la única forma de leer la potencia de la fibra era una rama <code>X_</code>.</li><li><b>Complican</b>: cada marca la llama distinto, a veces en otra unidad, y puede cambiarla de lugar en el siguiente firmware. Lo que se construye sobre una extensión se construye sobre arena.</li></ul><p>La regla de trabajo de Fibra Ejemplo es sencilla: si el dato está en la norma, se usa la norma, aunque el fabricante ofrezca también su versión; si solo existe como extensión, se anota en el perfil de ese modelo y de ese firmware, que es el tema del capítulo 6.</p></div></section>
+<section><h2>Los objetos que más usa un operador</h2><div class="prose"><p>El TR-181 completo tiene miles de parámetros. Un operador usa a diario unas pocas decenas, concentradas en siete ramas:</p><div class="tbl"><table><thead><tr><th>Rama</th><th>Qué guarda</th><th>Lo usa para</th></tr></thead><tbody><tr><td><code>Device.DeviceInfo.</code></td><td>Fabricante, modelo, número de serie, firmware, tiempo encendido</td><td>Identificar el equipo y saber si se reinicia solo</td></tr><tr><td><code>Device.ManagementServer.</code></td><td>La dirección del ACS, el intervalo del Inform, la dirección para despertarlo</td><td>La propia gestión (capítulo 3)</td></tr><tr><td><code>Device.PPP.</code> y <code>Device.IP.</code></td><td>La conexión a Internet: usuario, estado, dirección pública</td><td>Saber si el cliente navega</td></tr><tr><td><code>Device.Optical.</code></td><td>La potencia de la fibra que recibe y que envía la ONT</td><td>Separar un problema de fibra de uno de configuración</td></tr><tr><td><code>Device.WiFi.</code></td><td>Radios, redes, seguridad, dispositivos conectados y su señal</td><td>El reclamo número uno (capítulo 10)</td></tr><tr><td><code>Device.Hosts.</code></td><td>Todos los dispositivos de la casa, por cable o Wi-Fi</td><td>La ficha del cliente: «tiene 9 equipos conectados»</td></tr><tr><td><code>Device.Services.VoiceService.</code></td><td>La línea de voz: cuenta, estado, llamadas</td><td>El teléfono fijo</td></tr></tbody></table></div><p>Y una más, especial: las ramas de <b>diagnóstico</b> (<i>diagnostics</i>), como <code>Device.IP.Diagnostics.</code>, donde el ACS escribe «haz un ping a tal dirección» y luego lee el resultado. Son parámetros que se usan como botones; el capítulo 9 las explica.</p></div><div class="practica"><div class="practica-title"><span class="tag">En el navegador</span><h3>Lee en la norma qué sabe el equipo de cada dispositivo de tu casa</h3></div><p>Vas a abrir la definición pública de TR-181 que publica el Broadband Forum y a leer la ficha de la tabla de dispositivos conectados. Abre el <a href="https://cwmp-data-models.broadband-forum.org/tr-181-2-22-0-cwmp.html" target="_blank" rel="noopener">modelo de datos TR-181 para TR-069</a> en la computadora. Es una página enorme: dale unos segundos para que cargue.</p><ol class="steps"><li><span>Con Ctrl+F (Cmd+F en macOS), busca <code>Device.Hosts.Host.{i}.</code> y baja por la tabla de parámetros que aparece debajo.</span></li><li><span>Para cada parámetro, anota su nombre, su tipo (<i>Type</i>) y su acceso (<i>Write</i>): <code>R</code> es solo lectura y <code>W</code>, escritura.</span></li><li><span>Busca en particular <code>PhysAddress</code>, <code>IPAddress</code>, <code>HostName</code>, <code>Active</code>, <code>ActiveLastChange</code> e <code>InterfaceType</code>, y lee la descripción de cada uno.</span></li><li><span>Sube hasta <code>Device.Hosts.</code> y busca el contador <code>HostNumberOfEntries</code>.</span></li></ol><p><b>Qué observar:</b> casi toda la tabla es <code>R</code>: la arma el propio equipo a medida que ve dispositivos en la casa, y el ACS solo puede leerla, nunca agregar un dispositivo. <code>PhysAddress</code> es la dirección MAC; <code>Active</code> dice si el dispositivo está presente ahora mismo y <code>ActiveLastChange</code>, desde cuándo; <code>InterfaceType</code> dice si está por cable o por Wi-Fi. Con esos pocos campos, el agente de atención puede decir «veo nueve dispositivos, dos se desconectaron hace diez minutos». Fíjate también en la columna <i>Version</i>: dice desde qué versión de la norma existe cada parámetro, y algunos aparecen marcados como obsoletos, una señal de que la norma también cambia.</p></div><div class="ml"><b>En la práctica</b><p>La ingeniera de Fibra Ejemplo terminó la pantalla de atención con apenas ocho parámetros: modelo y firmware (<code>DeviceInfo</code>), tiempo encendido, potencia de la fibra (convertida a dBm y con un semáforo según el rango de la ONT), estado de la conexión a Internet, nombre de las dos redes Wi-Fi y número de dispositivos activos. No necesitó más. La tentación es mostrar el árbol entero; el agente, con un cliente en la línea, necesita pocos datos en su idioma.</p></div><div class="caso"><b>Un caso real</b><p>Un operador FTTH de la región quiso mostrar la potencia de la fibra en su pantalla de atención para toda la flota. En los equipos nuevos funcionó al primer intento con el parámetro <code>OpticalSignalLevel</code> de <code>Device.Optical.Interface.1.</code> En un lote antiguo con TR-098, el dato existía solo como extensión del fabricante, en otra unidad (dBm con decimales, no milésimas) y, en una versión de firmware, con el signo invertido. La pantalla mostró durante una semana señales «perfectas» en equipos que en realidad tenían la fibra casi cortada. La lección que suelen sacar estos operadores: cada dato que llega a una pantalla se valida modelo por modelo y firmware por firmware, y nunca se asume la unidad.</p></div><div class="prose"><p>Si te interesa cómo otros protocolos de gestión ordenan sus datos en árboles parecidos, el capítulo 27 de <a href="https://aaramirez.github.io/telco/27-gestion-de-red.html" target="_blank" rel="noopener">Cómo funciona un telco</a> cuenta el de SNMP. Y para la idea de capas sobre la que se apila TR-181, el curso de <a href="https://aaramirez.github.io/redes-de-computadoras/temario.html" target="_blank" rel="noopener">Redes de computadoras</a> la explica desde cero.</p><p>La idea con la que cierra este capítulo es la frontera de todo el curso: <b>si un dato no está en el árbol del equipo, el ACS no lo puede ver ni cambiar.</b></p></div><div class="quiz"><h3>Pruébate</h3><details><summary>¿Qué diferencia hay entre un objeto y un parámetro en TR-181?</summary><p>El objeto es una carpeta: agrupa y su nombre termina en punto (<code>Device.WiFi.</code>). El parámetro es una ficha: guarda un solo valor y no termina en punto (<code>Device.DeviceInfo.SoftwareVersion</code>).</p></details><details><summary>En <code>Device.WiFi.SSID.2.SSID</code>, ¿qué significa el 2 y qué significa cada <code>SSID</code>?</summary><p>El 2 es el número de instancia: la segunda red de la tabla de redes Wi-Fi. El primer <code>SSID</code> es la tabla (la carpeta) y el segundo, el parámetro con el nombre de esa red.</p></details><details><summary>¿Por qué un ACS no debe suponer que la red de 5 GHz es siempre <code>SSID.2</code>?</summary><p>Porque los números de instancia los asigna el equipo, no siempre son consecutivos y no dicen qué es cada instancia. Hay que leer sus parámetros (por ejemplo, la radio a la que está conectada) para saberlo.</p></details><details><summary>Un equipo reporta <code>OpticalSignalLevel = -24100</code>. ¿Qué potencia es y está dentro del rango de una ONT GPON B+?</summary><p>Son −24,1 dBm, porque el parámetro está en milésimas de dBm. Está dentro del rango de −8 a −27 dBm, aunque más cerca del límite bajo.</p></details><details><summary>¿Por qué un operador tiene equipos con TR-098 y con TR-181 al mismo tiempo?</summary><p>Porque el modelo de datos vive en el firmware de cada equipo; los equipos viejos siguen hablando TR-098 mientras no reciban un firmware con TR-181, y duran años en las casas.</p></details><details><summary>¿Qué indica el prefijo <code>X_</code> en una ruta y qué riesgo tiene usarla?</summary><p>Que es una extensión del fabricante, fuera de la norma. Su nombre, su unidad y su lugar pueden cambiar entre marcas y entre versiones de firmware.</p></details></div><div class="investiga"><h3>Para investigar</h3><p class="hint">Estas preguntas no se responden en el capítulo: búscalas por tu cuenta.</p><ol><li>¿Qué es un dBm y por qué −27 dBm es menos luz que −8 dBm?<small>Pista: busca «dBm escala logarítmica milivatio».</small></li><li>¿En qué se parece y en qué se diferencia el árbol de una MIB de SNMP, con sus números separados por puntos, del árbol de nombres de TR-181?<small>Pista: busca «SNMP OID MIB tree» y compáralo con una ruta de TR-181.</small></li><li>¿Qué formato de fecha y hora usan los parámetros de tipo <code>dateTime</code> y qué significa la fecha 0001-01-01T00:00:00Z en ellos?<small>Pista: busca «TR-106 dateTime unknown time».</small></li><li>¿Qué norma del Broadband Forum describe la rama de voz <code>Device.Services.VoiceService.</code> y qué cuenta guarda para la línea telefónica?<small>Pista: busca «TR-104 VoiceService».</small></li><li>¿Qué es un esquema XML y cómo publica el Broadband Forum sus modelos de datos en archivos que una máquina puede leer?<small>Pista: busca «Broadband Forum data model XML schema cwmp-datamodel».</small></li></ol></div><div class="vids"><span>Para saber más</span><a class="vid" href="https://cwmp-data-models.broadband-forum.org/tr-181-2-22-0-cwmp.html" target="_blank" rel="noopener">Modelo de datos TR-181 para TR-069 (Broadband Forum, inglés) <small>referencia</small></a><a class="vid" href="https://cwmp-data-models.broadband-forum.org/tr-098-1-8-0.html" target="_blank" rel="noopener">Modelo de datos TR-098, el anterior (Broadband Forum, inglés) <small>referencia</small></a><a class="vid" href="https://cwmp-data-models.broadband-forum.org/" target="_blank" rel="noopener">Índice de todos los modelos de datos de CWMP (Broadband Forum, inglés) <small>referencia</small></a><a class="vid" href="https://aaramirez.github.io/telco/28-gestionar-el-equipo-en-casa-del-cliente.html" target="_blank" rel="noopener">Gestionar el equipo en casa del cliente, capítulo 28 de Cómo funciona un telco <small>lectura</small></a></div></section>
+<label class="got"><input type="checkbox" id="got"> Lo tengo claro</label>
+<nav class="pager" id="pager" aria-label="Capítulo anterior y siguiente"></nav>
+</main>
+</div>
+<footer><span>Curso abierto de aaramirez.github.io.</span><span>Sitio publicado: <a href="https://github.com/aaramirez/gestion-remota-de-equipos" target="_blank" rel="noopener">github.com/aaramirez/gestion-remota-de-equipos</a></span></footer>
+</div>
+<script src="assets/lab.js"></script>
+<script>
+(function(){
+  const {$}=window.Lab;
+  // [nombre, tipo, acceso, valor, unidad, descripción, extra]
+  const P=(n,t,a,v,u,d,x)=>({n,t,a,v,u,d,x:x||{}});
+  const ARBOL={n:'Device.',h:[
+    {n:'DeviceInfo.',h:[
+      P('Manufacturer','string(:64)','R','Marca A','','El fabricante del equipo.'),
+      P('ModelName','string(:64)','R','ONT-AX3000','','El modelo.'),
+      P('SerialNumber','string(:64)','R','MRCA00012345','','El número de serie: con él el ACS reconoce al equipo.'),
+      P('SoftwareVersion','string(:64)','R','V3.2.1','','La versión de firmware que corre hoy.'),
+      P('UpTime','unsignedInt','R','352800','segundos','Cuánto lleva encendido desde el último reinicio.',{conv:v=>{const d=Math.floor(v/86400),h=Math.floor(v%86400/3600);return d+' días y '+h+' horas';}}),
+      P('X_0A1B2C_Temperature','int','R','48','grados Celsius (según el fabricante)','Extensión del fabricante (prefijo X_): no está en la norma. Otra marca la llama distinto o no la tiene.',{ext:1})
+    ]},
+    {n:'ManagementServer.',h:[
+      P('URL','string(:256)','W','https://acs.fibraejemplo.example/','','La dirección del ACS al que llama el equipo. Cambiarla mal deja al equipo sin gestión.',{url:1}),
+      P('PeriodicInformInterval','unsignedInt(1:)','W','3600','segundos','Cada cuánto llama el equipo con un Inform periódico (capítulo 3).',{min:1}),
+      P('ConnectionRequestURL','string(:256)','R','http://203.0.113.25:7547/cr','','La dirección donde el ACS puede despertar al equipo. La arma el propio equipo.')
+    ]},
+    {n:'Optical.',h:[{n:'Interface.',h:[{n:'1.',h:[
+      P('Status','string (enumeración)','R','Up','','Si la interfaz óptica está activa.'),
+      P('OpticalSignalLevel','int','R','-19500','milésimas de dBm','La potencia que recibe la ONT por la fibra.',{conv:v=>{const d=v/1000;return d.toLocaleString('es',{minimumFractionDigits:1})+' dBm · '+(d<=-8&&d>=-27?'dentro':'fuera')+' del rango de una ONT GPON B+ (−8 a −27 dBm)';},m:'opt'}),
+      P('TransmitOpticalLevel','int','R','2100','milésimas de dBm','La potencia que la ONT envía hacia la OLT.',{conv:v=>(v/1000).toLocaleString('es',{minimumFractionDigits:1})+' dBm'})
+    ]}]}]},
+    {n:'PPP.',h:[{n:'Interface.',h:[{n:'1.',h:[
+      P('Status','string (enumeración)','R','Up','','Si la sesión PPP está arriba.'),
+      P('Username','string(:64)','W','cliente2207@fibraejemplo','','El usuario de la conexión PPPoE.'),
+      P('LowerLayers','string (lista de rutas)','W','Device.Ethernet.VLANTermination.1','','La interfaz sobre la que se apoya esta (la pila del diagrama anterior). Cambiarlo sin saber rompe la conexión.')
+    ]}]}]},
+    {n:'IP.',h:[{n:'Interface.',h:[
+      {n:'1.',h:[{n:'IPv4Address.',h:[{n:'1.',h:[P('IPAddress','string(:45)','W','192.168.1.1','','La dirección del equipo dentro de la casa (lado LAN).',{ip:1})]}]}]},
+      {n:'2.',h:[{n:'IPv4Address.',h:[{n:'1.',h:[P('IPAddress','string(:45)','R','203.0.113.25','','La dirección pública, la del lado de Internet. La asigna la red del operador al abrir la sesión: el ACS solo la lee.')]}]}]}
+    ]}]},
+    {n:'WiFi.',h:[
+      {n:'Radio.',h:[
+        {n:'1.',h:[P('Channel','unsignedInt(1:255)','W','6','','El canal de la radio de 2,4 GHz. En esta banda el equipo solo acepta del 1 al 13.',{rango:[1,13]})]},
+        {n:'2.',h:[P('Channel','unsignedInt(1:255)','W','36','','El canal de la radio de 5 GHz. Este equipo acepta 36, 40, 44, 48, 149, 153, 157 y 161.',{lista:[36,40,44,48,149,153,157,161]})]}
+      ]},
+      {n:'SSID.',h:[
+        {n:'1.',h:[P('SSID','string(:32)','W','Casa-2207','','El nombre de la red de 2,4 GHz.'),P('Enable','boolean','W','true','','Si la red está encendida.')]},
+        {n:'2.',h:[P('SSID','string(:32)','W','Casa-2207-5G','','El nombre de la red de 5 GHz.'),P('Enable','boolean','W','true','','Si la red está encendida.')]}
+      ]},
+      {n:'AccessPoint.',h:[{n:'1.',h:[
+        P('AssociatedDeviceNumberOfEntries','unsignedInt','R','4','','Cuántos dispositivos están conectados ahora a esta red Wi-Fi.'),
+        {n:'Security.',h:[
+          P('ModeEnabled','string (enumeración)','W','WPA2-Personal','','El tipo de seguridad. Solo acepta valores de una lista.',{enum:['None','WPA2-Personal','WPA3-Personal','WPA3-Personal-Transition']}),
+          P('KeyPassphrase','string(8:63)','W','','','La clave del Wi-Fi. Fíjate: al leerla, el equipo devuelve un texto vacío. Se puede escribir, pero la norma no deja leerla, para que la clave no viaje por la red.',{m:'clave',secreto:1})
+        ]}
+      ]}]}
+    ]},
+    {n:'Hosts.',h:[
+      P('HostNumberOfEntries','unsignedInt','R','3','','Cuántas filas tiene la tabla Host: todos los dispositivos que el equipo vio en la casa, activos o no.',{m:'hosts'}),
+      {n:'Host.',h:[
+        {n:'1.',h:[P('PhysAddress','string(:64)','R','3c:22:fb:10:4e:01','','La dirección MAC del dispositivo.'),P('HostName','string(:64)','R','celular-ana','','El nombre con el que se presentó.'),P('IPAddress','string(:45)','R','192.168.1.23','','Su dirección en la red de la casa.'),P('Active','boolean','R','true','','Si está presente ahora.'),P('InterfaceType','string (enumeración)','R','Wi-Fi','','Por dónde se conecta: Ethernet o Wi-Fi.')]},
+        {n:'3.',h:[P('PhysAddress','string(:64)','R','f0:9f:c2:7a:11:9b','','La dirección MAC del dispositivo.'),P('HostName','string(:64)','R','tv-sala','','El nombre con el que se presentó.'),P('Active','boolean','R','false','','Si está presente ahora: este se desconectó.'),P('ActiveLastChange','dateTime','R','2026-11-23T21:14:05Z','','Desde cuándo está en su estado actual.')]},
+        {n:'4.',h:[P('PhysAddress','string(:64)','R','00:1a:2b:3c:4d:5e','','La dirección MAC del dispositivo.'),P('HostName','string(:64)','R','consola','','El nombre con el que se presentó.'),P('Active','boolean','R','true','','Si está presente ahora.'),P('InterfaceType','string (enumeración)','R','Ethernet','','Por dónde se conecta: Ethernet o Wi-Fi.')]}
+      ]}
+    ]}
+  ]};
+  const hechas=new Set();
+  let actual=null;
+  const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  function pinta(nodo,ruta,ul,nivel){
+    const li=document.createElement('li');ul.appendChild(li);
+    const b=document.createElement('button');b.type='button';
+    const r=ruta+nodo.n;
+    if(nodo.h){
+      b.className='obj';b.setAttribute('aria-expanded',String(nivel<1));b.textContent=nodo.n;li.appendChild(b);
+      const sub=document.createElement('ul');sub.hidden=nivel>=1;li.appendChild(sub);
+      nodo.h.forEach(h=>pinta(h,r,sub,nivel+1));
+      b.addEventListener('click',()=>{const ab=b.getAttribute('aria-expanded')!=='true';b.setAttribute('aria-expanded',String(ab));sub.hidden=!ab;objeto(nodo,r,b);});
+    }else{
+      b.className='par';b.innerHTML=nodo.x.ext?'<span class="x">'+esc(nodo.n)+'</span>':esc(nodo.n);li.appendChild(b);
+      b.addEventListener('click',()=>parametro(nodo,r,b));
+    }
+  }
+  function marcar(b){document.querySelectorAll('#l51-arbol button.sel').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');}
+  function mision(m){if(!m||hechas.has(m))return;hechas.add(m);document.querySelector('#l51-mis li[data-m="'+m+'"]').classList.add('hecha');}
+  function cuenta(n){return n.h?n.h.reduce((s,h)=>s+cuenta(h),0):1;}
+  function objeto(nodo,r,b){
+    marcar(b);actual=null;$('#l51-esc').hidden=true;$('#l51-res').hidden=true;$('#l51-xml').hidden=true;
+    const inst=/^\d+\.$/.test(nodo.n);
+    let extra='';
+    if(r==='Device.Hosts.Host.'){extra='<span>Es una tabla: sus filas son 1, 3 y 4. Falta la 2 (ese dispositivo se borró), y el contador HostNumberOfEntries dice 3. Contar «de 1 a N» fallaría.</span>';mision('hosts');}
+    else if(inst)extra='<span>Es una <b>instancia</b>: la fila '+nodo.n.slice(0,-1)+' de una tabla. El número lo puso el equipo.</span>';
+    $('#l51-out').innerHTML='<span class="big l51-ruta">'+esc(r)+'</span><span>Objeto (carpeta): no guarda valor, agrupa. Termina en punto.</span><span>Pedirlo con GetParameterValues devolvería sus '+cuenta(nodo)+' parámetros de una vez.</span>'+extra;
+  }
+  function parametro(p,r,b){
+    marcar(b);actual={p,r};
+    const v=p.x.secreto?'(vacío al leerlo)':p.v;
+    let lineas='<span class="big l51-ruta">'+esc(r)+'</span>';
+    lineas+='<span>Valor: <b>'+esc(v)+'</b>'+(p.u?' '+esc(p.u):'')+'</span>';
+    if(p.x.conv)lineas+='<span class="ok">= '+esc(p.x.conv(Number(p.v)))+'</span>';
+    lineas+='<span>Tipo: <code>'+esc(p.t)+'</code> · Acceso: <b>'+(p.a==='W'?'W (lectura y escritura)':'R (solo lectura)')+'</b></span>';
+    if(p.x.enum)lineas+='<span>Valores permitidos: '+p.x.enum.map(esc).join(', ')+'</span>';
+    lineas+='<span>'+esc(p.d)+'</span>';
+    $('#l51-out').innerHTML=lineas;
+    $('#l51-esc').hidden=false;$('#l51-val').value=p.x.secreto?'':p.v;
+    $('#l51-set').textContent=p.a==='W'?'Enviar SetParameterValues':'Intentar escribir';
+    $('#l51-res').hidden=true;$('#l51-xml').hidden=true;
+    mision(p.x.m);
+  }
+  function valida(p,v){
+    if(p.a!=='W')return [9008,'Attempt to set a non-writable parameter','El parámetro es de solo lectura: lo produce el equipo.'];
+    const t=p.t;
+    if(t.startsWith('boolean')){if(!/^(true|false|1|0)$/.test(v))return [9007,'Invalid parameter value','Un boolean solo acepta true, false, 1 o 0.'];return null;}
+    if(t.startsWith('unsignedInt')){
+      if(!/^\d+$/.test(v))return [9007,'Invalid parameter value','Se esperaba un número entero sin signo, sin letras ni decimales.'];
+      const n=Number(v);
+      if(p.x.min&&n<p.x.min)return [9007,'Invalid parameter value','El mínimo es '+p.x.min+'.'];
+      if(n>4294967295)return [9007,'Invalid parameter value','El número es más grande que lo que cabe en un unsignedInt.'];
+      if(t.includes('(1:255)')&&(n<1||n>255))return [9007,'Invalid parameter value','La norma permite de 1 a 255.'];
+      if(p.x.rango&&(n<p.x.rango[0]||n>p.x.rango[1]))return [9007,'Invalid parameter value','La norma permite de 1 a 255, pero esta radio de 2,4 GHz solo acepta del 1 al 13: el equipo rechaza lo que su hardware no puede hacer.'];
+      if(p.x.lista&&!p.x.lista.includes(n))return [9007,'Invalid parameter value','La norma lo permitiría, pero este equipo no maneja el canal '+n+' en 5 GHz.'];
+      return null;
+    }
+    if(p.x.enum){if(!p.x.enum.includes(v))return [9007,'Invalid parameter value','No está en la lista de valores permitidos (cuidado con mayúsculas y guiones).'];return null;}
+    const m=t.match(/string\((\d*):(\d+)\)/);
+    if(m){const min=m[1]?Number(m[1]):0,max=Number(m[2]);
+      if(v.length<min||v.length>max)return [9007,'Invalid parameter value','El texto tiene '+v.length+' caracteres; este parámetro acepta '+(min?'de '+min+' a '+max:'hasta '+max)+'.'];}
+    if(p.x.ip&&!/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/.test(v))return [9007,'Invalid parameter value','No es una dirección IPv4 válida.'];
+    if(p.x.url&&!/^https?:\/\/\S+$/.test(v))return [9007,'Invalid parameter value','No es una URL.'];
+    return null;
+  }
+  $('#l51-set').addEventListener('click',()=>{
+    if(!actual)return;const {p,r}=actual;const v=$('#l51-val').value;
+    const f=valida(p,v);const res=$('#l51-res'),xml=$('#l51-xml');res.hidden=false;xml.hidden=false;
+    if(f){
+      res.innerHTML='<span class="warn">Falla '+f[0]+' · '+esc(f[1])+'</span><span>'+esc(f[2])+'</span><span>El valor no cambió: el equipo rechaza toda la orden si un solo parámetro falla.</span>';
+      xml.textContent='<cwmp:Fault>\n  <FaultCode>9003</FaultCode>\n  <FaultString>Invalid arguments</FaultString>\n  <SetParameterValuesFault>\n    <ParameterName>'+r+'</ParameterName>\n    <FaultCode>'+f[0]+'</FaultCode>\n    <FaultString>'+f[1]+'</FaultString>\n  </SetParameterValuesFault>\n</cwmp:Fault>';
+    }else{
+      if(!p.x.secreto)p.v=v;
+      let nota='El equipo aceptó el valor y responde con Status 0: aplicado.';
+      if(p.x.url)nota+=' Ojo: si la URL nueva no lleva a un ACS que funcione, este equipo dejará de ser gestionable.';
+      if(p.x.secreto)nota+=' Si vuelves a leerla, seguirá llegando vacía.';
+      if(r.endsWith('LowerLayers'))nota+=' Ojo: el equipo lo aceptó, pero si la interfaz de abajo no es la correcta, el cliente se queda sin Internet.';
+      res.innerHTML='<span class="ok">Aceptado</span><span>'+esc(nota)+'</span>';
+      xml.textContent='<cwmp:SetParameterValuesResponse>\n  <Status>0</Status>\n</cwmp:SetParameterValuesResponse>';
+      parametroRefresco(p);
+    }
+  });
+  function parametroRefresco(p){const sel=document.querySelector('#l51-arbol button.sel');if(sel&&actual&&actual.p===p){const keep=[$('#l51-res').innerHTML,$('#l51-xml').textContent];parametro(p,actual.r,sel);$('#l51-res').hidden=false;$('#l51-xml').hidden=false;$('#l51-res').innerHTML=keep[0];$('#l51-xml').textContent=keep[1];}}
+  $('#l51-val').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('#l51-set').click();}});
+  const raiz=document.createElement('ul');$('#l51-arbol').appendChild(raiz);pinta(ARBOL,'',raiz,0);
+  $('#l51-out').innerHTML='<span>Abre una carpeta y toca un parámetro. Las fichas en otro color son extensiones del fabricante (<code>X_</code>).</span>';
+})();
+</script>
+<script>
+(function(){
+  const {$}=window.Lab;
+  const I='InternetGatewayDevice.';
+  const WL=I+'LANDevice.1.WLANConfiguration.1.';
+  const PPPC=I+'WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.';
+  // a: rutas TR-098, b: rutas TR-181, k: tipo de relación, p: pedazo a pedazo, t: explicación
+  const D=[
+    {id:'ssid',n:'Nombre del Wi-Fi (2,4 GHz)',a:[WL+'SSID'],b:['Device.WiFi.SSID.1.SSID'],k:'reparte',
+      p:[['LANDevice.1.','Desaparece: TR-181 no separa «la LAN» en un cajón; el Wi-Fi tiene su propia rama, WiFi.'],['WLANConfiguration.1.','Se reparte en tres: Radio, SSID y AccessPoint. El nombre de la red va a SSID.'],['SSID','Igual en los dos.']],
+      t:'Una carpeta vieja, tres nuevas: WLANConfiguration mezclaba radio, red y seguridad.'},
+    {id:'clave',n:'Clave del Wi-Fi',a:[WL+'KeyPassphrase',WL+'PreSharedKey.1.KeyPassphrase'],b:['Device.WiFi.AccessPoint.1.Security.KeyPassphrase'],k:'reparte',
+      p:[['WLANConfiguration.1.','La seguridad pasa a AccessPoint.1.Security.'],['PreSharedKey.1.','TR-098 tenía dos lugares para la clave; TR-181 deja uno solo.'],['KeyPassphrase','Igual en los dos, y en los dos se lee vacía.']],
+      t:'En TR-098 la clave podía estar en dos lugares, según cómo lo hiciera cada marca. TR-181 deja uno.'},
+    {id:'canal',n:'Canal del Wi-Fi',a:[WL+'Channel'],b:['Device.WiFi.Radio.1.Channel'],k:'reparte',
+      p:[['WLANConfiguration.1.','El canal es de la radio, no de la red: va a Radio.1.'],['Channel','Igual en los dos.']],
+      t:'En TR-181, dos redes que comparten una radio comparten también el canal: por eso el canal vive en la radio.'},
+    {id:'seg',n:'Tipo de seguridad del Wi-Fi',a:[WL+'BeaconType',WL+'IEEE11iEncryptionModes'],b:['Device.WiFi.AccessPoint.1.Security.ModeEnabled'],k:'junta',
+      p:[['BeaconType','Decía la familia: Basic, WPA, 11i (WPA2) o WPAand11i.'],['IEEE11iEncryptionModes','Decía el cifrado: AESEncryption, TKIPEncryption…'],['ModeEnabled','Un solo valor lo dice todo: WPA2-Personal, WPA3-Personal…']],
+      t:'El caso al revés: dos fichas viejas se juntan en una nueva. Traducir exige combinar valores, no solo cambiar el nombre.'},
+    {id:'clientes',n:'Dispositivos conectados al Wi-Fi',a:[WL+'TotalAssociations'],b:['Device.WiFi.AccessPoint.1.AssociatedDeviceNumberOfEntries'],k:'reparte',
+      p:[['WLANConfiguration.1.','Los dispositivos se asocian al punto de acceso: AccessPoint.1.'],['TotalAssociations','Cambia de nombre: AssociatedDeviceNumberOfEntries, el contador de la tabla AssociatedDevice.']],
+      t:'Mismo dato, otro nombre: TR-181 llama «…NumberOfEntries» a todos sus contadores.'},
+    {id:'ppp',n:'Usuario de la conexión (PPPoE)',a:[PPPC+'Username'],b:['Device.PPP.Interface.1.Username'],k:'igual',
+      p:[['WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.','Tres niveles de cajones se vuelven una pieza: PPP.Interface.1, una capa de la pila.'],['Username','Igual en los dos.']],
+      t:'Equivalente directo, con una ruta mucho más corta.'},
+    {id:'ip',n:'Dirección IP pública',a:[PPPC+'ExternalIPAddress'],b:['Device.IP.Interface.2.IPv4Address.1.IPAddress'],k:'igual',
+      p:[['WANPPPConnection.1.','En TR-181 la IP no vive en la conexión PPP: vive en la capa IP, encima.'],['ExternalIPAddress','Pasa a IPv4Address.1.IPAddress, y la interfaz IP puede tener varias direcciones.']],
+      t:'El número de la interfaz IP (aquí 2) depende del equipo: hay que seguir LowerLayers para saber cuál es la de Internet.'},
+    {id:'mac',n:'MAC de un dispositivo de la casa',a:[I+'LANDevice.1.Hosts.Host.3.MACAddress'],b:['Device.Hosts.Host.3.PhysAddress'],k:'igual',
+      p:[['LANDevice.1.','Desaparece: Hosts cuelga directo de la raíz.'],['Host.3.','La instancia se conserva.'],['MACAddress','Cambia de nombre: PhysAddress (dirección física).']],
+      t:'Mismo dato con otro nombre de ficha.'},
+    {id:'host',n:'Nombre de un dispositivo de la casa',a:[I+'LANDevice.1.Hosts.Host.3.HostName'],b:['Device.Hosts.Host.3.HostName'],k:'igual',
+      p:[['LANDevice.1.','Desaparece.'],['HostName','Igual en los dos.']],t:'Equivalente directo.'},
+    {id:'fw',n:'Versión de firmware',a:[I+'DeviceInfo.SoftwareVersion'],b:['Device.DeviceInfo.SoftwareVersion'],k:'igual',
+      p:[['DeviceInfo.','Igual.'],['SoftwareVersion','Igual.']],t:'Solo cambia la raíz: DeviceInfo pasó casi intacto de un modelo al otro.'},
+    {id:'serie',n:'Número de serie',a:[I+'DeviceInfo.SerialNumber'],b:['Device.DeviceInfo.SerialNumber'],k:'igual',p:[['SerialNumber','Igual.']],t:'Solo cambia la raíz.'},
+    {id:'uptime',n:'Tiempo encendido',a:[I+'DeviceInfo.UpTime'],b:['Device.DeviceInfo.UpTime'],k:'igual',p:[['UpTime','Igual, en segundos en los dos.']],t:'Solo cambia la raíz.'},
+    {id:'acs',n:'Dirección del ACS',a:[I+'ManagementServer.URL'],b:['Device.ManagementServer.URL'],k:'igual',p:[['ManagementServer.','Igual: la gestión es lo mismo en los dos.']],t:'Solo cambia la raíz.'},
+    {id:'inform',n:'Intervalo del Inform periódico',a:[I+'ManagementServer.PeriodicInformInterval'],b:['Device.ManagementServer.PeriodicInformInterval'],k:'igual',p:[['PeriodicInformInterval','Igual, en segundos.']],t:'Solo cambia la raíz.'},
+    {id:'opt',n:'Potencia de la fibra',a:[I+'X_0A1B2C_GponInterface.RxPower'],b:['Device.Optical.Interface.1.OpticalSignalLevel'],k:'ext',
+      p:[['X_0A1B2C_GponInterface.','No es de la norma: rama propia del fabricante (prefijo X_ y su OUI inventado).'],['RxPower','Su unidad la decide el fabricante; en este equipo, dBm con decimales (−19.5). En TR-181, milésimas de dBm (−19500).']],
+      t:'TR-098 no tiene rama óptica: el equipo viejo solo lo ofrece como extensión. Otra marca la llamaría distinto.'}
+  ];
+  const sel=$('#l52-dato');
+  D.forEach(d=>{const o=document.createElement('option');o.value=d.id;o.textContent=d.n;sel.appendChild(o);});
+  const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const trozos=r=>r.split(/(?<=\.)/);
+  // resalta las piezas que no aparecen en el otro modelo (las que cambian)
+  function ruta(r,otras){
+    const ajenas=new Set(otras.map(trozos).flat());
+    return '<div class="l52-ruta">'+trozos(r).map((seg,i)=>{
+      const c=seg.startsWith('X_')?'x':(i>0&&!/^\d+\.$/.test(seg)&&!ajenas.has(seg)?'k':'');
+      return '<span'+(c?' class="'+c+'"':'')+'>'+esc(seg)+'</span>';}).join('')+'</div>';
+  }
+  const ETQ={igual:'Equivalente directo',reparte:'Una carpeta vieja se reparte en varias nuevas',junta:'Varias fichas viejas se juntan en una nueva',ext:'Solo existe como extensión del fabricante'};
+  function muestra(d,dir){
+    sel.value=d.id;
+    $('#l52-a').innerHTML=d.a.map(r=>ruta(r,d.b)).join('')+(d.a.length>1?'<p class="l52-nada">'+(d.k==='junta'?'Dos fichas que se leen juntas.':'Dos lugares posibles, según la marca.')+'</p>':'');
+    $('#l52-b').innerHTML=d.b.map(r=>ruta(r,d.a)).join('')+'<p class="l52-nada">Resaltadas: las piezas que cambian de un modelo al otro.</p>';
+    const ia=d.a[0].replace(I,'').split('.').length,ib=d.b[0].replace('Device.','').split('.').length;
+    $('#l52-out').innerHTML='<span class="big">'+ETQ[d.k]+'</span><span>'+esc(d.t)+'</span><span>Niveles debajo de la raíz: TR-098 '+ia+' · TR-181 '+ib+'.'+(dir?' Traducido desde '+dir+'.':'')+'</span>';
+    $('#l52-tab').innerHTML='<caption class="l52-nada" style="text-align:left">Pedazo por pedazo</caption>'+d.p.map(x=>'<tr><td>'+esc(x[0])+'</td><td>'+esc(x[1])+'</td></tr>').join('');
+  }
+  function norm(r){return r.trim().replace(/^IGD\./,I).replace(/\{i\}/g,'1');}
+  function sinNum(r){return r.replace(/\.\d+\./g,'.N.');}
+  function busca(){
+    const t=norm($('#l52-txt').value);if(!t)return;
+    for(const d of D){
+      if(d.a.some(r=>sinNum(r)===sinNum(t)))return muestra(d,'TR-098');
+      if(d.b.some(r=>sinNum(r)===sinNum(t)))return muestra(d,'TR-181');
+    }
+    const parcial=D.find(d=>d.a.concat(d.b).some(r=>r.toLowerCase().endsWith('.'+t.split('.').pop().toLowerCase())&&t.split('.').pop().length>2));
+    if(parcial)return muestra(parcial,'la última pieza de la ruta (no encontré la ruta exacta)');
+    $('#l52-out').innerHTML='<span class="warn">No está en este traductor de ejemplo.</span><span>Prueba con una de las rutas de la lista, por ejemplo Device.WiFi.Radio.1.Channel o IGD.LANDevice.1.Hosts.Host.3.MACAddress. Si empieza con '+(t.startsWith(I)?'InternetGatewayDevice., es TR-098':t.startsWith('Device.')?'Device., es TR-181':'otra cosa, no es de ninguno de los dos')+'.</span>';
+    $('#l52-a').innerHTML='';$('#l52-b').innerHTML='';$('#l52-tab').innerHTML='';
+  }
+  sel.addEventListener('change',()=>{$('#l52-txt').value='';muestra(D.find(d=>d.id===sel.value));});
+  $('#l52-ir').addEventListener('click',busca);
+  $('#l52-txt').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();busca();}});
+  muestra(D[0]);
+})();
+</script>
+</body>
+</html>

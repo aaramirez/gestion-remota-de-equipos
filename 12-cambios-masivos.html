@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="es">
+<head>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-KX76XF8R');</script>
+<!-- End Google Tag Manager -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cambios masivos · Gestión remota de equipos (ACS) · Gestión remota de equipos (ACS)</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Cómo un operador configura, actualiza y diagnostica a distancia los equipos que tiene en casa de sus clientes: TR-069 y TR-369 a fondo, el modelo de datos TR-181, el aprovisionamiento sin visita, los cambios masivos, el firmware, los diagnósticos, la seguridad y la escala de un ACS.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400;1,8..60,600&display=swap">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KX76XF8R"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+<div class="wrap" data-page="cambios-masivos">
+<header class="topbar"><a class="brand" href="index.html">Gestión <b>remota</b> de equipos</a><span class="eyebrow">Curso visual e interactivo · Industrias y finanzas</span><a class="al-sitio" href="https://aaramirez.github.io/">← Todos los cursos</a></header>
+<div class="layout">
+<nav class="toc" id="toc" aria-label="Ruta de aprendizaje"></nav>
+<main>
+<header class="page-head"><span class="num">CAPÍTULO 12 DE 16</span><h1>Campañas y cambios masivos sin romper nada</h1><p class="lede">Un error en un equipo es un reclamo; el mismo error en cien mil es una crisis. Este capítulo muestra cómo se cambia algo en toda la flota: a quién, en qué orden, cómo se sabe que quedó, qué pasa con los equipos apagados y cómo se vuelve atrás.</p></header>
+<section><div class="prose"><p>Fibra Ejemplo estrena dos servidores <b>DNS</b> (<i>Domain Name System</i>, sistema de nombres de dominio), los que traducen <code>www.ejemplo.com</code> a una dirección IP, en <code>198.51.100.53</code> y <code>198.51.100.54</code>. Son más rápidos y están más cerca de los clientes. Para que se usen, hay que cambiar un parámetro en cada uno de los cien mil equipos: la dirección DNS que el equipo les entrega a los celulares y computadoras de la casa.</p><p>Con lo visto en el capítulo 4, el cambio es un <code>SetParameterValues</code> de una línea. Hacerlo en un equipo toma segundos. Hacerlo en cien mil a la vez es apostar la red entera a que no hay ningún error: ni en el valor, ni en la ruta del parámetro, ni en ningún modelo que entienda la norma a su manera. Si lo hay, cien mil casas se quedan sin poder abrir una página, en el mismo minuto, y la mesa de ayuda recibe miles de llamadas.</p><p>Un <b>cambio masivo</b> (<i>bulk change</i>) organizado se llama <b>campaña</b> (<i>campaign</i>). Este capítulo muestra cómo se arma una: a quién, en qué orden, qué hacer con los equipos que no contestan, cómo saber que el cambio quedó y cómo deshacerlo.</p></div></section>
+<section><h2>Ejemplos típicos de cambios masivos</h2><div class="analogia"><b>Imagínalo así</b><p>Piensa en una cadena de cien panaderías que cambia la receta del pan. Nadie sensato manda la receta nueva a las cien el mismo lunes. Primero la prueba una panadería, con clientes de verdad. Después, las de un barrio. Si los clientes siguen comprando y nadie se queja, el resto. Y mientras tanto, cada panadería guarda la receta vieja en un cajón, por si hay que volver a ella.</p></div><div class="prose"><p>Casi todos los cambios masivos de un operador son de cuatro clases. Todos se hacen con las órdenes del capítulo 4 sobre los parámetros del árbol TR-181 del capítulo 5:</p><div class="tbl"><table><thead><tr><th>Cambio</th><th>Qué se toca (TR-181)</th><th>Qué puede salir mal</th></tr></thead><tbody><tr><td>Cambiar el servidor DNS</td><td><code>Device.DHCPv4.Server.Pool.1.DNSServers</code></td><td>Un valor mal escrito deja la casa sin nombres: «hay internet pero no abre nada»</td></tr><tr><td>Activar IPv6</td><td><code>Device.IP.IPv6Enable</code> y la interfaz IPv6 de la conexión</td><td>Algún dispositivo viejo de la casa se confunde y navega peor</td></tr><tr><td>Abrir un puerto o crear una regla</td><td><code>AddObject</code> en <code>Device.NAT.PortMapping.</code></td><td>Abrir de más expone dispositivos de la casa a internet</td></tr><tr><td>Cambiar el intervalo del Inform</td><td><code>Device.ManagementServer.PeriodicInformInterval</code></td><td>Un intervalo muy corto multiplica la carga del ACS (capítulo 3)</td></tr></tbody></table></div><p><b>IPv6</b> (<i>Internet Protocol version 6</i>) es la versión nueva del protocolo de internet, con direcciones mucho más largas; aquí basta saber que se enciende con un parámetro. Lo que importa es la última columna: cada cambio tiene su forma de fallar, y conviene escribirla antes de empezar, porque dice qué hay que vigilar.</p></div></section>
+<section><h2>Segmentar: a quién le toca</h2><div class="prose"><p>Antes del «cuándo» va el «a quién». <b>Segmentar</b> (<i>segmenting</i>) es elegir el conjunto de equipos al que va la campaña, con criterios que el ACS conoce:</p><ul><li><b>Modelo y fabricante</b>: lo que el equipo informa en <code>Device.DeviceInfo</code> (capítulo 6). Si el cambio solo tiene sentido en los equipos con Wi-Fi 6, va solo a ellos.</li><li><b>Versión de firmware</b>: <code>Device.DeviceInfo.SoftwareVersion</code>. Una función puede existir desde la 4.1 y no antes.</li><li><b>Zona</b>: la ciudad, el nodo o el puerto de la OLT, que el ACS sabe por el inventario (capítulo 8).</li><li><b>Plan</b>: lo que el CRM dice que contrató el cliente.</li><li><b>Una lista</b>: los clientes que pidieron algo, o los que salieron del tablero del capítulo 11.</li></ul><p>En un ACS, la segmentación se escribe como una <b>consulta</b> (<i>query</i>). En GenieACS, un ACS de código abierto, se guarda además como <b>etiqueta</b> (<i>tag</i>): una marca que se le pone a cada equipo, como <code>piloto-dns</code> o <code>zona-sur</code>. Una regla que dice «a los equipos con la etiqueta <code>piloto-dns</code>, aplícales este valor» es una campaña en miniatura; GenieACS llama a esas reglas <b>presets</b>.</p><p>Y tan importante como a quién le toca es <b>a quién no</b>. Casi todos los operadores excluyen de las campañas, salvo que sea urgente, a los clientes empresariales con contrato especial, a los equipos con un reclamo abierto (para no mezclar un problema con otro) y a los que el propio cliente configuró a mano y pidió que nadie toque.</p></div></section>
+<section><h2>Lote piloto, ventanas y avance por tramos</h2><div class="prose"><p>Una vez elegido el conjunto, la campaña no va a todos a la vez. Avanza por <b>tramos</b> (<i>waves</i>), cada uno más grande que el anterior, y entre tramo y tramo hay una <b>compuerta</b> (<i>gate</i>): una revisión de los números que decide si se sigue.</p></div><figure class="fig fig-esquema" id="12-diagrama-1"><div class="lienzo"><svg viewBox="0 0 980 360" style="min-width:780px" role="img" aria-label="Los tramos de una campaña: equipos de empleados, piloto del 1 por ciento, 10, 50 y el resto. Entre tramo y tramo hay una compuerta con tres salidas: seguir, pausar o volver atrás, según cuántos equipos fallaron, si el valor quedó y si subieron las llamadas">
+  <defs>
+    <marker id="f12a-fl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--muted)"/></marker>
+    <marker id="f12a-fl-ok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--c-enl)"/></marker>
+  </defs>
+  <text x="20" y="30" class="t t-xs t-b t-m">CAMPAÑA: DNS 198.51.100.53 Y .54 · 100.000 EQUIPOS</text>
+
+  
+  <g>
+    <rect x="20" y="56" width="130" height="84" rx="10" class="c-tra"/>
+    <text x="85" y="80" text-anchor="middle" class="t t-b">Empleados</text><text x="85" y="98" text-anchor="middle" class="t t-s">200 equipos</text><text x="85" y="118" text-anchor="middle" class="t t-xs t-mono">0,2 %</text>
+    <rect x="215" y="56" width="130" height="84" rx="10" class="c-red"/>
+    <text x="280" y="80" text-anchor="middle" class="t t-b">Piloto</text><text x="280" y="98" text-anchor="middle" class="t t-s">1.000 equipos</text><text x="280" y="118" text-anchor="middle" class="t t-xs t-mono">1 % · cada modelo</text>
+    <rect x="410" y="56" width="130" height="84" rx="10" class="c-red"/>
+    <text x="475" y="80" text-anchor="middle" class="t t-b">Tramo 2</text><text x="475" y="98" text-anchor="middle" class="t t-s">10.000 equipos</text><text x="475" y="118" text-anchor="middle" class="t t-xs t-mono">10 %</text>
+    <rect x="605" y="56" width="130" height="84" rx="10" class="c-red"/>
+    <text x="670" y="80" text-anchor="middle" class="t t-b">Tramo 3</text><text x="670" y="98" text-anchor="middle" class="t t-s">50.000 equipos</text><text x="670" y="118" text-anchor="middle" class="t t-xs t-mono">50 %</text>
+    <rect x="800" y="56" width="160" height="84" rx="10" class="c-enl"/>
+    <text x="880" y="80" text-anchor="middle" class="t t-b">El resto</text><text x="880" y="98" text-anchor="middle" class="t t-s">hasta el 100 %</text><text x="880" y="118" text-anchor="middle" class="t t-xs t-mono">más la cola larga</text>
+  </g>
+
+  
+  <g>
+    <rect x="20" y="150" width="130" height="10" rx="3" class="caja"/><rect x="20" y="150" width="2" height="10" class="k-red"/>
+    <rect x="215" y="150" width="130" height="10" rx="3" class="caja"/><rect x="215" y="150" width="2" height="10" class="k-red"/>
+    <rect x="410" y="150" width="130" height="10" rx="3" class="caja"/><rect x="410" y="150" width="14" height="10" class="k-red"/>
+    <rect x="605" y="150" width="130" height="10" rx="3" class="caja"/><rect x="605" y="150" width="79" height="10" class="k-red"/>
+    <rect x="800" y="150" width="160" height="10" rx="3" class="caja"/><rect x="800" y="150" width="160" height="10" rx="3" class="k-enl"/>
+    <text x="20" y="178" class="t t-xs t-m">ACUMULADO</text>
+  </g>
+  <text x="85" y="200" text-anchor="middle" class="t t-s t-m">espera 2 días</text>
+  <text x="280" y="200" text-anchor="middle" class="t t-s t-m">espera 1 noche y 1 día</text>
+  <text x="475" y="200" text-anchor="middle" class="t t-s t-m">espera 2 noches</text>
+  <text x="670" y="200" text-anchor="middle" class="t t-s t-m">espera 2 noches</text>
+  <text x="880" y="200" text-anchor="middle" class="t t-s t-m">hasta el 99 %</text>
+
+  
+  <g>
+    <path d="M182 74 l18 24 -18 24 -18 -24z" class="caja" style="stroke:var(--warm);stroke-width:2"/>
+    <path d="M377 74 l18 24 -18 24 -18 -24z" class="caja" style="stroke:var(--warm);stroke-width:2"/>
+    <path d="M572 74 l18 24 -18 24 -18 -24z" class="caja" style="stroke:var(--warm);stroke-width:2"/>
+    <path d="M767 74 l18 24 -18 24 -18 -24z" class="caja" style="stroke:var(--warm);stroke-width:2"/>
+    <line x1="150" y1="98" x2="161" y2="98" class="ln" marker-end="url(#f12a-fl)"/><line x1="200" y1="98" x2="212" y2="98" class="ln s-enl" style="stroke-width:2" marker-end="url(#f12a-fl-ok)"/>
+    <line x1="345" y1="98" x2="356" y2="98" class="ln" marker-end="url(#f12a-fl)"/><line x1="395" y1="98" x2="407" y2="98" class="ln s-enl" style="stroke-width:2" marker-end="url(#f12a-fl-ok)"/>
+    <line x1="540" y1="98" x2="551" y2="98" class="ln" marker-end="url(#f12a-fl)"/><line x1="590" y1="98" x2="602" y2="98" class="ln s-enl" style="stroke-width:2" marker-end="url(#f12a-fl-ok)"/>
+    <line x1="735" y1="98" x2="746" y2="98" class="ln" marker-end="url(#f12a-fl)"/><line x1="785" y1="98" x2="797" y2="98" class="ln s-enl" style="stroke-width:2" marker-end="url(#f12a-fl-ok)"/>
+  </g>
+
+  
+  <path d="M377 122 L377 236" class="ln ln-d"/>
+  <rect x="200" y="236" width="560" height="108" rx="12" class="caja" style="stroke:var(--warm);stroke-width:1.6"/>
+  <text x="220" y="260" class="t t-xs t-b k-warm">LA COMPUERTA: TRES PREGUNTAS</text>
+  <text x="220" y="282" class="t t-s">1. ¿Cuántos fallaron? Regla de parada: más del 2 %.</text>
+  <text x="220" y="302" class="t t-s">2. ¿Quedó el valor? Lectura después de escribir.</text>
+  <text x="220" y="322" class="t t-s">3. ¿Subieron las llamadas de «no abre nada» en el tramo?</text>
+  <rect x="610" y="262" width="130" height="22" rx="6" class="c-enl"/><text x="675" y="277" text-anchor="middle" class="t t-s">seguir</text>
+  <rect x="610" y="290" width="130" height="22" rx="6" class="c-fis"/><text x="675" y="305" text-anchor="middle" class="t t-s">pausar y entender</text>
+  <rect x="610" y="318" width="130" height="22" rx="6" class="c-apl"/><text x="675" y="333" text-anchor="middle" class="t t-s">volver atrás</text>
+</svg></div><figcaption><b>Del piloto al 100 %.</b> De izquierda a derecha, los tramos de la campaña del DNS de Fibra Ejemplo: los equipos de los empleados, el piloto del 1 %, el 10 %, el 50 % y el resto. Cada bloque dice cuántos equipos tiene; la barra de abajo, qué parte de la flota acumulada lleva el cambio al terminar ese tramo, y debajo, cuánto se espera antes del siguiente. Entre tramo y tramo, el rombo naranja es una compuerta. El recuadro de abajo abre una de ellas: siempre hace las mismas tres preguntas (¿cuántos fallaron?, ¿quedó el valor?, ¿subieron las llamadas?) y tiene tres salidas: seguir, pausar para entender o volver atrás.</figcaption></figure><div class="prose"><p>Tres ideas sostienen el método:</p><ul><li><b>El piloto tiene que parecerse a la flota.</b> Un 1 % elegido al azar puede no tener ningún equipo de la marca C, el lote viejo que todavía habla el modelo de datos antiguo (<code>InternetGatewayDevice</code>, capítulo 5). Si el piloto no tiene ninguno, el problema aparece recién en el 50 %. Por eso el <b>lote piloto</b> (<i>pilot batch</i>) se arma a propósito: unos cuantos equipos de cada modelo, de cada firmware y de cada zona. Muchos operadores empiezan antes, con los equipos de las casas de sus propios empleados.</li><li><b>La ventana de mantenimiento</b> (<i>maintenance window</i>): los tramos se lanzan de madrugada, entre la una y las cinco, cuando casi nadie usa la conexión. Así, si algo sale mal, lo sufren pocos y hay tiempo de arreglarlo antes de la mañana.</li><li><b>La regla de parada</b>: antes de empezar se escribe qué número detiene la campaña sola, por ejemplo «más del 2 % de fallas en un tramo» o «llamadas de los clientes del tramo por encima de lo normal». Se escribe antes porque, a las tres de la mañana y con la campaña a medias, todo el mundo quiere seguir.</li></ul><p>Lanza tú la campaña del DNS en una flota de prueba.</p></div><div class="lab" id="12-lab-1"><div class="lab-title"><span class="tag">Laboratorio</span><h3>Campaña en vivo</h3></div><p class="hint">La cuadrícula es una flota de 1.000 equipos de las marcas A, B y C. Elige el segmento, lanza el cambio de DNS al 1 % y mira qué pasa con cada equipo. Si aparecen fallas, pausa, lee el código de error, corrige la campaña y avanza al resto. Si quieres ver el desastre, lanza directo al 100 %.</p><div class="opciones">
+  <label>Segmento
+    <select id="g12a-seg"><option value="ABC" selected>Toda la flota (A, B y C)</option><option value="AB">Solo marcas A y B</option><option value="A">Solo marca A</option></select></label>
+  <label>Cómo se arma el piloto
+    <select id="g12a-pil"><option value="azar" selected>Al azar</option><option value="rep">Representativo: de cada marca</option></select></label>
+  <label>Valor que se escribe
+    <select id="g12a-val"><option value="ok" selected>198.51.100.53,198.51.100.54</option><option value="typo">198.51.100.35,198.51.100.54 (con un error)</option></select></label>
+</div>
+<div class="btns">
+  <button type="button" class="primary" id="g12a-sig">Lanzar el piloto (1 %)</button>
+  <button type="button" id="g12a-todo">Directo al 100 %</button>
+  <button type="button" id="g12a-pau" aria-pressed="false">Pausar</button>
+  <button type="button" id="g12a-cor">Corregir la campaña</button>
+  <button type="button" id="g12a-atr">Volver atrás</button>
+  <button type="button" id="g12a-rei">Empezar de nuevo</button>
+</div>
+<canvas id="g12a-c" role="img" aria-label="Cuadrícula de mil equipos con el estado de la campaña en cada uno"></canvas>
+<div class="legend"><span><i style="background:var(--grid)"></i>sin tocar</span><span><i style="background:var(--good)"></i>verificado</span><span><i style="background:var(--accent)"></i>pendiente: apagado</span><span><i style="background:var(--warm)"></i>falla: no se aplicó</span><span><i style="background:var(--c-fis)"></i>aplicado, pero sin servicio</span><span><i style="background:var(--c-apl)"></i>vuelto atrás</span></div>
+<div class="readout" id="g12a-n" aria-live="polite"></div>
+<div class="readout texto" id="g12a-out" aria-live="polite"></div>
+<p class="hint">Flota de ejemplo: 70 % marca A, 18 % marca B y 12 % marca C, que habla el modelo de datos antiguo (<code>InternetGatewayDevice</code>). Cerca de 6 de cada 100 equipos están apagados y reciben la tarea en su próxima sesión. Las letras A, B y C de la cuadrícula aparecen en los equipos con falla.</p></div></section>
+<section><h2>Tareas pendientes: los equipos que no responden</h2><div class="prose"><p>Cuando la campaña llega a un equipo, el ACS intenta despertarlo con el <i>Connection Request</i> del capítulo 3. Muchos no contestan: están apagados, sin luz, desenchufados porque la familia salió de viaje, o detrás de un NAT que no deja pasar el timbre. Para esos, la orden queda como <b>tarea pendiente</b> (<i>pending task</i>) en el ACS y se entrega en la próxima sesión que el equipo abra, sea por su Inform periódico o porque volvió a encenderse.</p><p>Eso tiene dos consecuencias. La primera es que una campaña nunca llega al 100 % el primer día: llega rápido al 90 % y después avanza cada vez más lento, porque los que faltan son los que menos se conectan. A esa parte final se le dice la <b>cola larga</b> (<i>long tail</i>). La segunda es que hay que decidir cuánto vive una tarea: cuántas veces se reintenta, cada cuánto y cuándo <b>vence</b> (<i>expires</i>). Una tarea que nunca vence puede aplicarse meses después, cuando ese equipo vuelva de un depósito, con un valor que ya no tiene sentido.</p></div><figure class="fig fig-esquema" id="12-diagrama-2"><div class="lienzo"><svg viewBox="0 0 980 330" style="min-width:780px" role="img" aria-label="Estados de una tarea de campaña: pendiente, enviada, aplicada, verificada y revertida; desde enviada puede ir a falla, que se reintenta o queda para revisión; desde pendiente, si el equipo no aparece en el plazo, la tarea vence y el equipo pasa a una lista de seguimiento">
+  <defs>
+    <marker id="f12b-fl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--muted)"/></marker>
+    <marker id="f12b-fl-apl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--c-apl)"/></marker>
+  </defs>
+  
+  <rect x="20" y="50" width="140" height="62" rx="31" class="caja" style="stroke-width:2"/><text x="90" y="78" text-anchor="middle" class="t t-b">Pendiente</text><text x="90" y="96" text-anchor="middle" class="t t-xs t-m">espera una sesión</text>
+  <rect x="220" y="50" width="140" height="62" rx="31" class="c-red"/><text x="290" y="78" text-anchor="middle" class="t t-b">Enviada</text><text x="290" y="96" text-anchor="middle" class="t t-xs">en la sesión</text>
+  <rect x="420" y="50" width="140" height="62" rx="31" class="c-red"/><text x="490" y="78" text-anchor="middle" class="t t-b">Aplicada</text><text x="490" y="96" text-anchor="middle" class="t t-xs">estado 0</text>
+  <rect x="620" y="50" width="140" height="62" rx="31" class="c-enl"/><text x="690" y="78" text-anchor="middle" class="t t-b">Verificada</text><text x="690" y="96" text-anchor="middle" class="t t-xs">la lectura coincide</text>
+  <rect x="820" y="50" width="140" height="62" rx="31" class="c-apl"/><text x="890" y="78" text-anchor="middle" class="t t-b">Revertida</text><text x="890" y="96" text-anchor="middle" class="t t-xs">valor anterior</text>
+
+  <line x1="160" y1="81" x2="217" y2="81" class="ln" style="stroke-width:2" marker-end="url(#f12b-fl)"/><text x="188" y="72" text-anchor="middle" class="t t-xs t-m">Inform</text>
+  <line x1="360" y1="81" x2="417" y2="81" class="ln" style="stroke-width:2" marker-end="url(#f12b-fl)"/><text x="388" y="72" text-anchor="middle" class="t t-xs t-m">responde</text>
+  <line x1="560" y1="81" x2="617" y2="81" class="ln" style="stroke-width:2" marker-end="url(#f12b-fl)"/><text x="588" y="72" text-anchor="middle" class="t t-xs t-m">GPV</text>
+  <line x1="760" y1="81" x2="817" y2="81" class="ln s-apl ln-d" style="stroke-width:2" marker-end="url(#f12b-fl-apl)"/><text x="788" y="72" text-anchor="middle" class="t t-xs k-apl">rollback</text>
+
+  
+  <rect x="20" y="200" width="140" height="62" rx="12" class="c-fis"/><text x="90" y="226" text-anchor="middle" class="t t-b">Vencida</text><text x="90" y="244" text-anchor="middle" class="t t-xs">a la lista de</text><text x="90" y="256" text-anchor="middle" class="t t-xs">seguimiento</text>
+  <rect x="220" y="200" width="140" height="62" rx="12" class="c-fis"/><text x="290" y="226" text-anchor="middle" class="t t-b">Falla</text><text x="290" y="244" text-anchor="middle" class="t t-xs t-mono">9002, 9005, 9007…</text>
+  <rect x="420" y="200" width="140" height="62" rx="12" class="caja" style="stroke:var(--warm);stroke-width:1.6"/><text x="490" y="226" text-anchor="middle" class="t t-b">Para revisión</text><text x="490" y="244" text-anchor="middle" class="t t-xs t-m">reintentar no</text><text x="490" y="256" text-anchor="middle" class="t t-xs t-m">cambia nada</text>
+
+  <line x1="90" y1="112" x2="90" y2="197" class="ln" style="stroke-width:2" marker-end="url(#f12b-fl)"/>
+  <text x="98" y="150" class="t t-xs t-m">no aparece</text><text x="98" y="164" class="t t-xs t-m">en el plazo</text>
+  <line x1="290" y1="112" x2="290" y2="197" class="ln" style="stroke-width:2" marker-end="url(#f12b-fl)"/>
+  <text x="298" y="158" class="t t-xs t-m">error</text>
+  <path d="M220 224 C180 224 175 150 140 116" class="ln ln-d" style="stroke-width:1.6" marker-end="url(#f12b-fl)"/>
+  <text x="172" y="190" text-anchor="middle" class="t t-xs t-m">reintento</text>
+  <line x1="360" y1="231" x2="417" y2="231" class="ln" style="stroke-width:2" marker-end="url(#f12b-fl)"/>
+  <text x="388" y="222" text-anchor="middle" class="t t-xs t-m">siempre</text>
+  <path d="M490 112 C500 150 600 150 640 116" class="ln ln-d" style="stroke-width:1.4" marker-end="url(#f12b-fl)"/>
+  <text x="560" y="166" text-anchor="middle" class="t t-xs t-m">estado 1: leer tras reiniciar</text>
+
+  <text x="620" y="220" class="t t-s t-m">Verde: el éxito de verdad.</text>
+  <text x="620" y="240" class="t t-s t-m">Naranja: lo que exige una decisión.</text>
+  <text x="620" y="260" class="t t-s t-m">Rosado: el camino de vuelta.</text>
+  <text x="490" y="312" text-anchor="middle" class="t t-s t-m">«Aplicada» todavía no es éxito: lo es «verificada».</text>
+</svg></div><figcaption><b>La vida de una tarea de la campaña.</b> Cada caja es un estado de la tarea de un equipo; las flechas, lo que la mueve. Empieza en «pendiente». Si el equipo abre una sesión, pasa a «enviada» y de ahí a «aplicada» si el equipo contesta estado 0, o a «falla» si contesta un código de error. Una aplicada pasa a «verificada» cuando la lectura posterior confirma el valor. Una falla puede reintentarse o, si es una falla que no cambia con reintentar (un nombre de parámetro que no existe), quedar para revisión. Si el equipo no aparece en el plazo, la tarea vence y el equipo pasa a una lista de seguimiento. A la derecha, el camino de la vuelta atrás: «revertida».</figcaption></figure><div class="prose"><p>La política de reintentos se ajusta con números. Mueve tú los de Fibra Ejemplo.</p></div><div class="lab" id="12-lab-2"><div class="lab-title"><span class="tag">Laboratorio</span><h3>Equipos que no responden</h3></div><p class="hint">Mueve qué porcentaje de equipos pasa días apagado, cada cuánto llaman los demás y la política de la campaña: si solo se entrega la tarea en la ventana nocturna o en cualquier sesión, y a los cuántos días vence. La curva muestra qué porcentaje de la flota tiene el cambio día tras día, y la lectura, cuándo se llega al 99 %.</p><div class="ctls">
+  <label class="ctl">Equipos que pasan días apagados <output id="g12b-e-o"></output>
+    <input id="g12b-e" type="range" min="0" max="20" step="1" value="5" aria-label="Porcentaje de equipos que pasan días apagados"></label>
+  <label class="ctl">El timbre llega a <output id="g12b-t-o"></output>
+    <input id="g12b-t" type="range" min="0" max="100" step="5" value="85" aria-label="Porcentaje de equipos a los que les llega el Connection Request"></label>
+  <label class="ctl">La tarea vence a los <output id="g12b-v-o"></output>
+    <input id="g12b-v" type="range" min="3" max="60" step="1" value="14" aria-label="Días hasta que vence la tarea"></label>
+</div>
+<div class="opciones">
+  <label>Intervalo del Inform periódico
+    <select id="g12b-i"><option value="1">1 hora</option><option value="6" selected>6 horas</option><option value="24">24 horas</option></select></label>
+  <label>Cuándo se entrega la tarea pendiente
+    <select id="g12b-p"><option value="ventana" selected>Solo de 1 a 5 de la mañana</option><option value="cualquiera">En cualquier sesión del equipo</option></select></label>
+</div>
+<canvas id="g12b-c" role="img" aria-label="Curva del porcentaje de la flota con el cambio aplicado, día por día, con la meta del 99 por ciento"></canvas>
+<div class="legend"><span><i style="background:var(--accent)"></i>flota con el cambio</span><span><i style="background:var(--good)"></i>meta: 99 %</span><span><i style="background:var(--warm)"></i>día en que vencen las tareas</span></div>
+<div class="readout" id="g12b-out" aria-live="polite"></div>
+<p class="hint">Modelo simplificado para 100.000 equipos. Los equipos normales están encendidos 97 de cada 100 días, y 1 de cada 10 se apaga de noche. Los que pasan días apagados (segundas viviendas, viajes, desenchufados) aparecen, en promedio, uno de cada doce días.</p></div></section>
+<section><h2>Verificar que el cambio quedó: leer después de escribir</h2><div class="prose"><p>Que el equipo conteste «aplicado» no es lo mismo que «quedó bien». Hay tres niveles de comprobación, y una campaña seria hace los tres:</p><ol class="steps"><li><span><b>La respuesta de la orden.</b> <code>SetParameterValuesResponse</code> trae un estado: <code>0</code> quiere decir «aplicado»; <code>1</code>, «aceptado, pero se aplica después», casi siempre tras un reinicio. Un <code>1</code> no es un éxito todavía.</span></li><li><span><b>Leer después de escribir.</b> En la misma sesión o en la siguiente, el ACS hace un <code>GetParameterValues</code> del parámetro y compara. Hay equipos que aceptan un valor y lo guardan recortado, o que lo pierden al reiniciarse.</span></li><li><span><b>Mirar el efecto.</b> El valor puede estar bien escrito y el servicio, mal. En la campaña del DNS, el efecto es que los servidores nuevos reciben consultas desde las casas del tramo y que las llamadas de «hay internet pero no abre nada» no suben. Ese dato no está en el ACS: está en los servidores DNS y en la mesa de ayuda.</span></li></ol></div><figure class="fig fig-flujo" id="12-diagrama-3"><div class="lienzo"><svg viewBox="0 0 1000 600" style="min-width:780px" role="img" aria-label="Flujo de un equipo dentro de una campaña: el motor de campañas pasa la tarea al ACS, que despierta al equipo; el equipo llama con su Inform; el ACS lee el DNS actual y lo guarda como respaldo, escribe el nuevo, recibe estado 0 y vuelve a leer; al final anota el equipo como verificado en el registro, con el valor anterior">
+  <defs>
+    <marker id="f12c-fl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--muted)"/></marker>
+    <marker id="f12c-fl-apl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--c-apl)"/></marker>
+  </defs>
+  <rect x="30" y="14" width="150" height="52" rx="10" class="c-tra"/><text x="105" y="37" text-anchor="middle" class="t t-b">Motor de campañas</text><text x="105" y="54" text-anchor="middle" class="t t-s">tramo 2 · DNS</text>
+  <rect x="260" y="14" width="150" height="52" rx="10" class="c-apl"/><text x="335" y="37" text-anchor="middle" class="t t-b">ACS</text><text x="335" y="54" text-anchor="middle" class="t t-s">acs.ejemplo.com</text>
+  <rect x="490" y="14" width="150" height="52" rx="10" class="caja"/><text x="565" y="37" text-anchor="middle" class="t t-b">Equipo</text><text x="565" y="54" text-anchor="middle" class="t t-s t-m">casa 1207, marca A</text>
+  <rect x="720" y="14" width="150" height="52" rx="10" class="d-sis"/><text x="795" y="37" text-anchor="middle" class="t t-b">Registro</text><text x="795" y="54" text-anchor="middle" class="t t-s t-m">de la campaña</text>
+  <line x1="105" y1="66" x2="105" y2="560" class="vida"/>
+  <line x1="335" y1="66" x2="335" y2="560" class="vida"/>
+  <line x1="565" y1="66" x2="565" y2="560" class="vida"/>
+  <line x1="795" y1="66" x2="795" y2="560" class="vida"/>
+
+  <line x1="105" y1="104" x2="332" y2="104" class="ln" style="stroke-width:2" marker-end="url(#f12c-fl)"/>
+  <text x="115" y="96" class="t t-s">① tarea: DNS = 198.51.100.53,…54</text>
+  <line x1="335" y1="146" x2="562" y2="146" class="ln s-apl ln-d" style="stroke-width:2" marker-end="url(#f12c-fl-apl)"/>
+  <text x="345" y="138" class="t t-s">② <tspan class="t-mono">Connection Request</tspan></text>
+
+  <line x1="565" y1="196" x2="338" y2="196" class="ln s-apl" style="stroke-width:2.4" marker-end="url(#f12c-fl-apl)"/>
+  <text x="350" y="188" class="t t-s">③ <tspan class="t-mono t-b">Inform</tspan> 6 CONNECTION REQUEST</text>
+  <line x1="335" y1="240" x2="562" y2="240" class="ln s-apl" style="stroke-width:2" marker-end="url(#f12c-fl-apl)"/>
+  <text x="345" y="232" class="t t-s">④ <tspan class="t-mono t-b">GetParameterValues</tspan> (antes)</text>
+  <line x1="565" y1="276" x2="338" y2="276" class="ln s-apl" style="stroke-width:2" marker-end="url(#f12c-fl-apl)"/>
+  <text x="350" y="292" class="t t-s t-mono t-m">DNSServers = 192.0.2.53</text>
+  <line x1="335" y1="326" x2="562" y2="326" class="ln s-apl" style="stroke-width:2.4" marker-end="url(#f12c-fl-apl)"/>
+  <text x="345" y="318" class="t t-s">⑤ <tspan class="t-mono t-b">SetParameterValues</tspan></text>
+  <text x="345" y="344" class="t t-s t-mono t-m">…DNSServers = 198.51.100.53,…54</text>
+  <line x1="565" y1="372" x2="338" y2="372" class="ln s-apl" style="stroke-width:2" marker-end="url(#f12c-fl-apl)"/>
+  <text x="350" y="388" class="t t-s">⑥ estado 0</text>
+  <line x1="335" y1="420" x2="562" y2="420" class="ln s-apl" style="stroke-width:2" marker-end="url(#f12c-fl-apl)"/>
+  <text x="345" y="412" class="t t-s">⑦ <tspan class="t-mono t-b">GetParameterValues</tspan> (después)</text>
+  <line x1="565" y1="452" x2="338" y2="452" class="ln s-apl" style="stroke-width:2" marker-end="url(#f12c-fl-apl)"/>
+  <text x="350" y="468" class="t t-s t-mono t-m">198.51.100.53,198.51.100.54 ✓</text>
+
+  <line x1="335" y1="510" x2="792" y2="510" class="ln" style="stroke-width:2" marker-end="url(#f12c-fl)"/>
+  <text x="345" y="502" class="t t-s">⑧ verificada · antes: 192.0.2.53</text>
+  <line x1="795" y1="540" x2="108" y2="540" class="ln ln-d" style="stroke-width:1.6" marker-end="url(#f12c-fl)"/>
+  <text x="560" y="556" class="t t-s">⑨ suma al conteo del tramo</text>
+
+  <g class="t t-xs t-b">
+    <path d="M885 90v66" class="ln s-tra" style="stroke-width:3"/><text x="893" y="118" class="k-tra">PREPARACIÓN</text>
+    <path d="M885 180v290" class="ln s-apl" style="stroke-width:3"/><text x="893" y="300" class="k-apl">LA SESIÓN</text><text x="893" y="314" class="t-m">leer, escribir,</text><text x="893" y="328" class="t-m">volver a leer</text>
+    <path d="M885 494v56" class="ln" style="stroke-width:3"/><text x="893" y="524" class="t-m">CIERRE</text>
+  </g>
+  <text x="14" y="320" class="t t-xs t-m" transform="rotate(-90 14 320)">EL TIEMPO CORRE HACIA ABAJO ↓</text>
+  <text x="480" y="590" text-anchor="middle" class="t t-s t-m">El valor de ④ es el seguro: sin él no hay vuelta atrás equipo por equipo.</text>
+</svg></div><figcaption><b>Un equipo dentro de la campaña.</b> Cuatro participantes: el motor de campañas, el ACS, el equipo de la casa y el registro de la campaña; el tiempo corre hacia abajo. En la preparación (① y ②) el motor le pasa al ACS la tarea del equipo y el ACS lo despierta. En la sesión (③ a ⑦) el equipo llama con su Inform, el ACS primero lee el valor actual y lo guarda como respaldo (④), después escribe el nuevo (⑤), recibe el estado 0 y vuelve a leer (⑦). En el cierre (⑧ y ⑨) el ACS compara y anota el equipo como verificado en el registro, con el valor anterior al lado, listo por si hay que volver atrás.</figcaption></figure><div class="prose"><p>Hay un enfoque que hace la verificación casi automática: la <b>configuración deseada</b> (<i>desired state</i>), que ya apareció en el capítulo 8. En lugar de mandar una orden («escribe este valor»), se declara cómo debe estar el equipo («el DNS de este grupo es 198.51.100.53»). En cada sesión, el ACS compara lo declarado con lo que el equipo reporta y corrige la diferencia. GenieACS trabaja así: sus presets y sus <b>provisiones</b> (<i>provisions</i>), pequeños programas que declaran valores, se vuelven a evaluar en cada sesión. La ventaja es que un equipo que vuelve a valores de fábrica, o que alguien cambió a mano, regresa solo a lo declarado. El riesgo es el mismo: una declaración equivocada también se aplica sola, en cada sesión, a todos los del grupo.</p><p>Puedes armar una campaña en miniatura con GenieACS en tu computadora.</p></div><div class="practica"><div class="practica-title"><span class="tag">En la terminal</span><h3>Una campaña en miniatura con GenieACS</h3></div><p>Usa el GenieACS que instalaste en la práctica del capítulo 3, con <code>genieacs-cwmp</code>, <code>genieacs-nbi</code> y <code>genieacs-ui</code> corriendo, pero lanza esta vez cinco equipos simulados en lugar de uno. Vas a marcar dos como piloto, cambiar el DNS solo en ellos y leer después de escribir. Todo es local: no toca ninguna red ajena. En Windows, corre los comandos en WSL. El simulador usa el modelo de datos antiguo, así que el DNS que reparte la casa está en <code>InternetGatewayDevice.LANDevice.1.LANHostConfigManagement.DNSServers</code>.</p><div class="cmds"><div class="cmd-tabs" role="tablist" aria-label="Sistema operativo"><button type="button" role="tab" data-so="win">Windows</button><button type="button" role="tab" data-so="mac linux">macOS y Linux</button></div><div class="cmd-panel" role="tabpanel" data-so="win"><p class="cmd-nota">Windows (en WSL, con Ubuntu)</p><div class="cmd-l"><code>cd genieacs-sim &amp;&amp; ./genieacs-sim -u http://127.0.0.1:7547/ -p 5</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>curl -i -X POST 'http://127.0.0.1:7557/devices/202BC1-BM632w-000001/tags/piloto'</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>curl -i -X POST 'http://127.0.0.1:7557/devices/202BC1-BM632w-000003/tags/piloto'</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>curl -s 'http://127.0.0.1:7557/devices/?query=%7B%22_tags%22%3A%22piloto%22%7D&amp;projection=_id'</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>curl -i -X POST 'http://127.0.0.1:7557/devices/202BC1-BM632w-000001/tasks?connection_request' --data '{"name":"setParameterValues","parameterValues":[["InternetGatewayDevice.LANDevice.1.LANHostConfigManagement.DNSServers","198.51.100.53,198.51.100.54","xsd:string"]]}'</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>curl -i -X POST 'http://127.0.0.1:7557/devices/202BC1-BM632w-000003/tasks?connection_request' --data '{"name":"setParameterValues","parameterValues":[["InternetGatewayDevice.LANDevice.1.LANHostConfigManagement.DNSServers","198.51.100.53,198.51.100.54","xsd:string"]]}'</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>curl -s 'http://127.0.0.1:7557/devices/?projection=_id,_tags,InternetGatewayDevice.LANDevice.1.LANHostConfigManagement.DNSServers'</code><button type="button" class="copiar">Copiar</button></div></div><div class="cmd-panel" role="tabpanel" data-so="mac linux"><div class="cmd-l"><code>cd genieacs-sim &amp;&amp; ./genieacs-sim -u http://127.0.0.1:7547/ -p 5</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>curl -i -X POST 'http://127.0.0.1:7557/devices/202BC1-BM632w-000001/tags/piloto'</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>curl -i -X POST 'http://127.0.0.1:7557/devices/202BC1-BM632w-000003/tags/piloto'</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>curl -s 'http://127.0.0.1:7557/devices/?query=%7B%22_tags%22%3A%22piloto%22%7D&amp;projection=_id'</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>curl -i -X POST 'http://127.0.0.1:7557/devices/202BC1-BM632w-000001/tasks?connection_request' --data '{"name":"setParameterValues","parameterValues":[["InternetGatewayDevice.LANDevice.1.LANHostConfigManagement.DNSServers","198.51.100.53,198.51.100.54","xsd:string"]]}'</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>curl -i -X POST 'http://127.0.0.1:7557/devices/202BC1-BM632w-000003/tasks?connection_request' --data '{"name":"setParameterValues","parameterValues":[["InternetGatewayDevice.LANDevice.1.LANHostConfigManagement.DNSServers","198.51.100.53,198.51.100.54","xsd:string"]]}'</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>curl -s 'http://127.0.0.1:7557/devices/?projection=_id,_tags,InternetGatewayDevice.LANDevice.1.LANHostConfigManagement.DNSServers'</code><button type="button" class="copiar">Copiar</button></div></div></div><ol class="steps"><li><span>El primer comando deja corriendo los cinco simuladores, con números de serie del <code>000000</code> al <code>000004</code>; abre otra terminal para el resto. Espera a que los cinco aparezcan en la interfaz (<code>http://localhost:3000</code>).</span></li><li><span>Los dos comandos siguientes ponen la etiqueta <code>piloto</code> a dos equipos; el cuarto es la segmentación: pide solo los que la tienen.</span></li><li><span>Los dos <code>POST</code> con <code>tasks</code> son el tramo piloto: el cambio de DNS solo en esos dos. Fíjate en el código de la primera línea de cada respuesta.</span></li><li><span>El último comando lee los cinco: es la verificación, leer después de escribir.</span></li></ol><p><b>Qué observar:</b> la consulta por etiqueta devuelve solo los dos equipos del piloto, igual que una campaña elige su segmento. En la lectura final, los dos del piloto tienen los DNS nuevos y los otros tres siguen como estaban: el resto de la flota no se enteró. Si un <code>POST</code> contesta <code>202</code> en lugar de <code>200</code>, el timbre no llegó y la tarea quedó pendiente, como en el capítulo 4. Si el valor no aparece en la lectura, puede que GenieACS todavía no lo haya leído del equipo: pide un refresco del parámetro desde la interfaz y vuelve a leer. Al terminar, detén los simuladores con Ctrl+C.</p></div></section>
+<section><h2>Volver atrás: el valor anterior y el botón de pausa</h2><div class="prose"><p>La <b>vuelta atrás</b> (<i>rollback</i>) se prepara antes de empezar, no durante la emergencia. Tiene tres piezas:</p><ul><li><b>El valor anterior de cada equipo.</b> Por eso el paso ④ del diagrama del equipo dentro de la campaña lee antes de escribir. Volver atrás no es «poner el valor de fábrica», sino devolverle a cada equipo lo que tenía, que puede ser distinto en cada casa.</li><li><b>El botón de pausa.</b> Detiene la entrega de tareas nuevas sin tocar lo ya hecho. Es lo primero que se aprieta cuando algo se ve raro; se piensa después.</li><li><b>La vuelta atrás como otra campaña.</b> Devolver el valor anterior es, a su vez, un cambio masivo, con sus tareas pendientes, sus equipos apagados y su verificación. Por eso se prueba en el piloto, igual que el cambio.</li></ul><p>Hay cambios que no tienen vuelta atrás por la red, y conviene reconocerlos antes de lanzarlos: los que cortan la rama donde está sentado el ACS. Cambiar la dirección del ACS en <code>Device.ManagementServer.URL</code>, la contraseña con la que el equipo se presenta o la conexión por la que llama: si el valor nuevo está mal, el equipo ya no vuelve a llamar, y no hay orden que llegue para arreglarlo. Esos cambios se hacen con un piloto aún más chico, con equipos de laboratorio primero, y con <b>doble control</b> (<i>four-eyes principle</i>): una persona prepara la campaña y otra distinta la aprueba. El capítulo 14 trata los permisos y el registro de cada acción en el ACS.</p></div><div class="caso"><b>Un caso real</b><p>Un operador FTTH de la región quiso ver más seguido el estado de sus equipos y lanzó una campaña para bajar el intervalo del Inform periódico de un día a quince minutos. El cambio era correcto, el piloto salió bien y la campaña avanzó por tramos sin una sola falla. El problema apareció al final, y no en los equipos: el ACS pasó a recibir decenas de veces más sesiones que antes, se puso lento para todo, y los agentes de atención empezaron a esperar minutos por cada cambio de clave del Wi-Fi. La lección es que una campaña también puede romper algo que no es el equipo, y que la compuerta entre tramos tiene que mirar la salud del ACS y de los sistemas que dependen del cambio, no solo los equipos. Para mirar más seguido, la herramienta era la recolección masiva del capítulo 11, no el Inform.</p></div><div class="prose"><p>La automatización de los cambios en toda la red, con sus herramientas, respaldos y recetas, está en el capítulo 30 de <a href="https://aaramirez.github.io/telco/30-automatizacion-de-red.html" target="_blank" rel="noopener">Cómo funciona un telco</a>; aquí quedó lo propio del equipo del cliente.</p><p>La regla de Fibra Ejemplo para cualquier campaña cierra el capítulo: <b>ningún cambio llega a todos de una vez: piloto, verificación, tramos y una vuelta atrás probada.</b></p></div><div class="quiz"><h3>Pruébate</h3><details><summary>¿Por qué un lote piloto elegido al azar puede no servir?</summary><p>Porque puede no incluir algún modelo, firmware o zona minoritaria, como los equipos viejos de la marca C, y entonces la falla aparece recién en un tramo grande. El piloto se arma a propósito, con equipos de cada grupo.</p></details><details><summary>¿Qué es una tarea pendiente y cuándo se entrega?</summary><p>Es la orden de un equipo que no respondió al timbre. Queda guardada en el ACS y se entrega en la próxima sesión que abra el equipo, sea por su Inform periódico o al volver a encenderse.</p></details><details><summary>¿Por qué conviene que las tareas de una campaña venzan?</summary><p>Porque una tarea eterna puede aplicarse meses después, en un equipo que volvió de un depósito, con un valor que ya no tiene sentido. Los equipos que no aparecen en el plazo pasan a una lista de seguimiento.</p></details><details><summary>Un equipo contestó un <code>SetParameterValues</code> con estado 1. ¿Ya está el cambio?</summary><p>No del todo: el equipo lo aceptó, pero lo aplica después, casi siempre al reiniciarse. Hay que leer el valor más tarde para confirmarlo.</p></details><details><summary>¿Por qué el ACS lee el valor antes de escribir el nuevo?</summary><p>Para guardar el valor anterior de cada equipo y poder volver atrás devolviéndole exactamente lo que tenía.</p></details><details><summary>¿Qué tienen de especial los cambios de la dirección del ACS o de la contraseña del equipo?</summary><p>Que no tienen vuelta atrás por la red: si el valor nuevo está mal, el equipo ya no llama y ninguna orden lo alcanza. Se hacen con equipos de laboratorio, un piloto muy chico y doble control.</p></details></div><div class="investiga"><h3>Para investigar</h3><p class="hint">Estas preguntas no se responden en el capítulo: búscalas por tu cuenta.</p><ol><li>¿Qué es un despliegue «canario» en el software de internet y de dónde viene el nombre?<small>Pista: busca «canary release origen del nombre».</small></li><li>¿Qué guarda un resolvedor de DNS en su caché y qué es el TTL de un registro?<small>Pista: busca «DNS caché TTL resolvedor».</small></li><li>¿Qué problemas aparecieron en los operadores al activar IPv6 en los hogares, y qué es el mecanismo «Happy Eyeballs»?<small>Pista: busca «Happy Eyeballs <a href="https://www.rfc-editor.org/rfc/rfc8305" target="_blank" rel="noopener">RFC 8305</a>».</small></li><li>¿Qué es la idempotencia y por qué importa que repetir una orden no cambie el resultado?<small>Pista: busca «idempotencia automatización».</small></li><li>¿Qué es un cambio estándar, normal o de emergencia en la gestión de cambios de ITIL?<small>Pista: busca «ITIL change enablement tipos de cambio».</small></li></ol></div><div class="vids"><span>Para saber más</span><a class="vid" href="https://aaramirez.github.io/telco/30-automatizacion-de-red.html" target="_blank" rel="noopener">Automatización de red, capítulo 30 de Cómo funciona un telco <small>lectura</small></a><a class="vid" href="https://docs.genieacs.com/en/latest/api-reference.html" target="_blank" rel="noopener">GenieACS: referencia de la API, con etiquetas, tareas y presets (inglés) <small>referencia</small></a><a class="vid" href="https://docs.genieacs.com/en/latest/provisions.html" target="_blank" rel="noopener">GenieACS: provisiones y configuración declarativa (inglés) <small>referencia</small></a><a class="vid" href="https://github.com/genieacs/genieacs-sim" target="_blank" rel="noopener">Simulador de equipos de GenieACS (inglés) <small>referencia</small></a></div></section>
+<label class="got"><input type="checkbox" id="got"> Lo tengo claro</label>
+<nav class="pager" id="pager" aria-label="Capítulo anterior y siguiente"></nav>
+</main>
+</div>
+<footer><span>Curso abierto de aaramirez.github.io.</span><span>Sitio publicado: <a href="https://github.com/aaramirez/gestion-remota-de-equipos" target="_blank" rel="noopener">github.com/aaramirez/gestion-remota-de-equipos</a></span></footer>
+</div>
+<script src="assets/lab.js"></script>
+<script>
+(function(){
+  const {$,tok,canvasWidget}=window.Lab;
+  const N=1000,TR=[0.01,0.10,0.50,1];
+  let s=7,devs,orden,ti,cola,pausa,corregida,timer,directo,log;
+  const rnd=()=>{s=(s*1103515245+12345)%2147483648;return s/2147483648;};
+  function nuevo(){
+    s=7+Math.floor(Math.random()*100000);
+    devs=[];for(let i=0;i<N;i++){const r=rnd();devs.push({m:r<0.7?'A':r<0.88?'B':'C',on:rnd()<0.94,st:'n'});}
+    orden=devs.map((d,i)=>i);for(let i=N-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[orden[i],orden[j]]=[orden[j],orden[i]];}
+    ti=-1;cola=[];pausa=false;corregida=false;directo=false;log='Elige el segmento, el piloto y el valor, y lanza el piloto.';
+    $('#g12a-pau').setAttribute('aria-pressed','false');$('#g12a-pau').textContent='Pausar';
+    $('#g12a-val').value='ok';
+    clearInterval(timer);timer=null;leer();
+  }
+  const enSeg=d=>$('#g12a-seg').value.includes(d.m);
+  function ordenTramo(){
+    const seg=orden.filter(i=>enSeg(devs[i]));
+    if($('#g12a-pil').value==='rep'&&ti===0){
+      const pri=[];['C','B','A'].forEach(m=>{seg.filter(i=>devs[i].m===m).slice(0,m==='A'?4:3).forEach(i=>pri.push(i));});
+      return pri.concat(seg.filter(i=>!pri.includes(i)));
+    }
+    return seg;
+  }
+  function lanzar(hasta){
+    const seg=ordenTramo(),meta=Math.max(1,Math.round(seg.length*hasta));
+    const yaEn=seg.filter(i=>devs[i].st!=='n').length;
+    if(ti===0&&$('#g12a-pil').value==='rep')cola=seg.slice(0,meta).filter(i=>devs[i].st==='n');
+    else cola=seg.filter(i=>devs[i].st==='n').slice(0,Math.max(0,meta-yaEn));
+    correr();
+  }
+  function aplicar(i){
+    const d=devs[i];
+    if(!d.on){d.st='p';return;}
+    if(d.m==='C'&&!corregida){d.st='f';return;}
+    d.st=$('#g12a-val').value==='typo'?'x':'v';
+  }
+  function correr(){
+    if(timer)return;
+    const paso=directo?40:Math.max(1,Math.ceil(cola.length/25));
+    timer=setInterval(()=>{
+      if(pausa)return;
+      for(let k=0;k<paso&&cola.length;k++)aplicar(cola.shift());
+      if(!cola.length){clearInterval(timer);timer=null;fin();}
+      leer();
+    },70);
+  }
+  function cuenta(){const c={n:0,p:0,v:0,f:0,x:0,r:0};devs.forEach(d=>{if(enSeg(d)||d.st!=='n')c[d.st]++;});return c;}
+  function fin(){
+    const c=cuenta(),tocados=c.p+c.v+c.f+c.x,pf=tocados?c.f/tocados:0;
+    let m='Tramo terminado: '+Math.round(TR[Math.min(ti,3)]*100)+' % del segmento. ';
+    if(c.f&&pf>0.02&&!directo){pausa=true;$('#g12a-pau').setAttribute('aria-pressed','true');$('#g12a-pau').textContent='Reanudar';
+      m+='La regla de parada detuvo la campaña: '+c.f+' equipos de la marca C contestaron la falla 9005 (Invalid parameter name). La ruta Device.DHCPv4… no existe en su árbol antiguo. Aprieta «Corregir la campaña» para usar el perfil de cada marca (capítulo 6).';}
+    else if(c.f)m+=c.f+' equipos con falla 9005: no se les aplicó nada. Corrige la campaña.';
+    else if(c.x)m+='Todos dicen «aplicado» y la lectura coincide… pero '+c.x+' casas no abren páginas: el valor tiene un error y nadie lo vio en el ACS. Lo delatan las llamadas. Vuelve atrás o corrige el valor.';
+    else if(ti>=3)m+='Campaña completa en el segmento.'+($('#g12a-seg').value!=='ABC'?' Los equipos que quedaron fuera del segmento siguen con el DNS viejo: necesitan su propia campaña.':'')+(c.p?' Quedan '+c.p+' pendientes: se entregarán cuando esos equipos vuelvan a llamar.':'');
+    else if(ti===0&&$('#g12a-seg').value.includes('C')&&!devs.some(d=>d.m==='C'&&d.st!=='n'))m+='El piloto salió limpio, pero no tenía ningún equipo de la marca C. ¿Es una buena noticia o suerte?';
+    else m+='La compuerta está en verde: puedes avanzar al siguiente tramo.';
+    log=m;
+  }
+  function leer(){
+    const c=cuenta(),llam=Math.round(c.x*0.6);
+    $('#g12a-n').innerHTML='<span>Verificados '+c.v+' · pendientes '+c.p+' · fallas '+c.f+' · sin servicio '+c.x+' · vueltos atrás '+c.r+'</span><span'+(llam?' class="warn"':'')+'>Llamadas extra de «hay internet pero no abre nada»: '+llam+'</span>';
+    $('#g12a-out').textContent=log;
+    const sig=$('#g12a-sig');
+    sig.textContent=ti<0?'Lanzar el piloto (1 %)':ti<3?'Avanzar al '+Math.round(TR[ti+1]*100)+' %':'Campaña al 100 %';
+    sig.disabled=ti>=3||!!timer;$('#g12a-todo').disabled=ti>=3||!!timer;
+    dibujar();
+  }
+  const COL={n:'--grid',p:'--accent',v:'--good',f:'--warm',x:'--c-fis',r:'--c-apl'};
+  const dibujar=canvasWidget($('#g12a-c'),w=>w<520?0.66:0.4,(ctx,w,h)=>{
+    ctx.clearRect(0,0,w,h);
+    if(!devs)return;
+    const cols=w<520?40:50,filas=N/cols,cw=w/cols,ch=h/filas,lado=Math.min(cw,ch)*0.8;
+    devs.forEach((d,i)=>{const x=(i%cols)*cw+(cw-lado)/2,y=Math.floor(i/cols)*ch+(ch-lado)/2;
+      ctx.fillStyle=tok(COL[d.st]);
+      if(d.st==='p'){ctx.strokeStyle=ctx.fillStyle;ctx.lineWidth=1.5;ctx.strokeRect(x+0.75,y+0.75,lado-1.5,lado-1.5);}
+      else ctx.fillRect(x,y,lado,lado);
+      if(d.st==='f'&&lado>8){ctx.fillStyle=tok('--card');ctx.font='700 '+Math.floor(lado*0.8)+'px '+tok('--f-mono');ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(d.m,x+lado/2,y+lado/2+0.5);}
+    });
+  });
+  $('#g12a-sig').addEventListener('click',()=>{if(ti>=3)return;ti++;directo=false;log='Tramo en curso…';lanzar(TR[ti]);leer();});
+  $('#g12a-todo').addEventListener('click',()=>{ti=3;directo=true;log='Todo a la vez, sin compuertas…';lanzar(1);leer();});
+  $('#g12a-pau').addEventListener('click',e=>{pausa=!pausa;e.target.setAttribute('aria-pressed',String(pausa));e.target.textContent=pausa?'Reanudar':'Pausar';log=pausa?'Campaña en pausa: no salen tareas nuevas y lo ya hecho no se toca.':'Campaña reanudada.';leer();});
+  $('#g12a-cor').addEventListener('click',()=>{
+    corregida=true;$('#g12a-val').value='ok';
+    const re=devs.map((d,i)=>i).filter(i=>devs[i].st==='f'||devs[i].st==='x');
+    re.forEach(i=>devs[i].st='n');
+    pausa=false;$('#g12a-pau').setAttribute('aria-pressed','false');$('#g12a-pau').textContent='Pausar';
+    log=re.length?'Campaña corregida: perfil por marca y valor revisado. Se reintentan '+re.length+' equipos.':'Campaña corregida: perfil por marca y valor revisado.';
+    cola=re.concat(cola);directo=false;correr();leer();
+  });
+  $('#g12a-atr').addEventListener('click',()=>{
+    let n=0;devs.forEach(d=>{if(d.st==='v'||d.st==='x'){d.st='r';n++;}else if(d.st==='p')d.st='n';});
+    cola=[];clearInterval(timer);timer=null;
+    log='Vuelta atrás: '+n+' equipos recibieron su valor anterior, el que el ACS leyó antes de escribir. Las tareas pendientes se cancelaron.';leer();
+  });
+  $('#g12a-rei').addEventListener('click',nuevo);
+  ['#g12a-seg','#g12a-pil'].forEach(q=>$(q).addEventListener('input',()=>{if(ti<0)leer();}));
+  nuevo();
+})();
+</script>
+<script>
+(function(){
+  const mil=n=>String(n).replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+  const {$,tok,canvasWidget}=window.Lab;
+  const D=60;
+  function calc(){
+    const e=+$('#g12b-e').value/100,t=+$('#g12b-t').value/100,v=+$('#g12b-v').value,I=+$('#g12b-i').value,pol=$('#g12b-p').value;
+    // probabilidad de que un equipo normal reciba la tarea en un día dado
+    let pn;
+    if(pol==='cualquiera')pn=0.97;
+    else pn=0.97*0.9*Math.min(1,4/I);
+    const pe=pol==='cualquiera'?1/12:(1/12)*0.9*Math.min(1,4/I);
+    const curva=[];
+    for(let d=0;d<=D;d++){
+      const dias=Math.min(d,v); // días con entregas después del día 0
+      const n=1-(1-t)*Math.pow(1-pn,dias);
+      const es=1-(1-t*0.15)*Math.pow(1-pe,dias);
+      curva.push(((1-e)*n+e*es)*100);
+    }
+    let d99=curva.findIndex(x=>x>=99);
+    return {e,t,v,I,pol,curva,d99};
+  }
+  const dibujar=canvasWidget($('#g12b-c'),w=>w<520?0.7:0.4,(ctx,w,h)=>{
+    const d=calc();
+    ctx.clearRect(0,0,w,h);
+    const L=40,R=12,T=12,B=26,y0=60;
+    const X=x=>L+(w-L-R)*x/D,Y=y=>T+(h-T-B)*(100-y)/(100-y0);
+    ctx.strokeStyle=tok('--grid');ctx.fillStyle=tok('--muted');ctx.font='500 11px '+tok('--f-mono');ctx.lineWidth=1;
+    for(let y=60;y<=100;y+=10){ctx.beginPath();ctx.moveTo(L,Y(y));ctx.lineTo(w-R,Y(y));ctx.stroke();ctx.textAlign='right';ctx.textBaseline='middle';ctx.fillText(y+' %',L-4,Y(y));}
+    ctx.textAlign='center';ctx.textBaseline='top';
+    for(let x=0;x<=D;x+=10)ctx.fillText(String(x),X(x),h-B+6);
+    ctx.strokeStyle=tok('--good');ctx.lineWidth=2;ctx.setLineDash([6,4]);ctx.beginPath();ctx.moveTo(L,Y(99));ctx.lineTo(w-R,Y(99));ctx.stroke();
+    ctx.strokeStyle=tok('--warm');ctx.beginPath();ctx.moveTo(X(d.v),T);ctx.lineTo(X(d.v),h-B);ctx.stroke();ctx.setLineDash([]);
+    ctx.strokeStyle=tok('--accent');ctx.lineWidth=3;ctx.beginPath();
+    d.curva.forEach((y,x)=>{const px=X(x),py=Y(Math.max(y0,y));x?ctx.lineTo(px,py):ctx.moveTo(px,py);});ctx.stroke();
+    if(d.d99>=0){ctx.fillStyle=tok('--good');ctx.beginPath();ctx.arc(X(d.d99),Y(d.curva[d.d99]),5,0,Math.PI*2);ctx.fill();}
+  });
+  function leer(){
+    const d=calc();
+    $('#g12b-e-o').textContent=Math.round(d.e*100)+' %';$('#g12b-t-o').textContent=Math.round(d.t*100)+' %';$('#g12b-v-o').textContent=d.v+' días';
+    const f=x=>x.toFixed(1).replace('.',',');
+    const fin=d.curva[D],faltan=Math.round((100-fin)*1000);
+    let h='<span>Día 0, con el timbre: '+f(d.curva[0])+' % · día 1: '+f(d.curva[1])+' % · día 7: '+f(d.curva[7])+' %</span>';
+    if(d.d99>=0)h+='<span class="big">Llega al 99 % el día '+d.d99+'</span>';
+    else h+='<span class="big">No llega al 99 %: se queda en '+f(fin)+' %</span>';
+    h+='<span>Al vencer las tareas quedan unos '+mil(faltan)+' equipos sin el cambio: pasan a la lista de seguimiento.</span>';
+    if(d.pol==='ventana'&&d.I===24)h+='<span class="warn">Con un Inform al día y entrega solo de madrugada, casi nunca coinciden: la mayoría de las llamadas del equipo caen fuera de la ventana.</span>';
+    else if(d.d99<0&&d.v<20)h+='<span class="warn">Las tareas vencen antes de alcanzar a los equipos que pasan días apagados. Alarga el plazo o acepta una lista de seguimiento más larga.</span>';
+    else if(d.d99>=0&&d.d99<=3)h+='<span class="ok">La cola larga es corta: casi todos los equipos están encendidos y llaman seguido.</span>';
+    $('#g12b-out').innerHTML=h;dibujar();
+  }
+  ['#g12b-e','#g12b-t','#g12b-v','#g12b-i','#g12b-p'].forEach(q=>$(q).addEventListener('input',leer));
+  leer();
+})();
+</script>
+</body>
+</html>

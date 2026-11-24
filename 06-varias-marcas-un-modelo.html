@@ -1,0 +1,412 @@
+<!doctype html>
+<html lang="es">
+<head>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-KX76XF8R');</script>
+<!-- End Google Tag Manager -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Varias marcas, un modelo · Gestión remota de equipos (ACS) · Gestión remota de equipos (ACS)</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Cómo un operador configura, actualiza y diagnostica a distancia los equipos que tiene en casa de sus clientes: TR-069 y TR-369 a fondo, el modelo de datos TR-181, el aprovisionamiento sin visita, los cambios masivos, el firmware, los diagnósticos, la seguridad y la escala de un ACS.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400;1,8..60,600&display=swap">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KX76XF8R"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+<div class="wrap" data-page="varias-marcas-un-modelo">
+<header class="topbar"><a class="brand" href="index.html">Gestión <b>remota</b> de equipos</a><span class="eyebrow">Curso visual e interactivo · Industrias y finanzas</span><a class="al-sitio" href="https://aaramirez.github.io/">← Todos los cursos</a></header>
+<div class="layout">
+<nav class="toc" id="toc" aria-label="Ruta de aprendizaje"></nav>
+<main>
+<header class="page-head"><span class="num">CAPÍTULO 06 DE 16</span><h1>Varias marcas, un solo modelo: perfiles, plantillas y diferencias</h1><p class="lede">Todos los equipos dicen hablar TR-069 y casi ninguno lo habla igual. Este capítulo muestra cómo un operador convive con tres marcas sin que el agente de atención, el CRM ni el cliente se enteren: perfiles por modelo, plantillas de servicio y una capa que traduce.</p></header>
+<section><div class="prose"><p>En el capítulo 5 aprendimos a leer el árbol de un equipo. Si Fibra Ejemplo, el operador ficticio de este curso, tuviera una sola marca, con eso bastaría: se aprende un árbol y se usa siempre. Pero tiene tres. La marca A, ONT con router y Wi-Fi, está en la mayoría de las casas. La marca B, equipos de malla Wi-Fi, va a las casas grandes. Y un lote antiguo de la marca C todavía habla el modelo viejo, TR-098.</p><p>Un martes, el área de atención pide algo sencillo: un botón «Cambiar clave del Wi-Fi» en la pantalla del agente. El primer intento lo programa alguien del equipo de sistemas con la ruta que conoce, la de la marca A. En las casas de la marca A funciona. En las de la marca B cambia la clave del nodo principal, pero no la de los demás nodos de la malla, y el cliente llama de nuevo porque «la mitad de la casa no se conecta». En las de la marca C el equipo responde con una falla: esa ruta no existe en su árbol.</p><p>Este capítulo trata de cómo evitar ese martes.</p></div></section>
+<section><h2>Por qué dos equipos «compatibles con TR-069» no se comportan igual</h2><div class="analogia"><b>Imagínalo así</b><p>Piensa en un control remoto universal. Tiene un botón «subir volumen», uno solo, pero cada marca de televisor espera una señal distinta para hacer lo mismo. Por eso el control trae una tabla: para el televisor de esta marca, envía este código; para el de aquella, este otro. Tú aprietas el mismo botón y el control traduce. Si no tiene la marca en su tabla, el botón no hace nada, o peor, cambia el canal.</p></div><div class="prose"><p>TR-069 garantiza la conversación (el Inform, las órdenes, las fallas) y TR-181 garantiza los nombres de la norma. Pero entre «la norma lo permite» y «este equipo lo hace así» queda mucho espacio. Las diferencias más comunes son siete:</p><ol class="steps"><li><span><b>El modelo de datos.</b> Un equipo habla TR-181 (<code>Device.</code>) y otro TR-098 (<code>InternetGatewayDevice.</code>). Las rutas no se parecen.</span></li><li><span><b>Los números de instancia.</b> La red de 5 GHz es <code>SSID.2</code> en una marca y <code>SSID.5</code> en otra. La norma no fija el número.</span></li><li><span><b>Lo opcional.</b> La norma define miles de parámetros, pero la mayoría son opcionales. Un fabricante puede no tener <code>Device.Optical.</code> aunque sea una ONT.</span></li><li><span><b>Las extensiones.</b> Lo que no está en la norma va en ramas <code>X_</code> del fabricante, con su nombre, su unidad y su lugar (capítulo 5).</span></li><li><span><b>Los valores.</b> Un equipo acepta <code>WPA2-Personal</code>; otro, más viejo, espera dos fichas, <code>BeaconType</code> y un modo de cifrado.</span></li><li><span><b>Cuándo se aplica el cambio.</b> Uno aplica la clave nueva en el acto; otro responde con <code>Status 1</code>, que en TR-069 significa «lo guardé, pero se aplicará cuando reinicie».</span></li><li><span><b>Los errores del firmware.</b> Un parámetro que dice ser escribible y no guarda el valor, uno que se borra al reiniciar, una falla con el código equivocado.</span></li></ol><p>Ninguna de estas diferencias viola la norma por sí sola (la última sí, pero existe). Por eso «compatible con TR-069» es una condición necesaria para comprar un equipo, nunca suficiente.</p></div></section>
+<section><h2>Identificar el equipo: fabricante, clase, serie y firmware</h2><div class="prose"><p>Antes de traducir hay que saber con quién se habla. Cada Inform trae, en su encabezado, la <b>identificación del equipo</b> (<code>DeviceId</code>) con cuatro campos:</p><div class="tbl"><table><thead><tr><th>Campo</th><th>Qué es</th><th>Ejemplo</th></tr></thead><tbody><tr><td><code>Manufacturer</code></td><td>El nombre del fabricante, en texto libre</td><td>«Marca A»</td></tr><tr><td><code>OUI</code></td><td>El <b>OUI</b> (<i>Organizationally Unique Identifier</i>, identificador único de organización) del fabricante: seis caracteres hexadecimales que asigna el <b>IEEE</b> (<i>Institute of Electrical and Electronics Engineers</i>, instituto de ingenieros eléctricos y electrónicos)</td><td><code>0A1B2C</code></td></tr><tr><td><code>ProductClass</code></td><td>La <b>clase de producto</b> (<i>product class</i>): el modelo o la familia, como la nombra el fabricante</td><td><code>ONT-AX3000</code></td></tr><tr><td><code>SerialNumber</code></td><td>El número de serie de ese equipo, único dentro del fabricante</td><td><code>MRCA00012345</code></td></tr></tbody></table></div><p>Con los tres últimos, el ACS arma un nombre único para cada equipo. GenieACS, el ACS de <b>código abierto</b> (<i>open source</i>) que usamos en las prácticas, lo escribe así: <code>OUI-ProductClass-SerialNumber</code>, por ejemplo <code>0A1B2C-ONT-AX3000-MRCA00012345</code>.</p><p>Falta un dato que no viene en el <code>DeviceId</code> pero sí en los parámetros del Inform: la versión del <b>firmware</b> (el software que trae el equipo de fábrica y que se puede actualizar), en <code>DeviceInfo.SoftwareVersion</code>. Y conviene leer también <code>DeviceInfo.HardwareVersion</code>, porque el mismo modelo a veces cambia de placa a mitad de su vida.</p><p>El par que importa para gestionar es <b>modelo + firmware</b>. Dos equipos del mismo modelo con firmware distinto pueden comportarse como dos marcas diferentes: un parámetro que se agregó, una extensión que cambió de lugar, un error que se corrigió.</p></div></section>
+<section><h2>Perfiles por modelo y por firmware</h2><div class="prose"><p>El <b>perfil</b> (<i>device profile</i>) es la tabla del control remoto universal: un documento, uno por cada combinación de modelo y rango de firmware, que dice cómo se hace cada cosa en ese equipo. El perfil de Fibra Ejemplo para la marca A con firmware 3.x tiene, entre otras, estas entradas:</p><ul><li><b>Modelo de datos:</b> TR-181.</li><li><b>Wi-Fi:</b> la red de 2,4 GHz es <code>SSID.1</code> y la de 5 GHz, <code>SSID.2</code>; las dos usan la misma clave en <code>AccessPoint.1</code> y <code>AccessPoint.2</code>.</li><li><b>Óptica:</b> <code>Device.Optical.Interface.1.OpticalSignalLevel</code>, en milésimas de dBm.</li><li><b>Cambios que exigen reinicio:</b> ninguno en el Wi-Fi; el cambio de <b>VLAN</b> (<i>Virtual LAN</i>, red local virtual), sí.</li><li><b>Parámetros que no se tocan:</b> <code>ManagementServer.URL</code>, para no perder el equipo.</li><li><b>Errores conocidos:</b> en el firmware 3.1 el canal automático no se guarda; usar 3.2 o posterior.</li></ul><p>El perfil de la marca C, que habla TR-098, dice otra cosa en casi cada línea: la red de 5 GHz es <code>WLANConfiguration.5</code>, la clave puede estar en dos lugares, la potencia de la fibra es una extensión en dBm con decimales.</p><p>Ahí entra la regla del capítulo 5: si el dato está en la norma, se usa la norma; si solo existe como extensión, se anota en el perfil, con su unidad, y se vuelve a comprobar en cada firmware nuevo.</p></div><div class="practica"><div class="practica-title"><span class="tag">En el navegador</span><h3>Lee el árbol completo de un equipo real y cuenta sus extensiones</h3></div><p>El simulador de GenieACS que instalaste en el capítulo 3 no inventa su árbol: lo lee de un archivo con el árbol de un equipo real de una marca del mercado. Ese archivo es público y GitHub lo muestra como tabla. Abre el <a href="https://github.com/genieacs/genieacs-sim/blob/master/data_model_202BC1-BM632w-8KA8WA1151100043.csv" target="_blank" rel="noopener">modelo de datos del simulador genieacs-sim</a> en la computadora; si es la primera vez, dale unos segundos.</p><ol class="steps"><li><span>Mira las primeras filas: empiezan con <code>DeviceID.</code> y traen <code>Manufacturer</code>, <code>OUI</code>, <code>ProductClass</code> y <code>SerialNumber</code>. Compáralos con el nombre del archivo.</span></li><li><span>Lee las columnas: <code>Parameter</code> es la ruta, <code>Object</code> dice si es carpeta, <code>Writable</code> si se puede escribir, <code>Value</code> el valor y <code>Value type</code> el tipo.</span></li><li><span>Con Ctrl+F (Cmd+F en macOS), busca <code>X_</code> y mira cuántas coincidencias marca el navegador. Compáralo con el total de filas, que GitHub muestra arriba de la tabla.</span></li><li><span>Busca <code>WLANConfiguration</code> y anota cuántas instancias tiene y qué número lleva cada una.</span></li></ol><p><b>Qué observar:</b> el nombre del archivo es el mismo identificador que arma GenieACS: OUI, clase de producto y número de serie, separados por guiones. Todas las rutas empiezan con <code>InternetGatewayDevice.</code>: es un equipo TR-098. Y la cuenta de <code>X_</code> sorprende: de unas mil filas, unas cuatrocientas son extensiones del fabricante. Casi la mitad del árbol de este equipo no está en la norma, y otra marca tendría otra mitad distinta. Ese es el trabajo que hace un perfil.</p></div></section>
+<section><h2>Plantillas de servicio: el plan escrito una vez</h2><div class="prose"><p>El perfil dice <b>cómo</b> se hace algo en cada equipo. Falta decir <b>qué</b> hay que hacer para cada cliente. Eso es la <b>plantilla de servicio</b> (<i>service template</i>): el plan del cliente escrito en el idioma del negocio, sin una sola ruta.</p><p>La plantilla «Hogar 500» de Fibra Ejemplo dice, por ejemplo:</p><ul><li>Wi-Fi en dos bandas, con el mismo nombre y la misma clave en las dos.</li><li>Seguridad <b>WPA2</b> y <b>WPA3</b> (<i>Wi-Fi Protected Access</i>, acceso protegido al Wi-Fi, versiones 2 y 3) a la vez, para que funcionen los dispositivos viejos y los nuevos.</li><li>Red de invitados apagada.</li><li>Línea de voz activa si el cliente la contrató.</li><li>Inform periódico cada hora y hora local de la región.</li></ul><p>Esta plantilla se escribe una sola vez y la leen todas las áreas: ventas sabe qué vende, atención sabe qué debería ver en el equipo, y el ACS la aplica en cada marca usando su perfil. El día que «Hogar 500» cambie (por ejemplo, para encender la red de invitados), se cambia la plantilla, no tres programas distintos.</p><p>La velocidad del plan, los 500 Mbps, no está en la plantilla del ACS: la aplican <b>RADIUS</b> (<i>Remote Authentication Dial-In User Service</i>, el servidor que autoriza la conexión del cliente) y la red del operador, como vimos en el capítulo 2.</p></div></section>
+<section><h2>La capa de normalización: una acción, muchas formas</h2><div class="prose"><p>Con perfiles y plantillas aparece la pieza que resuelve el martes del botón: la <b>capa de normalización</b> (<i>normalization layer</i>). Es un programa que vive entre el negocio y los equipos y que solo entiende <b>acciones</b>: «cambiar la clave del Wi-Fi», «leer la potencia de la fibra», «contar los dispositivos conectados». Cuando recibe una, mira el modelo y el firmware del equipo, busca su perfil y traduce la acción a las órdenes de TR-069 que ese equipo entiende.</p></div><figure class="fig fig-capas" id="06-diagrama-1"><div class="lienzo"><svg viewBox="0 0 940 600" style="min-width:780px" role="img" aria-label="Capas entre el negocio y el equipo: el agente, el CRM y la aplicación piden acciones; la plantilla de servicio dice qué debe tener el cliente; la capa de normalización elige el perfil de cada marca; los perfiles de las marcas A, B y C producen órdenes TR-069 distintas para cada equipo">
+  <defs>
+    <marker id="f61-fl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--muted)"/></marker>
+  </defs>
+
+  
+  <text x="20" y="24" class="t t-xs t-b t-m">QUIENES PIDEN · HABLAN DE ACCIONES</text>
+  <rect x="20" y="34" width="280" height="50" rx="9" class="d-sis"/>
+  <text x="160" y="64" text-anchor="middle" class="t t-b">Agente de atención</text>
+  <rect x="330" y="34" width="280" height="50" rx="9" class="d-sis"/>
+  <text x="470" y="64" text-anchor="middle" class="t t-b">CRM</text>
+  <rect x="640" y="34" width="280" height="50" rx="9" class="d-sis"/>
+  <text x="780" y="64" text-anchor="middle" class="t t-b">Aplicación del cliente</text>
+  <text x="470" y="108" text-anchor="middle" class="t t-s">acción: «cambiar la clave del Wi-Fi» + la clave nueva</text>
+
+  <g class="ln" style="fill:none;stroke-width:1.5">
+    <path d="M160 84V118H470V130" marker-end="url(#f61-fl)"/>
+    <path d="M780 84V118H470"/>
+    <path d="M470 84V96"/>
+  </g>
+
+  
+  <rect x="120" y="132" width="700" height="46" rx="9" class="caja"/>
+  <text x="470" y="152" text-anchor="middle" class="t t-b">Plantilla de servicio «Hogar 500»</text>
+  <text x="470" y="170" text-anchor="middle" class="t t-s t-m">qué debe tener el cliente: misma clave en las dos bandas, WPA2 y WPA3</text>
+
+  
+  <path d="M20 198H920" class="ln ln-d" style="fill:none;stroke-width:1.5"/>
+  <text x="920" y="192" text-anchor="end" class="t t-xs t-b t-m">ARRIBA DE ESTA LÍNEA NADIE ESCRIBE RUTAS DEL ÁRBOL</text>
+
+  <path d="M470 178V214" class="ln" style="fill:none;stroke-width:1.5" marker-end="url(#f61-fl)"/>
+
+  
+  <rect x="120" y="216" width="700" height="56" rx="9" class="c-apl" style="stroke-width:2"/>
+  <text x="470" y="240" text-anchor="middle" class="t t-b">Capa de normalización</text>
+  <text x="470" y="259" text-anchor="middle" class="t t-s">lee el modelo y el firmware del equipo, elige su perfil y traduce la acción</text>
+
+  <g class="ln" style="fill:none;stroke-width:1.5">
+    <path d="M160 272V296" marker-end="url(#f61-fl)"/>
+    <path d="M470 272V296" marker-end="url(#f61-fl)"/>
+    <path d="M780 272V296" marker-end="url(#f61-fl)"/>
+  </g>
+
+  
+  <text x="20" y="292" class="t t-xs t-b t-m">PERFILES</text>
+  <rect x="20" y="298" width="280" height="56" rx="9" class="c-red"/>
+  <text x="32" y="320" class="t t-b">Marca A · ONT</text>
+  <text x="32" y="340" class="t t-s">TR-181 · firmware 3.x</text>
+  <rect x="330" y="298" width="280" height="56" rx="9" class="c-red"/>
+  <text x="342" y="320" class="t t-b">Marca B · malla</text>
+  <text x="342" y="340" class="t t-s">TR-181 · nodos que se sincronizan</text>
+  <rect x="640" y="298" width="280" height="56" rx="9" class="c-red"/>
+  <text x="652" y="320" class="t t-b">Marca C · lote viejo</text>
+  <text x="652" y="340" class="t t-s">TR-098 · 5 GHz en la instancia 5</text>
+
+  <g class="ln" style="fill:none;stroke-width:1.5">
+    <path d="M160 354V380" marker-end="url(#f61-fl)"/>
+    <path d="M470 354V380" marker-end="url(#f61-fl)"/>
+    <path d="M780 354V380" marker-end="url(#f61-fl)"/>
+  </g>
+
+  
+  <text x="20" y="376" class="t t-xs t-b t-m">ÓRDENES TR-069</text>
+  <rect x="20" y="382" width="280" height="110" rx="9" class="caja"/>
+  <text x="32" y="402" class="t t-xs t-b t-m">SETPARAMETERVALUES · 2 VALORES</text>
+  <text x="32" y="424" class="t t-s t-mono">WiFi.AccessPoint.1.</text>
+  <text x="44" y="442" class="t t-s t-mono">Security.KeyPassphrase</text>
+  <text x="32" y="462" class="t t-s t-mono">WiFi.AccessPoint.2.</text>
+  <text x="44" y="480" class="t t-s t-mono">Security.KeyPassphrase</text>
+
+  <rect x="330" y="382" width="280" height="110" rx="9" class="caja"/>
+  <text x="342" y="402" class="t t-xs t-b t-m">SETPARAMETERVALUES · 3 VALORES</text>
+  <text x="342" y="424" class="t t-s t-mono">WiFi.AccessPoint.1. y .2.</text>
+  <text x="354" y="442" class="t t-s t-mono">Security.KeyPassphrase</text>
+  <text x="342" y="462" class="t t-s t-mono">X_0D0E0F_Mesh.SyncNow</text>
+  <text x="342" y="480" class="t t-s">copia la clave a los nodos</text>
+
+  <rect x="640" y="382" width="280" height="110" rx="9" class="caja"/>
+  <text x="652" y="402" class="t t-xs t-b t-m">SETPARAMETERVALUES · 2 VALORES</text>
+  <text x="652" y="424" class="t t-s t-mono">IGD.LANDevice.1.</text>
+  <text x="664" y="442" class="t t-s t-mono">WLANConfiguration.1.KeyPassphrase</text>
+  <text x="652" y="462" class="t t-s t-mono">IGD.LANDevice.1.</text>
+  <text x="664" y="480" class="t t-s t-mono">WLANConfiguration.5.KeyPassphrase</text>
+
+  <g class="ln" style="fill:none;stroke-width:1.5">
+    <path d="M160 492V518" marker-end="url(#f61-fl)"/>
+    <path d="M470 492V518" marker-end="url(#f61-fl)"/>
+    <path d="M780 492V518" marker-end="url(#f61-fl)"/>
+  </g>
+
+  
+  <rect x="20" y="520" width="280" height="44" rx="9" class="d-casa"/>
+  <text x="160" y="547" text-anchor="middle" class="t t-b">ONT de la marca A</text>
+  <rect x="330" y="520" width="280" height="44" rx="9" class="d-casa"/>
+  <text x="470" y="547" text-anchor="middle" class="t t-b">Malla de la marca B</text>
+  <rect x="640" y="520" width="280" height="44" rx="9" class="d-casa"/>
+  <text x="780" y="547" text-anchor="middle" class="t t-b">Equipo de la marca C</text>
+
+  <text x="470" y="590" text-anchor="middle" class="t t-s t-m">Una sola acción arriba; abajo, tantas formas como perfiles. IGD abrevia InternetGatewayDevice.</text>
+</svg></div><figcaption><b>Las capas entre el negocio y el equipo.</b> Se lee de arriba hacia abajo. Arriba, quienes piden: el agente de atención, el <b>CRM</b> (<i>Customer Relationship Management</i>, gestión de la relación con el cliente) y la aplicación del cliente, que solo hablan de acciones («cambiar clave del Wi-Fi»). Debajo, la plantilla de servicio, que dice qué debe tener cada cliente. En el medio, la capa de normalización, que recibe la acción y consulta el perfil del equipo. Debajo, los perfiles por modelo y firmware de las marcas A, B y C. Abajo de todo, las órdenes de TR-069 que salen hacia cada equipo, distintas para cada marca. La línea punteada marca la frontera: arriba de ella nadie escribe una ruta del árbol.</figcaption></figure><div class="prose"><p>La regla que hace funcionar todo esto es una sola: <b>ningún sistema del negocio escribe rutas del árbol.</b> El CRM no sabe qué es <code>AccessPoint.2</code>; sabe que el cliente pidió cambiar su clave. Si un sistema de arriba se salta la capa y manda rutas directas, el martes vuelve.</p><h3>La capa en un ACS real</h3><p>En los ACS comerciales, la capa de normalización suele venir como «perfiles de equipo» o «acciones» que se configuran en pantallas. En GenieACS se arma con dos piezas que vale la pena conocer, porque muestran la idea al desnudo:</p><ul><li>Los <b>parámetros virtuales</b> (<i>virtual parameters</i>): un parámetro inventado por el operador, como <code>VirtualParameters.WiFiClave</code>, que no existe en ningún equipo. Detrás tiene un pequeño programa que, al escribirlo, busca la ruta real en el equipo que tenga delante. La propia documentación de GenieACS trae como ejemplo una clave del Wi-Fi que funciona igual en equipos TR-181 y TR-098.</li><li>Las <b>provisiones</b> (<i>provisions</i>): programas cortos que describen el estado que debe tener un equipo («esta clave, este nombre de red»). Se activan con <b>preajustes</b> (<i>presets</i>), reglas que dicen a qué equipos y en qué eventos se aplica cada provisión.</li></ul><p>El agente o el CRM escriben en el parámetro virtual, y el ACS se encarga del resto. Es el control remoto universal construido dentro del ACS.</p></div><div class="lab" id="06-lab-1"><div class="lab-title"><span class="tag">Laboratorio</span><h3>Traductor de marcas</h3></div><p class="hint">Elige una acción del negocio y mira las órdenes que salen hacia tres equipos distintos de Fibra Ejemplo: la ONT de la marca A, la malla de la marca B y el equipo viejo de la marca C. Primero apaga la capa de normalización: el sistema manda a todos la ruta de la marca A. Luego enciéndela y compara cuántos equipos quedan bien.</p><style>
+[id="06-lab-1"] .l61-eq{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+@media (max-width:700px){[id="06-lab-1"] .l61-eq{grid-template-columns:minmax(0,1fr)}}
+[id="06-lab-1"] .l61-c{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--line);border-radius:8px;padding:10px;display:grid;gap:6px;align-content:start}
+[id="06-lab-1"] .l61-c.ok{border-left-color:var(--good)}
+[id="06-lab-1"] .l61-c.medio{border-left-color:var(--warm)}
+[id="06-lab-1"] .l61-c.mal{border-left-color:var(--c-apl)}
+[id="06-lab-1"] .l61-c h4{margin:0;font:700 .95rem var(--f-display)}
+[id="06-lab-1"] .l61-c .sub{font-size:.8rem;color:var(--muted)}
+[id="06-lab-1"] .l61-c ul{margin:0;padding-left:16px;font:500 .76rem/1.5 var(--f-mono);word-break:break-all}
+[id="06-lab-1"] .l61-c .res{font-size:.86rem;font-weight:600}
+[id="06-lab-1"] .l61-c.ok .res{color:var(--good)}
+[id="06-lab-1"] .l61-c.medio .res{color:var(--warm)}
+[id="06-lab-1"] .l61-c.mal .res{color:var(--c-apl)}
+[id="06-lab-1"] .l61-c .nota{font-size:.84rem}
+</style>
+<div class="opciones">
+  <label>Acción del negocio
+    <select id="l61-acc">
+      <option value="clave">Cambiar la clave del Wi-Fi</option>
+      <option value="nombre">Cambiar el nombre del Wi-Fi</option>
+      <option value="canal">Fijar el canal de 5 GHz en el 36</option>
+      <option value="opt">Leer la potencia de la fibra</option>
+      <option value="hosts">Contar los dispositivos conectados</option>
+      <option value="inv">Encender la red de invitados</option>
+    </select></label>
+</div>
+<div class="btns" role="group" aria-label="Capa de normalización">
+  <button type="button" id="l61-sin" aria-pressed="true">Sin capa: rutas de la marca A para todos</button>
+  <button type="button" id="l61-con" aria-pressed="false">Con capa de normalización</button>
+</div>
+<div class="l61-eq" id="l61-eq"></div>
+<div class="readout texto" id="l61-out" aria-live="polite"></div></div><div class="ml"><b>En la práctica</b><p>El equipo de sistemas de Fibra Ejemplo rehízo el botón «Cambiar clave del Wi-Fi» en una tarde, pero sobre la capa de normalización. El botón ahora manda una sola acción con la clave nueva. La capa resolvió, para la marca A, dos parámetros; para la marca B, tres (las dos bandas del nodo principal y una extensión de la marca que copia la clave a los demás nodos de la malla); para la marca C, dos rutas de TR-098 en instancias distintas. Lo que más tiempo tomó no fue programar: fue completar los perfiles y probarlos con un equipo de cada modelo en el laboratorio.</p></div></section>
+<section><h2>Homologar un equipo nuevo antes de comprarlo</h2><div class="prose"><p>Cada marca nueva o cada firmware nuevo es un perfil nuevo, y un perfil nuevo puede romper algo que ya funcionaba. Por eso un operador ordenado <b>homologa</b> (<i>device qualification</i>, calificación de equipos): antes de comprar en volumen, pasa el equipo por una lista fija de pruebas en un laboratorio, con su ACS real y una copia de la red.</p></div><figure class="fig fig-flujo" id="06-diagrama-2"><div class="lienzo"><svg viewBox="0 0 940 400" style="min-width:760px" role="img" aria-label="Camino de un equipo nuevo hasta la flota: muestra del fabricante, laboratorio con la lista de pruebas, decisión por fallas críticas, perfil con restricciones, piloto con clientes reales, decisión del piloto y compra en volumen; cada firmware nuevo vuelve al laboratorio">
+  <defs>
+    <marker id="f62-fl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--muted)"/></marker>
+  </defs>
+
+  
+  <rect x="10" y="90" width="120" height="60" rx="9" class="d-sis"/>
+  <text x="70" y="116" text-anchor="middle" class="t t-b">Muestra</text>
+  <text x="70" y="135" text-anchor="middle" class="t t-s">del fabricante</text>
+
+  
+  <rect x="160" y="80" width="140" height="80" rx="9" class="c-red"/>
+  <text x="230" y="106" text-anchor="middle" class="t t-b">Laboratorio</text>
+  <text x="230" y="126" text-anchor="middle" class="t t-s">lista de 12 pruebas</text>
+  <text x="230" y="143" text-anchor="middle" class="t t-s">con el ACS real</text>
+
+  
+  <path d="M390 70 450 120 390 170 330 120Z" class="caja" style="stroke-width:2"/>
+  <text x="390" y="116" text-anchor="middle" class="t t-s t-b">¿falla</text>
+  <text x="390" y="132" text-anchor="middle" class="t t-s t-b">crítica?</text>
+
+  
+  <rect x="480" y="80" width="140" height="80" rx="9" class="c-apl"/>
+  <text x="550" y="106" text-anchor="middle" class="t t-b">Perfil</text>
+  <text x="550" y="126" text-anchor="middle" class="t t-s">rutas y unidades;</text>
+  <text x="550" y="143" text-anchor="middle" class="t t-s">fallas menores</text>
+
+  
+  <rect x="650" y="80" width="130" height="80" rx="9" class="d-casa"/>
+  <text x="715" y="106" text-anchor="middle" class="t t-b">Piloto</text>
+  <text x="715" y="126" text-anchor="middle" class="t t-s">un lote de clientes</text>
+  <text x="715" y="143" text-anchor="middle" class="t t-s">que aceptaron</text>
+
+  
+  <path d="M860 70 915 120 860 170 805 120Z" class="caja" style="stroke-width:2"/>
+  <text x="860" y="116" text-anchor="middle" class="t t-s t-b">¿salió</text>
+  <text x="860" y="132" text-anchor="middle" class="t t-s t-b">bien?</text>
+
+  
+  <rect x="800" y="250" width="120" height="60" rx="9" class="c-enl" style="stroke-width:2"/>
+  <text x="860" y="276" text-anchor="middle" class="t t-b">Flota</text>
+  <text x="860" y="295" text-anchor="middle" class="t t-s">compra en volumen</text>
+
+  
+  <rect x="320" y="250" width="140" height="60" rx="9" class="caja" style="stroke-dasharray:5 4"/>
+  <text x="390" y="276" text-anchor="middle" class="t t-b">Vuelve</text>
+  <text x="390" y="295" text-anchor="middle" class="t t-s">con el informe</text>
+
+  <g class="ln" style="fill:none;stroke-width:1.6">
+    <path d="M130 120H158" marker-end="url(#f62-fl)"/>
+    <path d="M300 120H328" marker-end="url(#f62-fl)"/>
+    <path d="M450 120H478" marker-end="url(#f62-fl)"/>
+    <path d="M620 120H648" marker-end="url(#f62-fl)"/>
+    <path d="M780 120H803" marker-end="url(#f62-fl)"/>
+    <path d="M390 170V248" marker-end="url(#f62-fl)"/>
+    <path d="M860 170V248" marker-end="url(#f62-fl)"/>
+    <path d="M860 70V40H230V78" marker-end="url(#f62-fl)"/>
+  </g>
+  <text x="462" y="112" class="t t-xs t-b t-m">NO</text>
+  <text x="398" y="215" class="t t-xs t-b t-m">SÍ</text>
+  <text x="868" y="215" class="t t-xs t-b t-m">SÍ</text>
+  <text x="545" y="32" text-anchor="middle" class="t t-xs t-b t-m">NO: SE CORRIGE Y SE REPITE</text>
+
+  
+  <path d="M860 310V360H230V162" class="ln ln-d" style="fill:none;stroke-width:1.6" marker-end="url(#f62-fl)"/>
+  <text x="545" y="382" text-anchor="middle" class="t t-s t-m">Cada firmware nuevo del mismo modelo vuelve a pasar por el laboratorio</text>
+</svg></div><figcaption><b>El camino de un equipo nuevo hasta la flota.</b> De izquierda a derecha: la muestra llega del fabricante; en el laboratorio corre la lista de pruebas; si pasa, se escribe su perfil y se prueba con un lote piloto de clientes reales que aceptaron participar; si el piloto sale bien, se compra en volumen y entra a la flota. Cada rombo es una decisión: una falla crítica en el laboratorio devuelve el equipo al fabricante con el informe; una falla menor se anota en el perfil como restricción. Debajo, una flecha de vuelta: cada firmware nuevo del mismo modelo repite el camino desde el laboratorio.</figcaption></figure><div class="prose"><p>La lista de Fibra Ejemplo tiene doce pruebas, agrupadas en cuatro bloques:</p><div class="tbl"><table><thead><tr><th>Bloque</th><th>Qué se prueba</th><th>Por qué importa</th></tr></thead><tbody><tr><td>Presentarse</td><td>El Inform trae OUI, clase y serie correctos; manda <code>0 BOOTSTRAP</code> al salir de fábrica; respeta el intervalo del Inform periódico</td><td>Si no se identifica bien, el ACS no sabe qué perfil usar</td></tr><tr><td>Obedecer</td><td>Lee y escribe las rutas de la plantilla; responde 9007 a un valor inválido; el cambio persiste después de un reinicio</td><td>Si dice «sí» y no guarda, el agente cree que resolvió</td></tr><tr><td>Volver</td><td>Responde al <i>Connection Request</i>; después de un reinicio de fábrica vuelve a llamar al ACS; acepta un firmware nuevo y vuelve al anterior si falla</td><td>Si no vuelve, es una visita</td></tr><tr><td>Cuidarse</td><td>Habla con el ACS por <b>HTTPS</b> (<i>HTTP Secure</i>, HTTP cifrado) y valida su certificado; trae una contraseña distinta en cada equipo; no deja abierta la gestión desde Internet</td><td>Un equipo inseguro es un problema de toda la red (capítulo 14)</td></tr></tbody></table></div><p>No todas las fallas pesan lo mismo. Que el equipo no vuelva al ACS después de un reinicio de fábrica es <b>crítico</b>: cada cliente que aprieta el botón de reinicio se convierte en una visita. Que el canal automático no se guarde es <b>menor</b>: se fija el canal desde la plantilla y se anota en el perfil. La decisión final tiene tres salidas: entra a la red, entra con restricciones anotadas en el perfil o vuelve al fabricante con el informe.</p></div><div class="lab" id="06-lab-2"><div class="lab-title"><span class="tag">Laboratorio</span><h3>Homologación de un equipo nuevo</h3></div><p class="hint">Fibra Ejemplo evalúa dos candidatos para reemplazar al lote viejo de la marca C. Corre la lista de pruebas sobre cada uno, mira qué falla y cuánto pesa cada falla, y decide: entra a la red, entra con restricciones o vuelve al fabricante.</p><style>
+[id="06-lab-2"] .l62-lista{list-style:none;margin:0;padding:0;display:grid;gap:5px}
+[id="06-lab-2"] .l62-lista li{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:8px;align-items:start;padding:6px 10px;border-radius:8px;background:var(--paper);font-size:.88rem;border-left:4px solid var(--line)}
+[id="06-lab-2"] .l62-lista li.pasa{border-left-color:var(--good)}
+[id="06-lab-2"] .l62-lista li.menor{border-left-color:var(--warm)}
+[id="06-lab-2"] .l62-lista li.critica{border-left-color:var(--c-apl);background:var(--c-apl-s)}
+[id="06-lab-2"] .l62-blq{font:700 .68rem var(--f-display);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding-top:3px;min-width:84px}
+[id="06-lab-2"] .l62-est{font:700 .78rem var(--f-mono);white-space:nowrap}
+[id="06-lab-2"] li.pasa .l62-est{color:var(--good)}
+[id="06-lab-2"] li.menor .l62-est{color:var(--warm)}
+[id="06-lab-2"] li.critica .l62-est{color:var(--c-apl)}
+[id="06-lab-2"] .l62-det{display:block;font-size:.82rem;color:var(--muted);margin-top:2px}
+@media (max-width:520px){[id="06-lab-2"] .l62-lista li{grid-template-columns:minmax(0,1fr) auto}[id="06-lab-2"] .l62-blq{grid-column:1/-1;padding:0}}
+</style>
+<div class="opciones">
+  <label>Candidato
+    <select id="l62-cand">
+      <option value="d1">Equipo D1 · el más barato · TR-181</option>
+      <option value="d2">Equipo D2 · precio medio · TR-181</option>
+      <option value="d3">Marca B con su firmware nuevo 4.1</option>
+    </select></label>
+</div>
+<div class="btns"><button type="button" class="primary" id="l62-run">Correr la lista de pruebas</button></div>
+<ol class="l62-lista" id="l62-lista" aria-live="polite"></ol>
+<div class="btns" role="group" aria-label="Decisión" id="l62-dec" hidden>
+  <button type="button" data-d="entra">Entra a la red</button>
+  <button type="button" data-d="restr">Entra con restricciones</button>
+  <button type="button" data-d="vuelve">Vuelve al fabricante</button>
+</div>
+<div class="readout texto" id="l62-out" aria-live="polite"></div></div><div class="caso"><b>Un caso real</b><p>Un operador FTTH de la región compró un lote grande de ONT de un modelo nuevo porque el precio era muy bueno y la hoja de datos decía «compatible con TR-069 y TR-181». No lo homologó con su ACS: lo probó con un solo equipo, en una oficina, durante una tarde. A los dos meses empezaron las llamadas: después de un reinicio de fábrica, el equipo volvía con la dirección de un ACS de pruebas del fabricante y quedaba fuera de gestión. Cada caso terminó en una visita. La solución llegó en un firmware nuevo, que hubo que instalar a mano en los equipos que ya no llamaban. La lección que suelen sacar estos operadores: la homologación cuesta semanas; saltársela cuesta visitas durante años.</p></div><div class="prose"><p>Si quieres ver cómo el mismo problema aparece en las plataformas de gestión del resto de la red, el capítulo 29 de <a href="https://aaramirez.github.io/telco/29-las-plataformas-de-gestion-en-la-practica.html" target="_blank" rel="noopener">Cómo funciona un telco</a> muestra cómo se gestionan equipos de varios fabricantes en la red del operador.</p><p>La idea con la que cierra este capítulo es la que sostiene toda la gestión de una flota mixta: <b>el negocio habla de acciones; una capa de perfiles las traduce a los parámetros de cada marca y firmware.</b></p></div><div class="quiz"><h3>Pruébate</h3><details><summary>¿Por qué «compatible con TR-069» no basta para saber cómo se comportará un equipo?</summary><p>Porque la norma deja muchas cosas abiertas: el modelo de datos (TR-098 o TR-181), los números de instancia, los parámetros opcionales, las extensiones <code>X_</code>, los valores aceptados y el momento en que se aplica un cambio. Además, el firmware puede tener errores.</p></details><details><summary>¿Qué cuatro campos trae el <code>DeviceId</code> de un Inform y cuál falta para elegir el perfil?</summary><p>Fabricante, OUI, clase de producto y número de serie. Para elegir el perfil falta la versión de firmware, que viene en <code>DeviceInfo.SoftwareVersion</code>.</p></details><details><summary>¿Qué diferencia hay entre un perfil y una plantilla de servicio?</summary><p>El perfil dice cómo se hace cada cosa en un modelo y firmware (rutas, instancias, unidades, errores). La plantilla dice qué debe tener el cliente según su plan, sin rutas.</p></details><details><summary>Un equipo responde a un <code>SetParameterValues</code> con <code>Status 1</code>. ¿Qué significa?</summary><p>Que guardó el valor, pero lo aplicará después de reiniciarse.</p></details><details><summary>¿Por qué ningún sistema del negocio debería escribir rutas del árbol?</summary><p>Porque las rutas cambian con la marca y el firmware. Si el CRM o la pantalla del agente las escriben directo, cada marca nueva rompe esos sistemas; la capa de normalización concentra ese conocimiento en un solo lugar.</p></details><details><summary>¿Por qué no volver al ACS después de un reinicio de fábrica es una falla crítica en la homologación?</summary><p>Porque cada cliente que reinicia el equipo de fábrica lo deja fuera de gestión, y la única forma de recuperarlo es una visita.</p></details></div><div class="investiga"><h3>Para investigar</h3><p class="hint">Estas preguntas no se responden en el capítulo: búscalas por tu cuenta.</p><ol><li>¿Cómo asigna el IEEE un OUI a un fabricante y qué diferencia hay entre los bloques MA-L, MA-M y MA-S?<small>Pista: busca «IEEE registration authority MA-L MA-M MA-S».</small></li><li>¿Qué es el versionado semántico y cómo ayuda a escribir un perfil para «el firmware 3.x»?<small>Pista: busca «semantic versioning MAJOR.MINOR.PATCH».</small></li><li>¿Qué diferencia hay entre WPA2 y WPA3, y por qué existe un modo de transición que acepta los dos?<small>Pista: busca «WPA3 transition mode SAE».</small></li><li>¿Tiene el Broadband Forum un programa de certificación para equipos TR-069 y qué cubre?<small>Pista: busca «Broadband Forum certification TR-069 test plan».</small></li><li>¿Qué es un archivo CSV y por qué tantas herramientas lo usan para intercambiar tablas?<small>Pista: busca «CSV comma-separated values <a href="https://www.rfc-editor.org/rfc/rfc4180" target="_blank" rel="noopener">RFC 4180</a>».</small></li></ol></div><div class="vids"><span>Para saber más</span><a class="vid" href="https://docs.genieacs.com/en/latest/virtual-parameters.html" target="_blank" rel="noopener">Parámetros virtuales en GenieACS, con el ejemplo de la clave del Wi-Fi en TR-181 y TR-098 (inglés) <small>referencia</small></a><a class="vid" href="https://docs.genieacs.com/en/latest/provisions.html" target="_blank" rel="noopener">Provisiones en GenieACS (inglés) <small>referencia</small></a><a class="vid" href="https://github.com/genieacs/genieacs-sim/blob/master/data_model_202BC1-BM632w-8KA8WA1151100043.csv" target="_blank" rel="noopener">El árbol de un equipo real en el simulador genieacs-sim (GitHub) <small>práctica</small></a><a class="vid" href="https://aaramirez.github.io/telco/29-las-plataformas-de-gestion-en-la-practica.html" target="_blank" rel="noopener">Las plataformas de gestión en la práctica, capítulo 29 de Cómo funciona un telco <small>lectura</small></a></div></section>
+<label class="got"><input type="checkbox" id="got"> Lo tengo claro</label>
+<nav class="pager" id="pager" aria-label="Capítulo anterior y siguiente"></nav>
+</main>
+</div>
+<footer><span>Curso abierto de aaramirez.github.io.</span><span>Sitio publicado: <a href="https://github.com/aaramirez/gestion-remota-de-equipos" target="_blank" rel="noopener">github.com/aaramirez/gestion-remota-de-equipos</a></span></footer>
+</div>
+<script src="assets/lab.js"></script>
+<script>
+(function(){
+  const {$}=window.Lab;
+  const EQ=[
+    {id:'A',n:'Marca A · ONT',s:'TR-181 · firmware 3.2'},
+    {id:'B',n:'Marca B · malla',s:'TR-181 · dos nodos'},
+    {id:'C',n:'Marca C · lote viejo',s:'TR-098 · firmware 1.8'}
+  ];
+  const I='InternetGatewayDevice.LANDevice.1.';
+  // por acción: rpc de cada marca (con capa) y resultado de mandar la ruta de A (sin capa)
+  const ACC={
+    clave:{
+      A:{rpc:'SetParameterValues',p:['Device.WiFi.AccessPoint.1.Security.KeyPassphrase','Device.WiFi.AccessPoint.2.Security.KeyPassphrase'],nota:'Las dos bandas con la misma clave.'},
+      B:{rpc:'SetParameterValues',p:['Device.WiFi.AccessPoint.1.Security.KeyPassphrase','Device.WiFi.AccessPoint.2.Security.KeyPassphrase','Device.X_0D0E0F_Mesh.SyncNow = true'],nota:'Las dos bandas del nodo principal y la extensión de la marca que copia la clave a los demás nodos.'},
+      C:{rpc:'SetParameterValues',p:[I+'WLANConfiguration.1.KeyPassphrase',I+'WLANConfiguration.5.KeyPassphrase'],nota:'En TR-098, con la red de 5 GHz en la instancia 5.'},
+      sin:{B:['medio','Aceptado, pero a medias','Cambió la clave en el nodo principal. Los nodos de la malla siguen con la vieja: la mitad de la casa se desconecta y el cliente vuelve a llamar.'],C:['mal','Falla 9005 · Invalid parameter name','La ruta Device.WiFi… no existe en un equipo TR-098. No cambió nada.']}
+    },
+    nombre:{
+      A:{rpc:'SetParameterValues',p:['Device.WiFi.SSID.1.SSID','Device.WiFi.SSID.2.SSID'],nota:'Mismo nombre en las dos bandas, como pide la plantilla.'},
+      B:{rpc:'SetParameterValues',p:['Device.WiFi.SSID.1.SSID','Device.WiFi.SSID.2.SSID','Device.X_0D0E0F_Mesh.SyncNow = true'],nota:'La malla anuncia una sola red; los nodos la copian del principal.'},
+      C:{rpc:'SetParameterValues',p:[I+'WLANConfiguration.1.SSID',I+'WLANConfiguration.5.SSID'],nota:'Rutas de TR-098.'},
+      sin:{B:['medio','Aceptado, pero a medias','El nodo principal cambió de nombre; los demás nodos siguen anunciando el viejo hasta su próxima sincronización.'],C:['mal','Falla 9005 · Invalid parameter name','La ruta no existe en TR-098.']}
+    },
+    canal:{
+      A:{rpc:'SetParameterValues',p:['Device.WiFi.Radio.2.AutoChannelEnable = false','Device.WiFi.Radio.2.Channel = 36'],nota:'Primero apaga el canal automático; si no, el equipo lo vuelve a cambiar.'},
+      B:{rpc:'SetParameterValues',p:['Device.WiFi.Radio.2.AutoChannelEnable = false','Device.WiFi.Radio.2.Channel = 36'],nota:'Igual que A. El perfil anota que en la malla el canal 36 se aplica a todos los nodos.'},
+      C:{rpc:'SetParameterValues',p:[I+'WLANConfiguration.5.AutoChannelEnable = false',I+'WLANConfiguration.5.Channel = 36'],nota:'En TR-098 el canal está en WLANConfiguration, no en una radio.'},
+      sin:{B:['ok','Aceptado','Coincide con A: los dos son TR-181 y ponen la radio de 5 GHz en la instancia 2. Esta vez hubo suerte.'],C:['mal','Falla 9005 · Invalid parameter name','La ruta no existe en TR-098.']}
+    },
+    opt:{
+      A:{rpc:'GetParameterValues',p:['Device.Optical.Interface.1.OpticalSignalLevel → -19500'],nota:'Milésimas de dBm: −19,5 dBm.'},
+      B:{rpc:'(ninguna)',p:['La malla no tiene fibra: el dato vive en la ONT que está antes.'],nota:'La capa responde «no aplica» en lugar de inventar un número.',na:1},
+      C:{rpc:'GetParameterValues',p:['InternetGatewayDevice.X_0A1B2C_GponInterface.RxPower → -19.5'],nota:'Extensión del fabricante, ya en dBm con decimales. La capa la devuelve en la misma unidad que A.'},
+      sin:{B:['mal','Falla 9005 · Invalid parameter name','La malla no tiene la rama Optical.'],C:['mal','Falla 9005 · Invalid parameter name','En TR-098 la potencia solo existe como extensión.']}
+    },
+    hosts:{
+      A:{rpc:'GetParameterValues',p:['Device.Hosts.HostNumberOfEntries → 9'],nota:'La tabla Host: activos e inactivos.'},
+      B:{rpc:'GetParameterValues',p:['Device.Hosts.HostNumberOfEntries → 12'],nota:'Igual que A: los dos son TR-181.'},
+      C:{rpc:'GetParameterValues',p:[I+'Hosts.HostNumberOfEntries → 6'],nota:'En TR-098 la tabla Hosts cuelga de LANDevice.1.'},
+      sin:{B:['ok','Respondió','Mismo nombre en los dos modelos TR-181.'],C:['mal','Falla 9005 · Invalid parameter name','En TR-098 la tabla está en otra ruta.']}
+    },
+    inv:{
+      A:{rpc:'AddObject + SetParameterValues',p:['AddObject Device.WiFi.SSID. → 3','Device.WiFi.SSID.3.SSID = Invitados-2207','Device.WiFi.SSID.3.Enable = true','AddObject Device.WiFi.AccessPoint. → 3','Device.WiFi.AccessPoint.3.SSIDReference = Device.WiFi.SSID.3','Device.WiFi.AccessPoint.3.Security.KeyPassphrase'],nota:'Crea la red y su punto de acceso. Los números los devuelve el equipo.'},
+      B:{rpc:'SetParameterValues',p:['Device.X_0D0E0F_GuestNetwork.Enable = true'],nota:'Esta marca trae la red de invitados como función propia: el perfil usa su extensión, porque crear objetos en la malla no se copia a los nodos.'},
+      C:{rpc:'SetParameterValues',p:[I+'WLANConfiguration.2.SSID = Invitados-2207',I+'WLANConfiguration.2.Enable = true'],nota:'El equipo viejo ya trae las instancias creadas y apagadas: solo hay que encender la 2.'},
+      sin:{B:['medio','Creada solo en el nodo principal','La red de invitados existe en un nodo; los demás no la conocen.'],C:['mal','Falla 9005 · Invalid parameter name','AddObject sobre Device.WiFi.SSID. no existe en TR-098.']}
+    }
+  };
+  let con=false;
+  const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  function pinta(){
+    const a=ACC[$('#l61-acc').value];
+    $('#l61-sin').setAttribute('aria-pressed',String(!con));$('#l61-con').setAttribute('aria-pressed',String(con));
+    let bien=0;const tarjetas=EQ.map(e=>{
+      let estado,res,nota,ord;
+      if(con){const r=a[e.id];ord=r;estado=r.na?'ok':'ok';res=r.na?'No aplica, y lo dice':'Correcto';nota=r.nota;}
+      else if(e.id==='A'){ord=a.A;estado='ok';res='Correcto';nota=a.A.nota;}
+      else{ord=a.A;[estado,res,nota]=a.sin[e.id];}
+      if(estado==='ok')bien++;
+      return '<div class="l61-c '+estado+'"><h4>'+esc(e.n)+'</h4><span class="sub">'+esc(e.s)+'</span><span class="sub">'+esc(ord.rpc)+'</span><ul>'+ord.p.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul><span class="res">'+esc(res)+'</span><span class="nota">'+esc(nota)+'</span></div>';
+    });
+    $('#l61-eq').innerHTML=tarjetas.join('');
+    const total=EQ.length;
+    $('#l61-out').innerHTML=con
+      ?'<span class="big">'+bien+' de '+total+' equipos quedan bien</span><span>La acción es la misma; cada perfil la tradujo a lo que su equipo entiende. El CRM no vio ninguna ruta.</span>'
+      :'<span class="big">'+bien+' de '+total+' equipos quedan bien</span><span class="warn">Sin capa, el sistema manda la ruta que conoce (la de la marca A) a todos.</span><span>En una flota con 60 % de la marca A, 25 % de la B y 15 % de la C, '+(bien===3?'esta vez no pasó nada, por suerte':'el '+(bien===1?'40':'15')+' % de las casas termina en otra llamada')+'.</span>';
+  }
+  $('#l61-acc').addEventListener('change',pinta);
+  $('#l61-sin').addEventListener('click',()=>{con=false;pinta();});
+  $('#l61-con').addEventListener('click',()=>{con=true;pinta();});
+  pinta();
+})();
+</script>
+<script>
+(function(){
+  const {$}=window.Lab;
+  const quieto=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // [bloque, prueba, peso si falla]
+  const T=[
+    ['Presentarse','El Inform trae OUI, clase de producto y serie correctos','critica'],
+    ['Presentarse','Manda 0 BOOTSTRAP al salir de fábrica','critica'],
+    ['Presentarse','Respeta el intervalo del Inform periódico','menor'],
+    ['Obedecer','Lee y escribe todas las rutas de la plantilla «Hogar 500»','critica'],
+    ['Obedecer','Responde 9007 a un valor inválido','menor'],
+    ['Obedecer','Lo que se escribe sigue ahí después de reiniciar','critica'],
+    ['Volver','Responde al Connection Request','critica'],
+    ['Volver','Vuelve a llamar al ACS después de un reinicio de fábrica','critica'],
+    ['Volver','Acepta un firmware nuevo y vuelve al anterior si falla','critica'],
+    ['Cuidarse','Habla por HTTPS y valida el certificado del ACS','critica'],
+    ['Cuidarse','Trae una contraseña de administrador distinta en cada equipo','critica'],
+    ['Cuidarse','No deja abierta la gestión desde Internet','critica']
+  ];
+  // fallas por candidato: índice → [peso, detalle]
+  const C={
+    d1:{f:{4:['menor','Responde 9002 (error interno) en lugar de 9007. Molesta al leer los registros, pero el valor no cambia.'],7:['critica','Después del reinicio de fábrica vuelve con la dirección de un ACS de pruebas del fabricante: queda fuera de gestión.']},ok:'vuelve',
+        txt:'Una sola falla crítica alcanza: cada cliente que apriete el botón de reinicio sería una visita. Vuelve al fabricante con el informe; si corrige el firmware, se repite la lista.'},
+    d2:{f:{3:['menor','El canal automático de 5 GHz no se guarda: vuelve a «automático» al reiniciar. Todo lo demás de la plantilla funciona.'],2:['menor','El primer Inform periódico después de reiniciar llega a los 10 segundos y no a la hora. No afecta la carga de forma visible.']},ok:'restr',
+        txt:'Lo que falla tiene arreglo en el perfil: el canal se fija desde la plantilla y no se usa el automático. Entra con esas restricciones escritas en su perfil, y se pide al fabricante la corrección para el próximo firmware.'},
+    d3:{f:{},ok:'entra',txt:'Pasó las doce. Es un firmware nuevo de un equipo que ya está en la red: entra, y su perfil se actualiza con el rango 4.x. Igual empieza por un lote piloto.'}
+  };
+  let turno=0,listo=false;
+  function fila(i,estado,det){
+    const t=T[i];const et={pasa:'PASA',menor:'FALLA MENOR',critica:'FALLA CRÍTICA',espera:'…'}[estado];
+    return '<li class="'+(estado==='espera'?'':estado)+'"><span class="l62-blq">'+t[0]+'</span><span>'+t[1]+(det?'<span class="l62-det">'+det+'</span>':'')+'</span><span class="l62-est">'+et+'</span></li>';
+  }
+  function base(){listo=false;$('#l62-dec').hidden=true;$('#l62-lista').innerHTML=T.map((_,i)=>fila(i,'espera')).join('');$('#l62-out').innerHTML='<span>Corre la lista para ver cómo le va a este candidato.</span>';}
+  async function correr(){
+    const mio=++turno;const c=C[$('#l62-cand').value];const filas=[];
+    for(let i=0;i<T.length;i++){
+      if(mio!==turno)return;
+      const f=c.f[i];
+      const peso=f?f[0]:'pasa';
+      filas.push(fila(i,peso,f?f[1]:''));
+      $('#l62-lista').innerHTML=filas.join('')+T.slice(i+1).map((_,j)=>fila(i+1+j,'espera')).join('');
+      if(!quieto)await new Promise(r=>setTimeout(r,180));
+    }
+    const nc=Object.keys(c.f).filter(k=>c.f[k][0]==='critica').length;
+    const nm=Object.keys(c.f).length-nc;
+    $('#l62-out').innerHTML='<span class="big">'+(T.length-nc-nm)+' pasan · '+nm+(nm===1?' falla menor':' fallas menores')+' · '+nc+(nc===1?' crítica':' críticas')+'</span><span>¿Qué decides?</span>';
+    $('#l62-dec').hidden=false;listo=true;
+  }
+  document.querySelectorAll('#l62-dec button').forEach(b=>b.addEventListener('click',()=>{
+    if(!listo)return;const c=C[$('#l62-cand').value];const d=b.dataset.d;
+    const ok=d===c.ok;
+    const NOM={entra:'entra a la red',restr:'entra con restricciones',vuelve:'vuelve al fabricante'};
+    let porque='';
+    if(!ok){
+      if(c.ok==='vuelve')porque='Hay una falla crítica: dejarlo entrar convierte cada reinicio de fábrica en una visita.';
+      else if(c.ok==='restr'&&d==='entra')porque='Si entra sin anotar la restricción en el perfil, la plantilla seguirá pidiendo canal automático y fallará en silencio.';
+      else if(c.ok==='restr')porque='Ninguna falla es crítica: todas se pueden manejar desde el perfil. Devolverlo sería perder un buen equipo.';
+      else porque='Pasó todo: no hay restricción que anotar.';
+    }
+    $('#l62-out').innerHTML='<span class="'+(ok?'ok':'warn')+'">'+(ok?'Bien decidido: ':'Otra vez: ')+NOM[d]+'.</span><span>'+(ok?c.txt:porque)+'</span>';
+  }));
+  $('#l62-run').addEventListener('click',correr);
+  $('#l62-cand').addEventListener('change',()=>{turno++;base();});
+  base();
+})();
+</script>
+</body>
+</html>

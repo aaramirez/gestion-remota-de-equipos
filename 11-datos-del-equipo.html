@@ -1,0 +1,470 @@
+<!doctype html>
+<html lang="es">
+<head>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-KX76XF8R');</script>
+<!-- End Google Tag Manager -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Los datos del equipo · Gestión remota de equipos (ACS) · Gestión remota de equipos (ACS)</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Cómo un operador configura, actualiza y diagnostica a distancia los equipos que tiene en casa de sus clientes: TR-069 y TR-369 a fondo, el modelo de datos TR-181, el aprovisionamiento sin visita, los cambios masivos, el firmware, los diagnósticos, la seguridad y la escala de un ACS.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400;1,8..60,600&display=swap">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KX76XF8R"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+<div class="wrap" data-page="datos-del-equipo">
+<header class="topbar"><a class="brand" href="index.html">Gestión <b>remota</b> de equipos</a><span class="eyebrow">Curso visual e interactivo · Industrias y finanzas</span><a class="al-sitio" href="https://aaramirez.github.io/">← Todos los cursos</a></header>
+<div class="layout">
+<nav class="toc" id="toc" aria-label="Ruta de aprendizaje"></nav>
+<main>
+<header class="page-head"><span class="num">CAPÍTULO 11 DE 16</span><h1>El equipo como sensor: recolección de datos y cuidado proactivo</h1><p class="lede">Cien mil equipos que reportan cada pocos minutos forman un mapa vivo de la red y de la experiencia de cada cliente. Este capítulo muestra cómo se recolecta ese dato con TR-232, qué indicadores salen de él y cómo se convierten en una acción antes de que el cliente llame.</p></header>
+<section><div class="prose"><p>Un lunes a las siete de la mañana, el equipo de la casa 1203 de Fibra Ejemplo lleva cuatro reinicios desde la medianoche. La clienta no se enteró: dormía. Se va a enterar el jueves, cuando la videollamada de su hija se corte por quinta vez en la semana, y entonces llamará enojada a decir que «el internet se cae todo el tiempo».</p><p>En el capítulo 9, el agente medía cuando el cliente llamaba. Este capítulo da vuelta la situación: ¿y si el operador lo supiera el lunes? Cada equipo de la casa mide cosas todo el tiempo: la luz que le llega por la fibra, la señal de cada celular conectado, los bytes que pasan, las veces que arranca. Si esos números viajan solos, cada pocos minutos, a un lugar donde alguien los mira, cien mil equipos se vuelven cien mil <b>sensores</b> (<i>sensors</i>) repartidos por la ciudad.</p><p>El capítulo recorre ese camino completo: por qué el Inform no alcanza, cómo se recolectan los datos con la norma TR-232, qué indicadores salen de ellos, cómo un indicador dispara una acción y cuánto dato es demasiado.</p></div></section>
+<section><h2>Del dato a pedido al dato periódico: el Inform no alcanza</h2><div class="analogia"><b>Imagínalo así</b><p>Piensa en el medidor de luz de tu casa. El de antes lo leía una persona una vez al mes: sabías cuánto gastaste, pero no cuándo. El medidor inteligente manda una lectura cada quince minutos: ahora la empresa ve que el consumo sube todas las noches a las nueve, que hubo un corte el martes a las tres y que un barrio entero gasta raro desde ayer. El medidor es el mismo; lo que cambió es que el dato viaja solo y seguido.</p></div><div class="prose"><p>Hasta aquí, el ACS se enteraba de lo que pasa en un equipo por dos caminos:</p><ul><li><b>El Inform</b> (capítulo 3): el equipo llama cada tantas horas y trae unos pocos parámetros, los que el fabricante y el ACS marcaron para que viajen siempre. Es una foto, y de baja frecuencia.</li><li><b>La lectura a pedido</b> (capítulo 4): el ACS abre una sesión y hace un <code>GetParameterValues</code>. Sirve para un equipo en una llamada de soporte, pero no para toda la flota.</li></ul><p>El problema es de cuentas. Si Fibra Ejemplo quisiera leer cincuenta parámetros de sus cien mil equipos cada cinco minutos con sesiones TR-069, necesitaría 100.000 ÷ 300 segundos, unas 333 sesiones por segundo, todo el día, solo para mirar. Con la fórmula del capítulo 3, eso es varias veces la carga normal del ACS, que además tiene que seguir configurando, actualizando y atendiendo llamadas.</p><p>Hay un segundo problema, más sutil: la foto llega a la hora equivocada. Un equipo que pierde luz entre las dos y las cuatro de la mañana, cuando baja la temperatura y la humedad se mete en un empalme, puede llamar a las doce y a las seis con todo en orden.</p></div><figure class="fig fig-comparacion" id="11-diagrama-1"><div class="lienzo"><svg viewBox="0 0 900 470" style="min-width:720px" role="img" aria-label="Un día de la luz que recibe el equipo de la casa 1203. Con un Inform cada seis horas, el ACS ve cuatro valores normales. Con un reporte cada quince minutos se ve que la luz cae cerca del límite de menos 27 dBm entre la una y media y las cuatro y media de la madrugada">
+<text x="90" y="38" class="t t-b">Inform cada 6 horas</text><text x="860" y="38" text-anchor="end" class="t t-s t-m">4 valores al día</text>
+<rect x="90" y="133.2" width="770" height="48.8" class="c-fis" style="stroke:none;opacity:.55"/>
+<line x1="90" y1="149.5" x2="860" y2="149.5" class="ln s-fis ln-d"/>
+<text x="856" y="163.5" text-anchor="end" class="t t-xs k-fis">LÍMITE −27 dBm</text>
+<text x="82" y="56.0" text-anchor="end" class="t t-xs t-mono t-m">−18</text>
+<text x="82" y="99.3" text-anchor="end" class="t t-xs t-mono t-m">−22</text>
+<text x="82" y="142.7" text-anchor="end" class="t t-xs t-mono t-m">−26</text>
+<text x="82" y="186.0" text-anchor="end" class="t t-xs t-mono t-m">−30</text>
+<line x1="90" y1="182" x2="860" y2="182" class="ln"/>
+<text x="90.0" y="198" text-anchor="middle" class="t t-xs t-mono t-m">00:00</text>
+<text x="186.2" y="198" text-anchor="middle" class="t t-xs t-mono t-m">03:00</text>
+<text x="282.5" y="198" text-anchor="middle" class="t t-xs t-mono t-m">06:00</text>
+<text x="378.8" y="198" text-anchor="middle" class="t t-xs t-mono t-m">09:00</text>
+<text x="475.0" y="198" text-anchor="middle" class="t t-xs t-mono t-m">12:00</text>
+<text x="571.2" y="198" text-anchor="middle" class="t t-xs t-mono t-m">15:00</text>
+<text x="667.5" y="198" text-anchor="middle" class="t t-xs t-mono t-m">18:00</text>
+<text x="763.8" y="198" text-anchor="middle" class="t t-xs t-mono t-m">21:00</text>
+<text x="860.0" y="198" text-anchor="middle" class="t t-xs t-mono t-m">24:00</text>
+<polyline points="90.0,99.7 93.2,99.5 96.4,99.4 99.6,99.2 102.8,99.1 106.0,99.0 109.2,98.9 112.5,98.8 115.7,98.7 118.9,98.7 122.1,98.7 125.3,98.8 128.5,99.0 131.7,99.5 134.9,100.2 138.1,101.2 141.3,102.6 144.5,104.5 147.8,106.9 151.0,110.0 154.2,113.7 157.4,118.0 160.6,122.8 163.8,128.0 167.0,133.3 170.2,138.5 173.4,143.4 176.6,147.5 179.8,150.7 183.0,152.7 186.2,153.3 189.5,152.4 192.7,150.3 195.9,146.9 199.1,142.6 202.3,137.5 205.5,132.1 208.7,126.6 211.9,121.2 215.1,116.2 218.3,111.7 221.5,107.8 224.8,104.5 228.0,101.9 231.2,99.8 234.4,98.2 237.6,97.0 240.8,96.2 244.0,95.6 247.2,95.1 250.4,94.8 253.6,94.6 256.8,94.5 260.0,94.4 263.2,94.4 266.5,94.3 269.7,94.3 272.9,94.3 276.1,94.3 279.3,94.3 282.5,94.3 285.7,94.3 288.9,94.3 292.1,94.3 295.3,94.3 298.5,94.3 301.8,94.3 305.0,94.3 308.2,94.4 311.4,94.4 314.6,94.4 317.8,94.5 321.0,94.5 324.2,94.6 327.4,94.6 330.6,94.7 333.8,94.7 337.0,94.8 340.2,94.8 343.5,94.9 346.7,95.0 349.9,95.0 353.1,95.1 356.3,95.2 359.5,95.3 362.7,95.4 365.9,95.5 369.1,95.5 372.3,95.6 375.5,95.7 378.8,95.8 382.0,95.9 385.2,96.0 388.4,96.1 391.6,96.3 394.8,96.4 398.0,96.5 401.2,96.6 404.4,96.7 407.6,96.8 410.8,97.0 414.0,97.1 417.2,97.2 420.5,97.3 423.7,97.5 426.9,97.6 430.1,97.7 433.3,97.9 436.5,98.0 439.7,98.1 442.9,98.3 446.1,98.4 449.3,98.5 452.5,98.7 455.8,98.8 459.0,99.0 462.2,99.1 465.4,99.2 468.6,99.4 471.8,99.5 475.0,99.7 478.2,99.8 481.4,100.0 484.6,100.1 487.8,100.2 491.0,100.4 494.2,100.5 497.5,100.7 500.7,100.8 503.9,100.9 507.1,101.1 510.3,101.2 513.5,101.3 516.7,101.5 519.9,101.6 523.1,101.7 526.3,101.9 529.5,102.0 532.8,102.1 536.0,102.3 539.2,102.4 542.4,102.5 545.6,102.6 548.8,102.7 552.0,102.9 555.2,103.0 558.4,103.1 561.6,103.2 564.8,103.3 568.0,103.4 571.2,103.5 574.5,103.6 577.7,103.7 580.9,103.8 584.1,103.9 587.3,104.0 590.5,104.0 593.7,104.1 596.9,104.2 600.1,104.3 603.3,104.4 606.5,104.4 609.8,104.5 613.0,104.6 616.2,104.6 619.4,104.7 622.6,104.7 625.8,104.8 629.0,104.8 632.2,104.9 635.4,104.9 638.6,104.9 641.8,105.0 645.0,105.0 648.2,105.0 651.5,105.0 654.7,105.1 657.9,105.1 661.1,105.1 664.3,105.1 667.5,105.1 670.7,105.1 673.9,105.1 677.1,105.1 680.3,105.1 683.5,105.0 686.8,105.0 690.0,105.0 693.2,105.0 696.4,104.9 699.6,104.9 702.8,104.9 706.0,104.8 709.2,104.8 712.4,104.7 715.6,104.7 718.8,104.6 722.0,104.6 725.2,104.5 728.5,104.4 731.7,104.4 734.9,104.3 738.1,104.2 741.3,104.1 744.5,104.0 747.7,104.0 750.9,103.9 754.1,103.8 757.3,103.7 760.5,103.6 763.8,103.5 767.0,103.4 770.2,103.3 773.4,103.2 776.6,103.1 779.8,103.0 783.0,102.9 786.2,102.7 789.4,102.6 792.6,102.5 795.8,102.4 799.0,102.3 802.2,102.1 805.5,102.0 808.7,101.9 811.9,101.7 815.1,101.6 818.3,101.5 821.5,101.3 824.7,101.2 827.9,101.1 831.1,100.9 834.3,100.8 837.5,100.7 840.8,100.5 844.0,100.4 847.2,100.2 850.4,100.1 853.6,100.0 856.8,99.8 860.0,99.7" class="ln apagado" style="stroke-width:1.5"/>
+<polyline points="90.0,99.7 282.5,94.3 475.0,99.7 667.5,105.1" class="ln s-apl" style="stroke-width:2"/>
+<circle cx="90.0" cy="99.7" r="6" class="c-apl" style="stroke-width:2"/>
+<circle cx="282.5" cy="94.3" r="6" class="c-apl" style="stroke-width:2"/>
+<circle cx="475.0" cy="99.7" r="6" class="c-apl" style="stroke-width:2"/>
+<circle cx="667.5" cy="105.1" r="6" class="c-apl" style="stroke-width:2"/>
+<text x="186.2" y="75.8" text-anchor="middle" class="t t-s k-apl">«todo en orden»</text>
+<text x="90" y="268" class="t t-b">Reporte cada 15 minutos (TR-232)</text><text x="860" y="268" text-anchor="end" class="t t-s t-m">96 valores al día</text>
+<rect x="90" y="363.2" width="770" height="48.8" class="c-fis" style="stroke:none;opacity:.55"/>
+<line x1="90" y1="379.5" x2="860" y2="379.5" class="ln s-fis ln-d"/>
+<text x="856" y="393.5" text-anchor="end" class="t t-xs k-fis">LÍMITE −27 dBm</text>
+<text x="82" y="286.0" text-anchor="end" class="t t-xs t-mono t-m">−18</text>
+<text x="82" y="329.3" text-anchor="end" class="t t-xs t-mono t-m">−22</text>
+<text x="82" y="372.7" text-anchor="end" class="t t-xs t-mono t-m">−26</text>
+<text x="82" y="416.0" text-anchor="end" class="t t-xs t-mono t-m">−30</text>
+<line x1="90" y1="412" x2="860" y2="412" class="ln"/>
+<text x="90.0" y="428" text-anchor="middle" class="t t-xs t-mono t-m">00:00</text>
+<text x="186.2" y="428" text-anchor="middle" class="t t-xs t-mono t-m">03:00</text>
+<text x="282.5" y="428" text-anchor="middle" class="t t-xs t-mono t-m">06:00</text>
+<text x="378.8" y="428" text-anchor="middle" class="t t-xs t-mono t-m">09:00</text>
+<text x="475.0" y="428" text-anchor="middle" class="t t-xs t-mono t-m">12:00</text>
+<text x="571.2" y="428" text-anchor="middle" class="t t-xs t-mono t-m">15:00</text>
+<text x="667.5" y="428" text-anchor="middle" class="t t-xs t-mono t-m">18:00</text>
+<text x="763.8" y="428" text-anchor="middle" class="t t-xs t-mono t-m">21:00</text>
+<text x="860.0" y="428" text-anchor="middle" class="t t-xs t-mono t-m">24:00</text>
+<polyline points="90.0,329.7 93.2,329.5 96.4,329.4 99.6,329.2 102.8,329.1 106.0,329.0 109.2,328.9 112.5,328.8 115.7,328.7 118.9,328.7 122.1,328.7 125.3,328.8 128.5,329.0 131.7,329.5 134.9,330.2 138.1,331.2 141.3,332.6 144.5,334.5 147.8,336.9 151.0,340.0 154.2,343.7 157.4,348.0 160.6,352.8 163.8,358.0 167.0,363.3 170.2,368.5 173.4,373.4 176.6,377.5 179.8,380.7 183.0,382.7 186.2,383.3 189.5,382.4 192.7,380.3 195.9,376.9 199.1,372.6 202.3,367.5 205.5,362.1 208.7,356.6 211.9,351.2 215.1,346.2 218.3,341.7 221.5,337.8 224.8,334.5 228.0,331.9 231.2,329.8 234.4,328.2 237.6,327.0 240.8,326.2 244.0,325.6 247.2,325.1 250.4,324.8 253.6,324.6 256.8,324.5 260.0,324.4 263.2,324.4 266.5,324.3 269.7,324.3 272.9,324.3 276.1,324.3 279.3,324.3 282.5,324.3 285.7,324.3 288.9,324.3 292.1,324.3 295.3,324.3 298.5,324.3 301.8,324.3 305.0,324.3 308.2,324.4 311.4,324.4 314.6,324.4 317.8,324.5 321.0,324.5 324.2,324.6 327.4,324.6 330.6,324.7 333.8,324.7 337.0,324.8 340.2,324.8 343.5,324.9 346.7,325.0 349.9,325.0 353.1,325.1 356.3,325.2 359.5,325.3 362.7,325.4 365.9,325.5 369.1,325.5 372.3,325.6 375.5,325.7 378.8,325.8 382.0,325.9 385.2,326.0 388.4,326.1 391.6,326.3 394.8,326.4 398.0,326.5 401.2,326.6 404.4,326.7 407.6,326.8 410.8,327.0 414.0,327.1 417.2,327.2 420.5,327.3 423.7,327.5 426.9,327.6 430.1,327.7 433.3,327.9 436.5,328.0 439.7,328.1 442.9,328.3 446.1,328.4 449.3,328.5 452.5,328.7 455.8,328.8 459.0,329.0 462.2,329.1 465.4,329.2 468.6,329.4 471.8,329.5 475.0,329.7 478.2,329.8 481.4,330.0 484.6,330.1 487.8,330.2 491.0,330.4 494.2,330.5 497.5,330.7 500.7,330.8 503.9,330.9 507.1,331.1 510.3,331.2 513.5,331.3 516.7,331.5 519.9,331.6 523.1,331.7 526.3,331.9 529.5,332.0 532.8,332.1 536.0,332.3 539.2,332.4 542.4,332.5 545.6,332.6 548.8,332.7 552.0,332.9 555.2,333.0 558.4,333.1 561.6,333.2 564.8,333.3 568.0,333.4 571.2,333.5 574.5,333.6 577.7,333.7 580.9,333.8 584.1,333.9 587.3,334.0 590.5,334.0 593.7,334.1 596.9,334.2 600.1,334.3 603.3,334.4 606.5,334.4 609.8,334.5 613.0,334.6 616.2,334.6 619.4,334.7 622.6,334.7 625.8,334.8 629.0,334.8 632.2,334.9 635.4,334.9 638.6,334.9 641.8,335.0 645.0,335.0 648.2,335.0 651.5,335.0 654.7,335.1 657.9,335.1 661.1,335.1 664.3,335.1 667.5,335.1 670.7,335.1 673.9,335.1 677.1,335.1 680.3,335.1 683.5,335.0 686.8,335.0 690.0,335.0 693.2,335.0 696.4,334.9 699.6,334.9 702.8,334.9 706.0,334.8 709.2,334.8 712.4,334.7 715.6,334.7 718.8,334.6 722.0,334.6 725.2,334.5 728.5,334.4 731.7,334.4 734.9,334.3 738.1,334.2 741.3,334.1 744.5,334.0 747.7,334.0 750.9,333.9 754.1,333.8 757.3,333.7 760.5,333.6 763.8,333.5 767.0,333.4 770.2,333.3 773.4,333.2 776.6,333.1 779.8,333.0 783.0,332.9 786.2,332.7 789.4,332.6 792.6,332.5 795.8,332.4 799.0,332.3 802.2,332.1 805.5,332.0 808.7,331.9 811.9,331.7 815.1,331.6 818.3,331.5 821.5,331.3 824.7,331.2 827.9,331.1 831.1,330.9 834.3,330.8 837.5,330.7 840.8,330.5 844.0,330.4 847.2,330.2 850.4,330.1 853.6,330.0 856.8,329.8 860.0,329.7" class="ln s-enl" style="stroke-width:1.5"/>
+<circle cx="90.0" cy="329.7" r="2.6" class="k-enl"/>
+<circle cx="98.0" cy="329.3" r="2.6" class="k-enl"/>
+<circle cx="106.0" cy="329.0" r="2.6" class="k-enl"/>
+<circle cx="114.1" cy="328.7" r="2.6" class="k-enl"/>
+<circle cx="122.1" cy="328.7" r="2.6" class="k-enl"/>
+<circle cx="130.1" cy="329.2" r="2.6" class="k-enl"/>
+<circle cx="138.1" cy="331.2" r="2.6" class="k-enl"/>
+<circle cx="146.1" cy="335.6" r="2.6" class="k-enl"/>
+<circle cx="154.2" cy="343.7" r="2.6" class="k-enl"/>
+<circle cx="162.2" cy="355.3" r="2.6" class="k-enl"/>
+<circle cx="170.2" cy="368.5" r="2.6" class="k-enl"/>
+<circle cx="178.2" cy="379.2" r="2.6" class="k-enl"/>
+<circle cx="186.2" cy="383.3" r="2.6" class="k-enl"/>
+<circle cx="194.3" cy="378.7" r="2.6" class="k-enl"/>
+<circle cx="202.3" cy="367.5" r="2.6" class="k-enl"/>
+<circle cx="210.3" cy="353.8" r="2.6" class="k-enl"/>
+<circle cx="218.3" cy="341.7" r="2.6" class="k-enl"/>
+<circle cx="226.4" cy="333.2" r="2.6" class="k-enl"/>
+<circle cx="234.4" cy="328.2" r="2.6" class="k-enl"/>
+<circle cx="242.4" cy="325.8" r="2.6" class="k-enl"/>
+<circle cx="250.4" cy="324.8" r="2.6" class="k-enl"/>
+<circle cx="258.4" cy="324.5" r="2.6" class="k-enl"/>
+<circle cx="266.5" cy="324.3" r="2.6" class="k-enl"/>
+<circle cx="274.5" cy="324.3" r="2.6" class="k-enl"/>
+<circle cx="282.5" cy="324.3" r="2.6" class="k-enl"/>
+<circle cx="290.5" cy="324.3" r="2.6" class="k-enl"/>
+<circle cx="298.5" cy="324.3" r="2.6" class="k-enl"/>
+<circle cx="306.6" cy="324.4" r="2.6" class="k-enl"/>
+<circle cx="314.6" cy="324.4" r="2.6" class="k-enl"/>
+<circle cx="322.6" cy="324.5" r="2.6" class="k-enl"/>
+<circle cx="330.6" cy="324.7" r="2.6" class="k-enl"/>
+<circle cx="338.6" cy="324.8" r="2.6" class="k-enl"/>
+<circle cx="346.7" cy="325.0" r="2.6" class="k-enl"/>
+<circle cx="354.7" cy="325.2" r="2.6" class="k-enl"/>
+<circle cx="362.7" cy="325.4" r="2.6" class="k-enl"/>
+<circle cx="370.7" cy="325.6" r="2.6" class="k-enl"/>
+<circle cx="378.8" cy="325.8" r="2.6" class="k-enl"/>
+<circle cx="386.8" cy="326.1" r="2.6" class="k-enl"/>
+<circle cx="394.8" cy="326.4" r="2.6" class="k-enl"/>
+<circle cx="402.8" cy="326.7" r="2.6" class="k-enl"/>
+<circle cx="410.8" cy="327.0" r="2.6" class="k-enl"/>
+<circle cx="418.9" cy="327.3" r="2.6" class="k-enl"/>
+<circle cx="426.9" cy="327.6" r="2.6" class="k-enl"/>
+<circle cx="434.9" cy="327.9" r="2.6" class="k-enl"/>
+<circle cx="442.9" cy="328.3" r="2.6" class="k-enl"/>
+<circle cx="450.9" cy="328.6" r="2.6" class="k-enl"/>
+<circle cx="459.0" cy="329.0" r="2.6" class="k-enl"/>
+<circle cx="467.0" cy="329.3" r="2.6" class="k-enl"/>
+<circle cx="475.0" cy="329.7" r="2.6" class="k-enl"/>
+<circle cx="483.0" cy="330.0" r="2.6" class="k-enl"/>
+<circle cx="491.0" cy="330.4" r="2.6" class="k-enl"/>
+<circle cx="499.1" cy="330.7" r="2.6" class="k-enl"/>
+<circle cx="507.1" cy="331.1" r="2.6" class="k-enl"/>
+<circle cx="515.1" cy="331.4" r="2.6" class="k-enl"/>
+<circle cx="523.1" cy="331.7" r="2.6" class="k-enl"/>
+<circle cx="531.1" cy="332.1" r="2.6" class="k-enl"/>
+<circle cx="539.2" cy="332.4" r="2.6" class="k-enl"/>
+<circle cx="547.2" cy="332.7" r="2.6" class="k-enl"/>
+<circle cx="555.2" cy="333.0" r="2.6" class="k-enl"/>
+<circle cx="563.2" cy="333.2" r="2.6" class="k-enl"/>
+<circle cx="571.2" cy="333.5" r="2.6" class="k-enl"/>
+<circle cx="579.3" cy="333.7" r="2.6" class="k-enl"/>
+<circle cx="587.3" cy="334.0" r="2.6" class="k-enl"/>
+<circle cx="595.3" cy="334.2" r="2.6" class="k-enl"/>
+<circle cx="603.3" cy="334.4" r="2.6" class="k-enl"/>
+<circle cx="611.4" cy="334.5" r="2.6" class="k-enl"/>
+<circle cx="619.4" cy="334.7" r="2.6" class="k-enl"/>
+<circle cx="627.4" cy="334.8" r="2.6" class="k-enl"/>
+<circle cx="635.4" cy="334.9" r="2.6" class="k-enl"/>
+<circle cx="643.4" cy="335.0" r="2.6" class="k-enl"/>
+<circle cx="651.5" cy="335.0" r="2.6" class="k-enl"/>
+<circle cx="659.5" cy="335.1" r="2.6" class="k-enl"/>
+<circle cx="667.5" cy="335.1" r="2.6" class="k-enl"/>
+<circle cx="675.5" cy="335.1" r="2.6" class="k-enl"/>
+<circle cx="683.5" cy="335.0" r="2.6" class="k-enl"/>
+<circle cx="691.6" cy="335.0" r="2.6" class="k-enl"/>
+<circle cx="699.6" cy="334.9" r="2.6" class="k-enl"/>
+<circle cx="707.6" cy="334.8" r="2.6" class="k-enl"/>
+<circle cx="715.6" cy="334.7" r="2.6" class="k-enl"/>
+<circle cx="723.6" cy="334.5" r="2.6" class="k-enl"/>
+<circle cx="731.7" cy="334.4" r="2.6" class="k-enl"/>
+<circle cx="739.7" cy="334.2" r="2.6" class="k-enl"/>
+<circle cx="747.7" cy="334.0" r="2.6" class="k-enl"/>
+<circle cx="755.7" cy="333.7" r="2.6" class="k-enl"/>
+<circle cx="763.8" cy="333.5" r="2.6" class="k-enl"/>
+<circle cx="771.8" cy="333.2" r="2.6" class="k-enl"/>
+<circle cx="779.8" cy="333.0" r="2.6" class="k-enl"/>
+<circle cx="787.8" cy="332.7" r="2.6" class="k-enl"/>
+<circle cx="795.8" cy="332.4" r="2.6" class="k-enl"/>
+<circle cx="803.9" cy="332.1" r="2.6" class="k-enl"/>
+<circle cx="811.9" cy="331.7" r="2.6" class="k-enl"/>
+<circle cx="819.9" cy="331.4" r="2.6" class="k-enl"/>
+<circle cx="827.9" cy="331.1" r="2.6" class="k-enl"/>
+<circle cx="835.9" cy="330.7" r="2.6" class="k-enl"/>
+<circle cx="844.0" cy="330.4" r="2.6" class="k-enl"/>
+<circle cx="852.0" cy="330.0" r="2.6" class="k-enl"/>
+<text x="208.2" y="400.1" class="t t-s t-b k-fis">−27,4 dBm a las 03:00</text>
+<text x="20" y="250" class="t t-xs t-m" transform="rotate(-90 20 250)">LUZ RECIBIDA (dBm)</text>
+<text x="450.0" y="462" text-anchor="middle" class="t t-s t-m">Valores de ejemplo. La foto no miente: solo llega a la hora equivocada.</text>
+</svg></div><figcaption><b>La foto y la película.</b> Un día de la casa 1203, de medianoche a medianoche. La curva es la luz que le llega por la fibra, en dBm; la franja naranja de abajo es la zona de riesgo, cerca del límite de −27 dBm. Arriba, los cuatro puntos rosados son lo que ve el ACS con un Inform cada seis horas: todo en orden. Abajo, los puntos verdes son un reporte cada quince minutos: la caída de la madrugada aparece entera. El equipo es el mismo; cambia cada cuánto viaja el dato.</figcaption></figure><div class="prose"><p>Por eso el <b>monitoreo</b> (<i>monitoring</i>) de la flota necesita un tercer camino: que el equipo junte sus propios números y los mande solo, a intervalos fijos, a un servidor preparado para recibirlos. Ese camino tiene norma.</p></div></section>
+<section><h2>Recolección masiva de datos (TR-232): qué se envía, cada cuánto y adónde</h2><div class="prose"><p>En 2012, el Broadband Forum publicó <b>TR-232</b> (<i>Bulk Data Collection</i>, recolección masiva de datos). Su punto de partida es una frase que conviene recordar: TR-069 es un protocolo para <b>gestionar</b> equipos, no para <b>recolectar</b> datos, y usarlo para lo segundo ensucia lo primero. La solución separa los papeles:</p><ul><li>El <b>ACS</b> configura, una sola vez, qué datos quiere y adónde van.</li><li>El <b>equipo</b> junta esos datos y los manda solo, cada cierto tiempo.</li><li>Un <b>colector</b> (<i>collector</i>), un servidor distinto del ACS, los recibe y los guarda.</li></ul><p>La primera versión de TR-232 usaba <b>IPDR</b> (<i>Internet Protocol Detail Record</i>, registro detallado de IP), un formato de la industria para registros de uso. Con los años, el modelo de datos TR-181 sumó el envío por <b>HTTP</b>, el mismo protocolo de la web, con los datos en formato <b>JSON</b> (<i>JavaScript Object Notation</i>, notación de objetos de JavaScript) o <b>CSV</b> (<i>Comma-Separated Values</i>, valores separados por comas), y más tarde por <b>MQTT</b> (<i>Message Queuing Telemetry Transport</i>), un protocolo liviano de mensajes muy usado en sensores. Hoy, HTTP con JSON es lo más común.</p><p>Todo se configura bajo <code>Device.BulkData</code>, en el árbol del capítulo 5. La pieza central es el <b>perfil</b> (<i>profile</i>), <code>Device.BulkData.Profile.{i}</code>. Funciona como una suscripción a una revista: dice qué secciones quieres, cada cuánto te llega, a qué dirección y en qué idioma.</p><div class="tbl"><table><thead><tr><th>Pregunta</th><th>Parámetro del perfil</th><th>Ejemplo en Fibra Ejemplo</th></tr></thead><tbody><tr><td>¿Qué datos?</td><td><code>Parameter.{i}.Reference</code>, uno por dato</td><td><code>Device.Optical.Interface.1.OpticalSignalLevel</code></td></tr><tr><td>¿Cada cuánto?</td><td><code>ReportingInterval</code>, en segundos</td><td><code>900</code> (quince minutos)</td></tr><tr><td>¿A qué hora de referencia?</td><td><code>TimeReference</code></td><td><code>2026-01-01T00:03:17Z</code>: cada equipo, con su propio desfase</td></tr><tr><td>¿Adónde?</td><td><code>Protocol</code> y <code>HTTP.URL</code></td><td><code>HTTP</code> a <code>https://datos.ejemplo.com/bulk</code></td></tr><tr><td>¿En qué formato?</td><td><code>EncodingType</code> y <code>JSONEncoding.ReportFormat</code></td><td><code>JSON</code>, con pares nombre y valor</td></tr><tr><td>¿Y si el colector no contesta?</td><td><code>HTTP.RetryEnable</code> y <code>NumberOfRetainedFailedReports</code></td><td>reintentar y guardar hasta 4 reportes</td></tr></tbody></table></div><p><code>Parameter.{i}.Reference</code> acepta <b>comodines</b> (<i>wildcards</i>), un asterisco en lugar del número de instancia. <code>Device.WiFi.AccessPoint.*.AssociatedDevice.*.SignalStrength</code> quiere decir «la señal de todos los dispositivos conectados a todos los puntos de acceso», sin saber de antemano cuántos hay. Y el desfase de <code>TimeReference</code> no es un detalle: si los cien mil equipos mandaran su reporte en el mismo segundo, el colector recibiría una avalancha cada quince minutos. El capítulo 15 vuelve sobre ese problema.</p><p>Así se ve el camino completo:</p></div><figure class="fig fig-flujo" id="11-diagrama-2"><div class="lienzo"><svg viewBox="0 0 1000 660" style="min-width:780px" role="img" aria-label="Flujo de la recolección masiva de datos: en una sesión TR-069 el ACS crea un perfil de Device.BulkData en el equipo, le escribe qué datos, cada cuánto y adónde, y lo activa. Después, cada quince minutos, el equipo manda un reporte en JSON por HTTP al colector, que contesta 200 y guarda los valores en la base de series de tiempo. Si el colector no contesta, el equipo guarda el reporte y lo reintenta junto con el siguiente">
+  <defs>
+    <marker id="f11b-fl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--muted)"/></marker>
+    <marker id="f11b-fl-apl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--c-apl)"/></marker>
+    <marker id="f11b-fl-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--c-red)"/></marker>
+  </defs>
+
+  <rect x="30" y="14" width="150" height="52" rx="10" class="c-apl"/><text x="105" y="37" text-anchor="middle" class="t t-b">ACS</text><text x="105" y="54" text-anchor="middle" class="t t-s">acs.ejemplo.com</text>
+  <rect x="260" y="14" width="150" height="52" rx="10" class="caja"/><text x="335" y="37" text-anchor="middle" class="t t-b">Equipo</text><text x="335" y="54" text-anchor="middle" class="t t-s t-m">casa 1203</text>
+  <rect x="490" y="14" width="150" height="52" rx="10" class="d-oper"/><text x="565" y="37" text-anchor="middle" class="t t-b">Colector</text><text x="565" y="54" text-anchor="middle" class="t t-s t-m">datos.ejemplo.com</text>
+  <rect x="720" y="14" width="150" height="52" rx="10" class="d-sis"/><text x="795" y="37" text-anchor="middle" class="t t-b">Base de datos</text><text x="795" y="54" text-anchor="middle" class="t t-s t-m">series de tiempo</text>
+  <line x1="105" y1="66" x2="105" y2="620" class="vida"/>
+  <line x1="335" y1="66" x2="335" y2="620" class="vida"/>
+  <line x1="565" y1="66" x2="565" y2="620" class="vida"/>
+  <line x1="795" y1="66" x2="795" y2="620" class="vida"/>
+
+  
+  <line x1="335" y1="104" x2="108" y2="104" class="ln s-apl" style="stroke-width:2" marker-end="url(#f11b-fl-apl)"/>
+  <text x="120" y="96" class="t t-s">① <tspan class="t-mono t-b">Inform</tspan> 2 PERIODIC</text>
+  <line x1="105" y1="146" x2="332" y2="146" class="ln s-apl" style="stroke-width:2" marker-end="url(#f11b-fl-apl)"/>
+  <text x="115" y="138" class="t t-s">② <tspan class="t-mono t-b">AddObject</tspan></text>
+  <text x="115" y="164" class="t t-s t-mono t-m">Device.BulkData.Profile.</text>
+  <line x1="105" y1="196" x2="332" y2="196" class="ln s-apl" style="stroke-width:2" marker-end="url(#f11b-fl-apl)"/>
+  <text x="115" y="188" class="t t-s">③ <tspan class="t-mono t-b">SetParameterValues</tspan></text>
+  <text x="115" y="214" class="t t-s t-mono t-m">…ReportingInterval = 900</text>
+  <text x="115" y="230" class="t t-s t-mono t-m">…HTTP.URL = https://datos…/bulk</text>
+  <text x="115" y="246" class="t t-s t-mono t-m">…Enable = true</text>
+  <line x1="335" y1="272" x2="108" y2="272" class="ln s-apl" style="stroke-width:2" marker-end="url(#f11b-fl-apl)"/>
+  <text x="120" y="264" class="t t-s">④ estado 0 y fin de la sesión</text>
+
+  
+  <line x1="335" y1="320" x2="562" y2="320" class="ln s-red" style="stroke-width:2.4" marker-end="url(#f11b-fl-red)"/>
+  <text x="345" y="312" class="t t-s">⑤ <tspan class="t-mono t-b">POST /bulk</tspan> con el JSON</text>
+  <text x="345" y="338" class="t t-s t-m">cada 15 min, sin el ACS</text>
+  <line x1="565" y1="362" x2="338" y2="362" class="ln s-red" style="stroke-width:2" marker-end="url(#f11b-fl-red)"/>
+  <text x="380" y="378" class="t t-s">⑥ <tspan class="t-mono">200 OK</tspan></text>
+  <line x1="565" y1="404" x2="792" y2="404" class="ln" style="stroke-width:2" marker-end="url(#f11b-fl)"/>
+  <text x="575" y="396" class="t t-s">⑦ guardar cada valor</text>
+  <text x="575" y="422" class="t t-s t-m">con su fecha y hora</text>
+
+  
+  <line x1="335" y1="466" x2="520" y2="466" class="ln s-red ln-d" style="stroke-width:2"/>
+  <text x="530" y="471" class="t t-b k-fis">✕</text>
+  <text x="345" y="458" class="t t-s">⑧ <tspan class="t-mono t-b">POST</tspan> sin respuesta</text>
+  <rect x="190" y="490" width="140" height="40" rx="8" class="c-fis"/>
+  <text x="260" y="508" text-anchor="middle" class="t t-s">⑨ guarda el reporte</text>
+  <text x="260" y="523" text-anchor="middle" class="t t-xs t-m">y espera para reintentar</text>
+  <line x1="335" y1="566" x2="562" y2="566" class="ln s-red" style="stroke-width:3.2" marker-end="url(#f11b-fl-red)"/>
+  <text x="345" y="558" class="t t-s">⑩ <tspan class="t-mono t-b">POST</tspan> con 2 reportes</text>
+  <line x1="565" y1="600" x2="338" y2="600" class="ln s-red" style="stroke-width:2" marker-end="url(#f11b-fl-red)"/>
+  <text x="380" y="616" class="t t-s"><tspan class="t-mono">200 OK</tspan>: no se perdió nada</text>
+
+  <g class="t t-xs t-b">
+    <path d="M885 86v196" class="ln s-apl" style="stroke-width:3"/><text x="893" y="170" class="k-apl">CONFIGURACIÓN</text><text x="893" y="184" class="t-m">una vez,</text><text x="893" y="198" class="t-m">por TR-069</text>
+    <path d="M885 300v130" class="ln s-red" style="stroke-width:3"/><text x="893" y="356" class="k-red">REPORTES</text><text x="893" y="370" class="t-m">cada 15 min,</text><text x="893" y="384" class="t-m">por HTTP</text>
+    <path d="M885 446v170" class="ln s-fis" style="stroke-width:3"/><text x="893" y="520" class="k-fis">FALLA Y</text><text x="893" y="534" class="k-fis">REINTENTO</text>
+  </g>
+  <text x="14" y="350" class="t t-xs t-m" transform="rotate(-90 14 350)">EL TIEMPO CORRE HACIA ABAJO ↓</text>
+  <text x="480" y="650" text-anchor="middle" class="t t-s t-m">De ⑤ en adelante, el ACS no participa: la recolección no le suma sesiones.</text>
+</svg></div><figcaption><b>El ACS configura una vez y el equipo reporta solo.</b> Cuatro participantes: el ACS, el equipo de la casa, el colector de datos y la base de series de tiempo; el tiempo corre hacia abajo. En la configuración (① a ④), en una sesión TR-069 normal, el ACS crea el perfil con <code>AddObject</code>, le escribe los parámetros con <code>SetParameterValues</code> y lo activa. Desde ahí el ACS sale de escena. En los reportes (⑤ a ⑦), cada quince minutos, el equipo manda un <code>POST</code> con el JSON al colector, que contesta 200 y guarda los valores. En la falla (⑧ a ⑩), el colector no contesta, el equipo guarda el reporte y lo reintenta junto con el siguiente. Las flechas rosadas son TR-069; las azules, los reportes por HTTP.</figcaption></figure><div class="prose"><p>Cada reporte es un texto corto. Con el formato de pares nombre y valor, el que manda la casa 1203 se parece a esto (abreviado):</p><div class="code-copia"><pre><code>{
+  "Report": [{
+    "CollectionTime": 1795496400,
+    "Device.DeviceInfo.SerialNumber": "A1B2C3001203",
+    "Device.DeviceInfo.UpTime": 412,
+    "Device.Optical.Interface.1.OpticalSignalLevel": -24800,
+    "Device.IP.Interface.1.Stats.BytesReceived": 918273645512,
+    "Device.WiFi.AccessPoint.1.AssociatedDevice.1.SignalStrength": -58,
+    "Device.WiFi.AccessPoint.1.AssociatedDevice.2.SignalStrength": -79
+  }]
+}</code></pre><button type="button" class="copiar copiar-todo">Copiar</button></div><p>Fíjate en dos tipos de número. <code>OpticalSignalLevel</code> y <code>SignalStrength</code> son <b>medidas instantáneas</b> (<i>gauges</i>): valen lo que valen en ese momento. <code>BytesReceived</code> es un <b>contador</b> (<i>counter</i>): suma desde que el equipo arrancó y solo sube. Para saber cuánto tráfico hubo en los últimos quince minutos, el colector resta el valor anterior al actual. Y si el contador bajó, el equipo se reinició: <code>UpTime</code> de 412 segundos lo confirma. Ese detalle, que parece de contabilidad, es justamente cómo se cuentan los reinicios de la casa 1203.</p><p>En TR-369 (USP), que verás en el capítulo 16, el mismo objeto <code>Device.BulkData</code> sigue existiendo, y el reporte también puede viajar como un mensaje del propio protocolo.</p></div><div class="practica"><div class="practica-title"><span class="tag">En el navegador</span><h3>El perfil de recolección en la norma</h3></div><p>Vas a buscar en la definición pública de TR-181 el objeto que configura la recolección masiva. No hace falta registrarse.</p><ol class="steps"><li><span>Abre el <a href="https://cwmp-data-models.broadband-forum.org/tr-181-2-18-0-cwmp.html" target="_blank" rel="noopener">modelo de datos TR-181 en línea</a> del Broadband Forum. Es una página larga: usa la búsqueda del navegador (Ctrl+F o Cmd+F) con <code>Device.BulkData.Profile.{i}</code>.</span></li><li><span>Lee la fila de <code>ReportingInterval</code> y la de <code>TimeReference</code>. Busca después <code>Device.BulkData.MinReportingInterval</code>.</span></li><li><span>Busca <code>Device.BulkData.Protocols</code> y <code>Device.BulkData.EncodingTypes</code>, y anota qué valores admiten.</span></li><li><span>Busca <code>Device.BulkData.Profile.{i}.Parameter.{i}</code> y lee qué dice de <code>Reference</code> y de los comodines.</span></li></ol><p><b>Qué observar:</b> el perfil no lleva datos, lleva instrucciones: qué parámetros, cada cuánto, a qué dirección y en qué formato. <code>MinReportingInterval</code> es el piso que pone el fabricante: el equipo no acepta reportar más seguido que eso, porque cada reporte le cuesta procesador. Los protocolos y formatos de la lista son los que la norma permite; cada equipo dice cuáles soporta de verdad en esos mismos parámetros, y no todos soportan todos.</p></div><div class="prose"><p>El cálculo que hace el colector con los contadores lo puedes hacer tú con tu computadora.</p></div><div class="practica"><div class="practica-title"><span class="tag">En la terminal</span><h3>Un contador que solo sube</h3></div><p>Vas a leer dos veces, con un minuto de diferencia, cuántos bytes recibió tu computadora, y calcular la velocidad promedio como lo hace un colector. Solo se lee: no cambia nada.</p><div class="cmds"><div class="cmd-tabs" role="tablist" aria-label="Sistema operativo"><button type="button" role="tab" data-so="win">Windows</button><button type="button" role="tab" data-so="mac">macOS</button><button type="button" role="tab" data-so="linux">Linux</button></div><div class="cmd-panel" role="tabpanel" data-so="win"><p class="cmd-nota">Windows (PowerShell)</p><div class="cmd-l"><code>Get-NetAdapterStatistics | Select-Object Name, ReceivedBytes, SentBytes</code><button type="button" class="copiar">Copiar</button></div></div><div class="cmd-panel" role="tabpanel" data-so="mac"><div class="cmd-l"><code>netstat -ib</code><button type="button" class="copiar">Copiar</button></div></div><div class="cmd-panel" role="tabpanel" data-so="linux"><div class="cmd-l"><code>ip -s link show</code><button type="button" class="copiar">Copiar</button></div></div></div><ol class="steps"><li><span>Corre el comando y anota los bytes recibidos de tu interfaz principal (en Windows, la columna <code>ReceivedBytes</code> de tu adaptador Wi-Fi o Ethernet; en macOS, la columna <code>Ibytes</code> de <code>en0</code>; en Linux, el número debajo de <code>RX: bytes</code> de tu interfaz, como <code>wlan0</code> o <code>eth0</code>).</span></li><li><span>Pon un video en el navegador y espera exactamente 60 segundos.</span></li><li><span>Corre el comando de nuevo, resta el primer valor del segundo y multiplica por 8 para pasar a bits. Divide por 60.</span></li></ol><p><b>Qué observar:</b> el resultado es tu velocidad promedio de bajada en ese minuto, en bits por segundo. El número que lee el comando no es una velocidad: es un contador que sube desde que encendiste la computadora, y por eso se lee dos veces y se resta. Si la reinicias, vuelve a empezar de cero; un colector que ve un contador que bajó sabe que hubo un reinicio. Los equipos de la casa hacen exactamente lo mismo con <code>Device.IP.Interface.{i}.Stats.BytesReceived</code>.</p></div></section>
+<section><h2>Indicadores de experiencia: reinicios, caídas, Wi-Fi y velocidad real</h2><div class="prose"><p>Un dato suelto no dice mucho. Que un celular tenga −79 dBm a las 21:15 puede ser un mal momento o un problema de todos los días. Lo que sirve es el <b>indicador</b> (<i>Key Performance Indicator</i>, KPI, indicador clave de desempeño): un número calculado a partir de muchos datos, con una regla clara para decir si está bien o mal. Cuando el indicador habla de lo que vive el cliente, y no de la red, se le dice indicador de <b>calidad de experiencia</b> (<i>Quality of Experience</i>, QoE).</p><p>Fibra Ejemplo calcula cinco por cada casa, todos los días:</p><div class="tbl"><table><thead><tr><th>Indicador</th><th>De dónde sale</th><th>Cuándo preocupa (ejemplo)</th></tr></thead><tbody><tr><td><b>Reinicios</b></td><td>Los <code>1 BOOT</code> del Inform y los contadores que bajan</td><td>Más de 2 por semana</td></tr><tr><td><b>Caídas de la conexión</b></td><td>Los cambios de <code>Device.IP.Interface.1.Status</code></td><td>Más de 3 por día</td></tr><tr><td><b>Calidad del Wi-Fi</b></td><td>Porcentaje de muestras con <code>SignalStrength</code> peor que −75 dBm, y los <code>Retransmissions</code></td><td>Más del 30 % de las muestras</td></tr><tr><td><b>Velocidad real</b></td><td>Una prueba TR-143 programada de madrugada (capítulo 9)</td><td>Menos del 80 % del plan, tres noches seguidas</td></tr><tr><td><b>Luz de la fibra</b></td><td>La tendencia de <code>OpticalSignalLevel</code></td><td>Caída de más de 3 dB en una semana, aunque siga en rango</td></tr></tbody></table></div><p>El último indicador muestra por qué la película vale más que la foto: un equipo puede estar en −24 dBm, dentro de rango, y aun así preocupar si hace una semana estaba en −20. Algo se está degradando, y fallará antes de que nadie llame.</p><p>Mirados casa por casa, los indicadores sirven a soporte. Mirados juntos, agrupados por zona, por modelo o por versión de firmware, sirven a ingeniería y al NOC (<i>Network Operations Center</i>, centro de operaciones de red): si un grupo entero se porta peor que los demás, el problema no está en las casas, está en lo que comparten. Ese es el trabajo del tablero de la flota.</p></div><div class="lab" id="11-lab-1"><div class="lab-title"><span class="tag">Laboratorio</span><h3>Tablero de la flota</h3></div><p class="hint">Estos son los 6.000 equipos de una de las ciudades de Fibra Ejemplo, con sus reinicios de la última semana. Agrupa por zona, por modelo o por firmware, y filtra con los selectores. La línea naranja es el umbral de 2 reinicios por semana. Encuentra el grupo que se reinicia demasiado y di qué tiene en común: ¿es una zona, un modelo o una versión?</p><div class="opciones">
+  <label>Agrupar por
+    <select id="g11a-por">
+      <option value="zona" selected>Zona</option>
+      <option value="modelo">Modelo</option>
+      <option value="fw">Versión de firmware</option>
+    </select></label>
+  <label>Solo la zona
+    <select id="g11a-fz"><option value="">Todas</option><option>Norte</option><option>Centro</option><option>Sur</option></select></label>
+  <label>Solo el modelo
+    <select id="g11a-fm"><option value="">Todos</option><option value="A6">A · ONT Wi-Fi 6</option><option value="A5">A · ONT Wi-Fi 5</option><option value="B">B · malla</option><option value="C">C · antiguo (TR-098)</option></select></label>
+</div>
+<canvas id="g11a-c" role="img" aria-label="Barras con el promedio de reinicios por equipo en la última semana, para cada grupo elegido, con una línea en el umbral de 2 reinicios"></canvas>
+<div class="legend"><span><i style="background:var(--accent)"></i>bajo el umbral</span><span><i style="background:var(--warm)"></i>sobre el umbral de 2 por semana</span></div>
+<div class="readout texto" id="g11a-out" aria-live="polite"></div>
+<p class="hint">Datos inventados para 6.000 equipos, con reinicios contados por los <code>1 BOOT</code> del Inform y los contadores que vuelven a cero. Un reinicio por un corte de luz en la casa también cuenta.</p></div><div class="caso"><b>Un caso real</b><p>Un operador FTTH de la región empezó a recolectar el tiempo encendido de todos sus equipos cada quince minutos y, al armar el primer tablero, encontró algo que ningún reclamo había mostrado: un modelo de ONT con una versión de firmware concreta se reiniciaba casi todas las madrugadas, siempre a la misma hora. Los clientes no llamaban porque dormían, pero las encuestas de esas casas eran peores que las del resto. La causa era una tarea interna del firmware que agotaba la memoria del equipo. El fabricante corrigió la versión y el operador la distribuyó con el método del capítulo 13. La lección: hay fallas que los clientes sufren sin reportar, y solo las ve quien mira la flota completa.</p></div></section>
+<section><h2>Del indicador a la acción: avisar, corregir o llamar antes</h2><div class="prose"><p>Un tablero que nadie convierte en acciones es decoración. El valor está en la <b>regla</b> (<i>rule</i>): «si este indicador cruza este umbral durante este tiempo, se hace esto, y lo hace este sistema». Las acciones posibles van de la más barata a la más cara:</p><ol class="steps"><li><span><b>Corregir a distancia, sin molestar.</b> Si el Wi-Fi de una casa está en un canal saturado tres noches seguidas, el ACS lo cambia a las cuatro de la mañana (capítulo 10). Si un equipo perdió parte de su configuración, el ACS la vuelve a aplicar. El cliente no se entera, y no tiene por qué.</span></li><li><span><b>Avisar al cliente.</b> Un mensaje en la aplicación o por SMS: «el televisor del cuarto tiene señal débil; acercar el equipo o sumar un punto de malla puede ayudar». O, después de una falla de zona: «hubo un corte en tu barrio entre las 2 y las 3; ya está resuelto».</span></li><li><span><b>Llamar antes de que llame él.</b> Si la luz de la fibra cae semana tras semana, alguien de soporte llama, explica y agenda la visita con el diagnóstico hecho. A esto se le llama <b>atención proactiva</b> (<i>proactive care</i>).</span></li><li><span><b>Escalar.</b> Si el mismo indicador empeora en todas las casas de un puerto de la OLT, no se llama a nadie: se abre un incidente para el NOC, como en el capítulo 9.</span></li></ol></div><figure class="fig fig-arquitectura" id="11-diagrama-3"><div class="lienzo"><svg viewBox="0 0 960 430" style="min-width:760px" role="img" aria-label="Del dato a la acción: los equipos de las casas mandan sus reportes al colector, que los guarda en una base de series de tiempo; un motor de reglas calcula los indicadores y, según la regla, ordena al ACS corregir el equipo, avisa al cliente por la aplicación o por mensaje, pide a la mesa de ayuda llamar al cliente o abre un incidente en el NOC. El ACS cierra el círculo con un cambio en el equipo">
+  <defs>
+    <marker id="f11c-fl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--muted)"/></marker>
+    <marker id="f11c-fl-apl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--c-apl)"/></marker>
+    <marker id="f11c-fl-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--c-red)"/></marker>
+    <symbol id="f11c-ont" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="10" rx="1.6"/><path d="M8 12h.01M11 12h.01M14 12h.01"/><path d="M12 18v3.5"/><circle cx="12" cy="4.5" r="1.6"/></g></symbol>
+    <symbol id="f11c-srv" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="7" rx="1.5"/><rect x="4" y="14" width="16" height="7" rx="1.5"/><path d="M8 6.5h.01M8 17.5h.01M12 6.5h5M12 17.5h5"/></g></symbol>
+    <symbol id="f11c-mon" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M8 20h8M12 16v4"/><path d="M6 12l3-3 3 2 4-4"/></g></symbol>
+  </defs>
+
+  
+  <rect x="10" y="10" width="170" height="380" rx="12" class="d-casa" style="opacity:.55"/>
+  <text x="24" y="32" class="t t-xs t-b k-casa">CASAS</text>
+  <rect x="190" y="10" width="520" height="380" rx="12" class="d-oper" style="opacity:.55"/>
+  <text x="204" y="32" class="t t-xs t-b k-oper">RED DEL OPERADOR</text>
+  <rect x="720" y="10" width="230" height="380" rx="12" class="d-sis" style="opacity:.55"/>
+  <text x="734" y="32" class="t t-xs t-b k-sis">SISTEMAS DEL NEGOCIO</text>
+
+  
+  <g>
+    <rect x="34" y="70" width="122" height="48" rx="9" class="caja"/><use href="#f11c-ont" x="44" y="80" width="28" height="28" class="ico"/><text x="80" y="92" class="t t-s t-b">casa 1203</text><text x="80" y="107" class="t t-xs t-m">marca A</text>
+    <rect x="34" y="150" width="122" height="48" rx="9" class="caja"/><use href="#f11c-ont" x="44" y="160" width="28" height="28" class="ico"/><text x="80" y="172" class="t t-s t-b">casa 1204</text><text x="80" y="187" class="t t-xs t-m">marca A</text>
+    <rect x="34" y="230" width="122" height="48" rx="9" class="caja"/><use href="#f11c-ont" x="44" y="240" width="28" height="28" class="ico"/><text x="80" y="252" class="t t-s t-b">casa 1207</text><text x="80" y="267" class="t t-xs t-m">marca B</text>
+    <text x="95" y="372" text-anchor="middle" class="t t-s t-m">… cien mil</text>
+  </g>
+
+  
+  <rect x="226" y="130" width="130" height="78" rx="10" class="caja"/><use href="#f11c-srv" x="236" y="140" width="26" height="26" class="ico"/><text x="268" y="158" class="t t-b">Colector</text><text x="240" y="184" class="t t-xs t-m">recibe los</text><text x="240" y="198" class="t t-xs t-m">reportes</text>
+  <rect x="392" y="130" width="130" height="78" rx="10" class="caja"/><use href="#f11c-srv" x="402" y="140" width="26" height="26" class="ico"/><text x="434" y="158" class="t t-b">Series</text><text x="406" y="184" class="t t-xs t-m">de tiempo:</text><text x="406" y="198" class="t t-xs t-m">valor + hora</text>
+  <rect x="558" y="120" width="132" height="98" rx="10" class="c-tra"/><text x="624" y="146" text-anchor="middle" class="t t-b">Motor de reglas</text><text x="624" y="166" text-anchor="middle" class="t t-xs">indicadores</text><text x="624" y="182" text-anchor="middle" class="t t-xs">umbral + duración</text><text x="624" y="198" text-anchor="middle" class="t t-xs">= acción</text>
+
+  <path d="M156 94 C190 100 200 150 223 160" class="ln s-red" style="stroke-width:2" marker-end="url(#f11c-fl-red)"/>
+  <path d="M156 174 L223 172" class="ln s-red" style="stroke-width:2" marker-end="url(#f11c-fl-red)"/>
+  <path d="M156 254 C190 248 200 200 223 186" class="ln s-red" style="stroke-width:2" marker-end="url(#f11c-fl-red)"/>
+  <line x1="356" y1="169" x2="389" y2="169" class="ln" style="stroke-width:2" marker-end="url(#f11c-fl)"/>
+  <line x1="522" y1="169" x2="555" y2="169" class="ln" style="stroke-width:2" marker-end="url(#f11c-fl)"/>
+
+  
+  <rect x="392" y="282" width="130" height="66" rx="10" class="c-apl"/><text x="457" y="306" text-anchor="middle" class="t t-b">ACS</text><text x="457" y="324" text-anchor="middle" class="t t-xs">① corregir a distancia</text><text x="457" y="338" text-anchor="middle" class="t t-xs">canal, configuración</text>
+  <rect x="558" y="282" width="132" height="66" rx="10" class="caja"/><use href="#f11c-mon" x="566" y="290" width="24" height="24" class="ico"/><text x="636" y="306" text-anchor="middle" class="t t-b">NOC</text><text x="624" y="324" text-anchor="middle" class="t t-xs">④ incidente</text><text x="624" y="338" text-anchor="middle" class="t t-xs">de zona</text>
+  <path d="M600 218 C560 250 500 250 470 279" class="ln s-apl" style="stroke-width:2" marker-end="url(#f11c-fl-apl)"/>
+  <line x1="624" y1="218" x2="624" y2="279" class="ln" style="stroke-width:2" marker-end="url(#f11c-fl)"/>
+
+  
+  <rect x="750" y="96" width="176" height="66" rx="10" class="caja"/><use href="#f11c-mon" x="758" y="104" width="24" height="24" class="ico"/><text x="790" y="121" class="t t-b">App y mensajes</text><text x="838" y="140" text-anchor="middle" class="t t-xs">② avisar al cliente</text><text x="838" y="154" text-anchor="middle" class="t t-xs t-m">«señal débil en el cuarto»</text>
+  <rect x="750" y="196" width="176" height="66" rx="10" class="caja"/><use href="#f11c-mon" x="758" y="204" width="24" height="24" class="ico"/><text x="790" y="221" class="t t-b">Mesa de ayuda</text><text x="838" y="240" text-anchor="middle" class="t t-xs">③ llamar antes</text><text x="838" y="254" text-anchor="middle" class="t t-xs t-m">con el diagnóstico hecho</text>
+  <path d="M690 150 C716 140 730 132 747 130" class="ln" style="stroke-width:2" marker-end="url(#f11c-fl)"/>
+  <path d="M690 186 C716 200 730 222 747 226" class="ln" style="stroke-width:2" marker-end="url(#f11c-fl)"/>
+
+  
+  <path d="M392 318 C260 318 150 340 110 282" class="ln s-apl ln-d" style="stroke-width:2" marker-end="url(#f11c-fl-apl)"/>
+  <text x="262" y="346" text-anchor="middle" class="t t-xs k-apl">EL CAMBIO LLEGA A LA CASA</text>
+
+  <text x="480" y="418" text-anchor="middle" class="t t-s t-m">Azul: los datos que suben. Rosado: el ACS que actúa. Violeta: donde se decide.</text>
+</svg></div><figcaption><b>Del dato a la acción.</b> De izquierda a derecha, en tres franjas: la casa, la red del operador y los sistemas del negocio. Los equipos de las casas mandan sus reportes al colector; el colector los guarda en la base de series de tiempo; el motor de reglas calcula los indicadores y decide. Cada regla termina en un sistema distinto: el ACS para corregir a distancia, la aplicación o los mensajes para avisar al cliente, la mesa de ayuda para llamar, y el NOC para un incidente de zona. La flecha punteada que vuelve del ACS a los equipos cierra el círculo: el dato terminó en un cambio en la casa.</figcaption></figure><div class="prose"><p>Elegir el umbral es la parte difícil. Si es muy estricto, se escapan casos y los clientes llaman igual. Si es muy suelto, aparecen <b>falsas alarmas</b> (<i>false positives</i>): llamadas a clientes que estaban bien, cambios de canal que no hacían falta, visitas inútiles. Cada falsa alarma cuesta, y algunas molestan. Mueve tú los umbrales.</p></div><div class="lab" id="11-lab-2"><div class="lab-title"><span class="tag">Laboratorio</span><h3>Cuidado proactivo</h3></div><p class="hint">Hay 1.000 casas; 80 de ellas van a llamar esta semana por un problema real. Fija el umbral de reinicios, el de señal débil del Wi-Fi y el de caída de luz. Cada punto de la cuadrícula es una casa, y su color dice si el problema se atiende antes de que el cliente llame, si se escapa o si es una falsa alarma. Busca el punto en que la mesa de ayuda puede con la carga.</p><div class="ctls">
+  <label class="ctl">Reinicios en la semana, desde <output id="g11b-r-o"></output>
+    <input id="g11b-r" type="range" min="1" max="7" step="1" value="2" aria-label="Umbral de reinicios por semana"></label>
+  <label class="ctl">Muestras con Wi-Fi débil, desde <output id="g11b-w-o"></output>
+    <input id="g11b-w" type="range" min="10" max="90" step="5" value="30" aria-label="Umbral de porcentaje de muestras con señal débil"></label>
+  <label class="ctl">Caída de la luz en la semana, desde <output id="g11b-o-o"></output>
+    <input id="g11b-o" type="range" min="0.5" max="6" step="0.5" value="2" aria-label="Umbral de caída de la luz de la fibra en dB"></label>
+</div>
+<canvas id="g11b-c" role="img" aria-label="Mil casas en una cuadrícula, coloreadas según si tenían un problema y si la regla las marcó"></canvas>
+<div class="legend"><span><i style="background:var(--good)"></i>problema atendido antes de que llame</span><span><i style="background:var(--warm)"></i>problema que se escapó: llamará</span><span><i style="background:var(--accent)"></i>falsa alarma</span><span><i style="background:var(--grid)"></i>casa sin problema, sin contacto</span></div>
+<div class="readout" id="g11b-out" aria-live="polite"></div>
+<p class="hint">Población inventada: 30 casas con un equipo que falla, 30 con mal Wi-Fi y 20 con la fibra degradándose, entre 920 sanas, que también tienen reinicios por cortes de luz, rincones sin señal y luz que varía un poco. La mesa de ayuda puede hacer 100 contactos proactivos por semana.</p></div><div class="ml"><b>En la práctica</b><p>Tres hábitos separan una regla útil de una que molesta. Primero, <b>duración</b>: no actuar por una muestra mala, sino por varias seguidas («tres noches», «dos horas»). Segundo, <b>descanso</b>: después de actuar sobre una casa, no volver a tocarla por unos días, aunque el indicador siga mal; si no mejoró, la regla siguiente es otra. Tercero, <b>comprobar</b>: comparar las casas donde se actuó con otras parecidas donde no, para saber si la acción sirvió o solo pareció servir.</p></div></section>
+<section><h2>Cuánto dato es demasiado: almacenamiento y privacidad</h2><div class="prose"><p>Los datos no son gratis. La cuenta del volumen es una multiplicación: equipos × parámetros × reportes por día. Para Fibra Ejemplo, con cien mil equipos y cuarenta parámetros:</p><div class="tbl"><table><thead><tr><th>Cada cuánto reporta</th><th>Reportes por equipo al día</th><th>Valores por día</th><th>Almacenamiento aproximado por mes</th></tr></thead><tbody><tr><td>1 hora</td><td>24</td><td>96 millones</td><td>30 GB</td></tr><tr><td>15 minutos</td><td>96</td><td>384 millones</td><td>120 GB</td></tr><tr><td>5 minutos</td><td>288</td><td>1.152 millones</td><td>350 GB</td></tr></tbody></table></div><p>Las cifras suponen unos 10 bytes por valor ya comprimido, que es lo normal en una <b>base de datos de series de tiempo</b> (<i>time-series database</i>), un tipo de base pensada para guardar números con su fecha y hora. Para el equipo, en cambio, el costo es poco: un reporte de 4 KB cada quince minutos son menos de 400 KB al día, nada frente a lo que mueve una casa.</p><p>La decisión que importa es qué guardar y por cuánto tiempo. Una regla común es guardar el detalle de cada reporte por unas semanas, para soporte, y solo promedios por hora o por día durante uno o dos años, para ver tendencias. Y no todo dato merece viajar: un parámetro que nadie usa en un indicador cuesta lo mismo que uno que sí.</p><p>Hay un costo que no se mide en gigabytes. Entre los datos que el equipo sabe dar está la tabla <code>Device.Hosts.Host.{i}</code>: cada dispositivo de la casa, con su nombre («iPhone de Laura»), su dirección física y a qué hora se conecta y se desconecta. Con eso se puede saber cuándo hay alguien en casa, cuántas personas viven allí y a qué hora se acuesta cada una. Es información del cliente, no del operador. Las prácticas sanas son cuatro:</p><ul><li><b>Minimizar</b>: recolectar solo lo que alimenta un indicador. Para la calidad del Wi-Fi basta la señal; no hace falta el nombre del dispositivo.</li><li><b>Agregar</b>: guardar «3 dispositivos con señal débil», no la lista de cuáles.</li><li><b>Seudonimizar</b>: reemplazar la dirección física por un código que no identifica a nadie fuera del sistema.</li><li><b>Retener poco y dar acceso por rol</b>: borrar el detalle a las pocas semanas, y que cada área vea solo lo que necesita.</li></ul><p>Las reglas concretas dependen de la ley de protección de datos de cada país y del contrato con el cliente. El capítulo 14 trata la privacidad junto con la seguridad del ACS.</p></div></section>
+<section><h2>Los modelos que predicen: de dónde sale el dato</h2><div class="prose"><p>El siguiente paso natural es predecir: qué equipo va a fallar la semana que viene, qué cliente está por darse de baja. Eso es trabajo de un <b>modelo de aprendizaje automático</b> (<i>machine learning model</i>), y se explica en el curso de <a href="https://aaramirez.github.io/aprendizaje-estadistico/temario.html" target="_blank" rel="noopener">Aprendizaje automático</a>. Lo que le toca a la gestión remota es darle buena materia prima: datos de los equipos que llegan completos y a tiempo, cruzados con lo que pasó después, que no está en el equipo sino en el CRM (los reclamos, las visitas, las bajas). Ese cruce solo funciona si cada reporte trae algo que lo una al cliente, como el número de serie, y si el inventario dice la verdad sobre qué serie está en qué casa (capítulo 8).</p><p>La regla con la que Fibra Ejemplo mira sus cien mil sensores cierra el capítulo: <b>cada equipo es un sensor de la experiencia del cliente; el dato vale cuando dispara una acción.</b></p></div><div class="quiz"><h3>Pruébate</h3><details><summary>¿Por qué no conviene usar sesiones TR-069 para leer muchos datos de toda la flota cada pocos minutos?</summary><p>Porque cada lectura es una sesión: con cien mil equipos cada cinco minutos serían más de 300 sesiones por segundo solo para mirar, y el ACS tiene que seguir configurando. TR-069 es para gestionar, no para recolectar.</p></details><details><summary>¿Qué papel cumple cada uno en la recolección masiva: el ACS, el equipo y el colector?</summary><p>El ACS configura una vez el perfil (qué datos, cada cuánto, adónde, en qué formato); el equipo junta los datos y los manda solo; el colector los recibe y los guarda.</p></details><details><summary>¿Para qué sirve que cada equipo tenga un <code>TimeReference</code> distinto?</summary><p>Para repartir los reportes en el tiempo y que los cien mil equipos no le manden su reporte al colector en el mismo segundo.</p></details><details><summary>El contador de bytes de un equipo pasó de 918.000.000.000 a 2.400.000 entre dos reportes. ¿Qué pasó?</summary><p>El equipo se reinició: los contadores vuelven a cero al arrancar. El colector lo cuenta como un reinicio y no como tráfico negativo.</p></details><details><summary>Un equipo tiene la luz en −24 dBm, dentro del rango de −8 a −27. ¿Por qué podría preocupar?</summary><p>Porque lo que importa también es la tendencia: si hace una semana estaba en −20 dBm, algo se está degradando y fallará antes de que el cliente llame.</p></details><details><summary>¿Qué se pierde si el umbral de una regla proactiva es demasiado suelto?</summary><p>Aparecen muchas falsas alarmas: llamadas, cambios o visitas a casas que estaban bien, con su costo y la molestia del cliente.</p></details></div><div class="investiga"><h3>Para investigar</h3><p class="hint">Estas preguntas no se responden en el capítulo: búscalas por tu cuenta.</p><ol><li>¿Qué es IPDR y por qué la industria del cable lo usó para medir el consumo de sus clientes?<small>Pista: busca «IPDR DOCSIS subscriber usage».</small></li><li>¿Qué significan los niveles de calidad de servicio 0, 1 y 2 de MQTT y cuál conviene para un reporte que no se puede perder?<small>Pista: busca «MQTT QoS levels».</small></li><li>¿Cómo comprime una base de datos de series de tiempo los valores que cambian poco de una muestra a otra?<small>Pista: busca «time series compression delta-of-delta Gorilla».</small></li><li>¿En qué se diferencia la seudonimización de la anonimización según el Reglamento General de Protección de Datos europeo?<small>Pista: busca «RGPD seudonimización anonimización diferencia».</small></li><li>¿Qué dice la ley de protección de datos de tu país sobre los datos de uso de un servicio de internet y cuánto tiempo puede guardarlos el operador?</li></ol></div><div class="vids"><span>Para saber más</span><a class="vid" href="https://www.broadband-forum.org/pdfs/tr-232-1-0-0.pdf" target="_blank" rel="noopener">TR-232: Bulk Data Collection (Broadband Forum, inglés) <small>norma</small></a><a class="vid" href="https://cwmp-data-models.broadband-forum.org/tr-181-2-18-0-cwmp.html" target="_blank" rel="noopener">Modelo de datos TR-181 en línea, con el objeto Device.BulkData (Broadband Forum, inglés) <small>referencia</small></a><a class="vid" href="https://aaramirez.github.io/telco/31-el-noc.html" target="_blank" rel="noopener">El NOC, capítulo 31 de Cómo funciona un telco <small>lectura</small></a></div></section>
+<label class="got"><input type="checkbox" id="got"> Lo tengo claro</label>
+<nav class="pager" id="pager" aria-label="Capítulo anterior y siguiente"></nav>
+</main>
+</div>
+<footer><span>Curso abierto de aaramirez.github.io.</span><span>Sitio publicado: <a href="https://github.com/aaramirez/gestion-remota-de-equipos" target="_blank" rel="noopener">github.com/aaramirez/gestion-remota-de-equipos</a></span></footer>
+</div>
+<script src="assets/lab.js"></script>
+<script>
+(function(){
+  const mil=n=>String(n).replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+  const {$,tok,canvasWidget}=window.Lab;
+  // generador con semilla, para que todos vean la misma flota
+  let s=20261124;const rnd=()=>{s=(s*1103515245+12345)%2147483648;return s/2147483648;};
+  const pois=l=>{let L=Math.exp(-l),k=0,p=1;do{k++;p*=rnd();}while(p>L);return k-1;};
+  const ZONAS=['Norte','Centro','Sur'];
+  const MOD={A6:'A · ONT Wi-Fi 6',A5:'A · ONT Wi-Fi 5',B:'B · malla',C:'C · antiguo'};
+  const FW={A6:['A6 4.1','A6 4.2'],A5:['A5 3.8'],B:['B 2.0'],C:['C 1.7']};
+  const pick=(arr,w)=>{let r=rnd(),a=0;for(let i=0;i<arr.length;i++){a+=w[i];if(r<a)return arr[i];}return arr[arr.length-1];};
+  const flota=[];
+  for(let i=0;i<6000;i++){
+    const zona=pick(ZONAS,[0.36,0.4,0.24]);
+    const modelo=pick(['A6','A5','B','C'],[0.46,0.3,0.12,0.12]);
+    const fw=modelo==='A6'?(rnd()<0.42?'A6 4.2':'A6 4.1'):FW[modelo][0];
+    let l=0.25;
+    if(zona==='Sur')l+=0.6;          // cortes de luz más frecuentes
+    if(modelo==='C')l+=0.45;         // equipos viejos
+    if(fw==='A6 4.2')l+=3.1;         // la falla escondida
+    flota.push({zona,modelo,fw,r:pois(l)});
+  }
+  const UM=2;
+  function grupos(){
+    const por=$('#g11a-por').value,fz=$('#g11a-fz').value,fm=$('#g11a-fm').value;
+    const sel=flota.filter(e=>(!fz||e.zona===fz)&&(!fm||e.modelo===fm));
+    const m=new Map();
+    sel.forEach(e=>{const k=por==='zona'?e.zona:por==='modelo'?MOD[e.modelo]:e.fw;const g=m.get(k)||{k,n:0,r:0,sobre:0};g.n++;g.r+=e.r;if(e.r>UM)g.sobre++;m.set(k,g);});
+    const arr=[...m.values()].map(g=>({...g,p:g.r/g.n}));
+    arr.sort((a,b)=>b.p-a.p);
+    return {arr,sel,por,fz,fm};
+  }
+  const dibujar=canvasWidget($('#g11a-c'),w=>w<520?0.8:0.42,(ctx,w,h)=>{
+    const {arr}=grupos();
+    ctx.clearRect(0,0,w,h);
+    const L=w<520?104:150,R=w<520?62:90,T=8,B=24,max=4;
+    const X=v=>L+(w-L-R)*Math.min(v,max)/max;
+    const filas=Math.max(arr.length,3),bh=(h-T-B)/filas;
+    ctx.textBaseline='middle';
+    // ejes
+    ctx.strokeStyle=tok('--grid');ctx.lineWidth=1;ctx.fillStyle=tok('--muted');ctx.font='500 11px '+tok('--f-mono');ctx.textAlign='center';
+    for(let v=0;v<=max;v++){ctx.beginPath();ctx.moveTo(X(v),T);ctx.lineTo(X(v),h-B);ctx.stroke();ctx.fillText(String(v),X(v),h-B+12);}
+    arr.forEach((g,i)=>{
+      const y=T+i*bh+bh*0.18,alto=bh*0.64;
+      ctx.fillStyle=tok('--ink');ctx.textAlign='right';ctx.font='600 '+(w<520?11:13)+'px '+tok('--f-display');
+      ctx.fillText(g.k,L-8,y+alto/2);
+      ctx.fillStyle=g.p>UM?tok('--warm'):tok('--accent');
+      ctx.fillRect(L,y,Math.max(2,X(g.p)-L),alto);
+      ctx.fillStyle=tok('--ink');ctx.textAlign='left';ctx.font='600 11px '+tok('--f-mono');
+      ctx.fillText(g.p.toFixed(1).replace('.',',')+' · '+g.n,X(g.p)+5,y+alto/2);
+    });
+    ctx.strokeStyle=tok('--warm');ctx.lineWidth=2;ctx.setLineDash([6,4]);ctx.beginPath();ctx.moveTo(X(UM),T);ctx.lineTo(X(UM),h-B);ctx.stroke();ctx.setLineDash([]);
+  });
+  function leer(){
+    const {arr,sel,por,fz,fm}=grupos();
+    const tot=sel.reduce((a,e)=>a+e.r,0),prom=tot/Math.max(1,sel.length);
+    const peor=arr[0];
+    let h='<span>'+mil(sel.length)+' equipos en la vista · '+prom.toFixed(2).replace('.',',')+' reinicios por equipo y semana en promedio. Cada barra dice el promedio y cuántos equipos tiene el grupo.</span>';
+    if(!peor){$('#g11a-out').innerHTML=h;dibujar();return;}
+    h+='<span>El grupo más alto es <b>'+peor.k+'</b>, con '+peor.p.toFixed(1).replace('.',',')+' reinicios por semana; '+peor.sobre+' de sus '+peor.n+' equipos pasan de 2.</span>';
+    if(por==='fw'&&peor.k==='A6 4.2'){
+      h+='<span class="ok">Lo encontraste: la versión 4.2 del modelo A con Wi-Fi 6 se reinicia mucho más que la 4.1 del mismo modelo, en todas las zonas. No es la casa ni la zona: es el firmware. El siguiente paso es avisar al fabricante y frenar esa versión (capítulo 13).</span>';
+    }else if(por==='zona'&&!fm){
+      h+='<span class="warn">El Sur sale más alto, pero mira la escala: ¿la diferencia explica todo? Los cortes de luz suben un poco cualquier zona. Prueba a agrupar por modelo o por firmware.</span>';
+    }else if(por==='modelo'&&peor.k===MOD.A6){
+      h+='<span class="warn">El modelo A con Wi-Fi 6 está cerca del umbral, pero un promedio puede esconder dos grupos distintos. Filtra ese modelo y agrupa por versión de firmware.</span>';
+    }else if(fm&&fm!=='A6'){
+      h+='<span>Este modelo se porta parecido en todas sus versiones y zonas. El problema está en otra parte de la flota.</span>';
+    }else{
+      h+='<span>Prueba otra combinación: el grupo culpable aparece cuando lo separas por lo que comparte.</span>';
+    }
+    $('#g11a-out').innerHTML=h;
+    dibujar();
+  }
+  ['#g11a-por','#g11a-fz','#g11a-fm'].forEach(q=>$(q).addEventListener('input',leer));
+  leer();
+})();
+</script>
+<script>
+(function(){
+  const {$,tok,canvasWidget}=window.Lab;
+  let s=11032026;const rnd=()=>{s=(s*1103515245+12345)%2147483648;return s/2147483648;};
+  const pois=l=>{let L=Math.exp(-l),k=0,p=1;do{k++;p*=rnd();}while(p>L);return k-1;};
+  const gauss=()=>{let u=0,v=0;while(!u)u=rnd();while(!v)v=rnd();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);};
+  const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+  const casas=[];
+  for(let i=0;i<1000;i++){
+    const tipo=i<30?'equipo':i<60?'wifi':i<80?'fibra':'';
+    const c={tipo,
+      r:pois(tipo==='equipo'?4.2:(rnd()<0.08?2.2:0.35)),
+      w:clamp(tipo==='wifi'?55+gauss()*14:(rnd()<0.15?30+gauss()*14:10+gauss()*9),0,100),
+      o:Math.abs(tipo==='fibra'?3.4+gauss()*1.1:gauss()*0.9)};
+    casas.push(c);
+  }
+  // mezclar el orden para que la cuadrícula no muestre los problemas juntos
+  for(let i=casas.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[casas[i],casas[j]]=[casas[j],casas[i]];}
+  const CAP=100;
+  function calc(){
+    const ur=+$('#g11b-r').value,uw=+$('#g11b-w').value,uo=+$('#g11b-o').value;
+    let tp=0,fn=0,fp=0,tn=0;
+    casas.forEach(c=>{c.marca=c.r>=ur||c.w>=uw||c.o>=uo;const p=!!c.tipo;
+      c.est=p&&c.marca?'tp':p?'fn':c.marca?'fp':'tn';
+      if(c.est==='tp')tp++;else if(c.est==='fn')fn++;else if(c.est==='fp')fp++;else tn++;});
+    return {ur,uw,uo,tp,fn,fp,tn};
+  }
+  const dibujar=canvasWidget($('#g11b-c'),w=>w<520?0.62:0.4,(ctx,w,h)=>{
+    ctx.clearRect(0,0,w,h);
+    const cols=w<520?40:50,filas=Math.ceil(1000/cols),cw=w/cols,ch=h/filas,r=Math.max(1.5,Math.min(cw,ch)*0.36);
+    const col={tp:tok('--good'),fn:tok('--warm'),fp:tok('--accent'),tn:tok('--grid')};
+    casas.forEach((c,i)=>{const x=(i%cols+0.5)*cw,y=(Math.floor(i/cols)+0.5)*ch;
+      ctx.beginPath();ctx.arc(x,y,c.est==='tn'?r*0.8:r,0,Math.PI*2);ctx.fillStyle=col[c.est];ctx.fill();});
+  });
+  function leer(){
+    const d=calc();
+    $('#g11b-r-o').textContent=d.ur;$('#g11b-w-o').textContent=d.uw+' %';$('#g11b-o-o').textContent=String(d.uo).replace('.',',')+' dB';
+    const cont=d.tp+d.fp,prec=cont?Math.round(d.tp/cont*10):0;
+    let h='<span class="big">'+d.tp+' de 80 problemas atendidos antes de que el cliente llame</span>';
+    h+='<span>Se escapan '+d.fn+' (llamarán igual) · falsas alarmas: '+d.fp+'</span>';
+    h+='<span>Contactos proactivos esta semana: '+cont+' de '+CAP+' posibles · de cada 10 contactos, '+prec+' eran necesarios</span>';
+    if(cont>CAP)h+='<span class="warn">La mesa de ayuda no da abasto: '+(cont-CAP)+' contactos quedan sin hacer. Sube algún umbral o resuelve una parte a distancia, sin llamar.</span>';
+    else if(d.fn>40)h+='<span class="warn">Los umbrales son tan estrictos que la mayoría de los problemas se escapan: el tablero existe, pero casi no actúa.</span>';
+    else if(d.fp>d.tp)h+='<span class="warn">Hay más falsas alarmas que problemas reales: cada contacto inútil cuesta y molesta.</span>';
+    else h+='<span class="ok">Un punto razonable: la mesa de ayuda puede con la carga y la mayoría de los contactos sirven.</span>';
+    $('#g11b-out').innerHTML=h;
+    dibujar();
+  }
+  ['#g11b-r','#g11b-w','#g11b-o'].forEach(q=>$(q).addEventListener('input',leer));
+  leer();
+})();
+</script>
+</body>
+</html>

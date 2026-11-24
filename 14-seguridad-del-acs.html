@@ -1,0 +1,442 @@
+<!doctype html>
+<html lang="es">
+<head>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-KX76XF8R');</script>
+<!-- End Google Tag Manager -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Seguridad · Gestión remota de equipos (ACS) · Gestión remota de equipos (ACS)</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Cómo un operador configura, actualiza y diagnostica a distancia los equipos que tiene en casa de sus clientes: TR-069 y TR-369 a fondo, el modelo de datos TR-181, el aprovisionamiento sin visita, los cambios masivos, el firmware, los diagnósticos, la seguridad y la escala de un ACS.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400;1,8..60,600&display=swap">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KX76XF8R"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+<div class="wrap" data-page="seguridad-del-acs">
+<header class="topbar"><a class="brand" href="index.html">Gestión <b>remota</b> de equipos</a><span class="eyebrow">Curso visual e interactivo · Industrias y finanzas</span><a class="al-sitio" href="https://aaramirez.github.io/">← Todos los cursos</a></header>
+<div class="layout">
+<nav class="toc" id="toc" aria-label="Ruta de aprendizaje"></nav>
+<main>
+<header class="page-head"><span class="num">CAPÍTULO 14 DE 16</span><h1>Seguridad del ACS y del equipo del cliente</h1><p class="lede">Un servidor que puede cambiar cualquier equipo de la red es la llave maestra del operador. Este capítulo muestra por dónde se puede atacar, cómo se cierra cada puerta y qué enseñó el ataque de 2016 contra el puerto 7547.</p></header>
+<section><div class="prose"><p>En los trece capítulos anteriores, Fibra Ejemplo aprendió a hacer con su ACS cosas que antes exigían una camioneta: cambiar la clave del Wi-Fi de una casa, cargarle el plan a un equipo recién instalado, actualizar el firmware de cien mil equipos en dos semanas. Ahora conviene mirar esa misma lista con otros ojos. Si una persona ajena lograra sentarse frente al ACS, podría hacer exactamente lo mismo: cambiar el servidor de nombres de toda la flota para mandar a los clientes a páginas falsas, instalar un firmware con una puerta trasera o reiniciar todos los equipos de una ciudad a la vez.</p><p>Este capítulo recorre las puertas por las que se puede atacar la gestión remota y cómo se cierra cada una: el cifrado de la conversación, la identidad de cada equipo, el timbre, los servicios que el equipo deja abiertos, las personas que usan el ACS y los datos que el operador guarda de cada casa.</p></div></section>
+<section><h2>El riesgo en una frase</h2><div class="analogia"><b>Imagínalo así</b><p>Piensa en el administrador de un edificio de cien departamentos que guarda en su oficina una copia de todas las llaves. Es muy práctico: si alguien se queda afuera, le abren en un minuto. Pero esa oficina vale más que cualquier departamento. Un ladrón no necesita forzar cien puertas: le basta con entrar a una, la del administrador. Por eso esa oficina tiene la mejor cerradura del edificio, solo entran unos pocos, y cada vez que alguien saca una llave queda anotado quién, cuándo y para qué.</p></div><div class="prose"><p>El ACS es esa oficina. La regla que resume el capítulo es corta: <b>un ACS comprometido es una red comprometida.</b> Con él, un atacante no ataca a un cliente: ataca a todos a la vez, y con la confianza del operador, porque los equipos obedecen al ACS sin preguntar.</p><p>El ataque puede venir por varios lados, y conviene tenerlos todos a la vista antes de cerrar ninguno:</p></div><figure class="fig fig-arquitectura" id="14-diagrama-1"><div class="lienzo"><svg viewBox="0 0 960 520" style="min-width:760px" role="img" aria-label="Las seis puertas por donde se puede atacar la gestión remota: la sesión entre el equipo y el ACS, la identidad del ACS, la identidad del equipo, los servicios del equipo abiertos hacia Internet, la consola de las personas y la API hacia el norte, cada una con su defensa">
+  <defs>
+    <marker id="f14a-fl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--warm)"/></marker>
+    <symbol id="f14a-ont" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="10" rx="1.6"/><path d="M8 12h.01M11 12h.01M14 12h.01"/><path d="M12 18v3.5"/><circle cx="12" cy="4.5" r="1.6"/></g></symbol>
+    <symbol id="f14a-srv" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="7" rx="1.5"/><rect x="4" y="14" width="16" height="7" rx="1.5"/><path d="M8 6.5h.01M8 17.5h.01M12 6.5h5M12 17.5h5"/></g></symbol>
+    <symbol id="f14a-per" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></g></symbol>
+  </defs>
+
+  
+  <rect x="14" y="14" width="932" height="76" rx="12" class="d-inet"/>
+  <text x="26" y="34" class="t t-xs t-b k-inet">INTERNET</text>
+  <rect x="14" y="104" width="260" height="290" rx="12" class="d-casa"/>
+  <text x="26" y="124" class="t t-xs t-b k-casa">LA CASA DEL CLIENTE</text>
+  <rect x="288" y="104" width="380" height="290" rx="12" class="d-oper"/>
+  <text x="656" y="124" text-anchor="end" class="t t-xs t-b k-oper">RED DEL OPERADOR</text>
+  <rect x="682" y="104" width="264" height="290" rx="12" class="d-sis"/>
+  <text x="934" y="124" text-anchor="end" class="t t-xs t-b k-sis">SISTEMAS DEL NEGOCIO</text>
+
+  
+  <rect x="380" y="32" width="200" height="46" rx="10" class="caja" style="stroke:var(--warm)"/>
+  <text x="480" y="52" text-anchor="middle" class="t t-b k-warm">Atacante</text>
+  <text x="480" y="68" text-anchor="middle" class="t t-s t-m">en Internet o en el camino</text>
+
+  
+  <rect x="44" y="210" width="190" height="66" rx="10" class="caja"/>
+  <use href="#f14a-ont" x="54" y="224" width="34" height="34" class="ico"/>
+  <text x="96" y="236" class="t t-b">Equipo</text>
+  <text x="96" y="254" class="t t-s t-m">ONT con router</text>
+  <text x="96" y="268" class="t t-s t-m t-mono">FEJ0001203</text>
+
+  
+  <rect x="420" y="210" width="190" height="66" rx="10" class="c-apl"/>
+  <use href="#f14a-srv" x="430" y="224" width="34" height="34" class="ico"/>
+  <text x="472" y="238" class="t t-b">ACS</text>
+  <text x="472" y="256" class="t t-s t-mono">acs.ejemplo.com</text>
+
+  
+  <rect x="716" y="160" width="200" height="56" rx="10" class="caja"/>
+  <text x="816" y="184" text-anchor="middle" class="t t-b">CRM y mesa de ayuda</text>
+  <text x="816" y="202" text-anchor="middle" class="t t-s t-m">piden por la API</text>
+  <rect x="716" y="290" width="200" height="56" rx="10" class="caja"/>
+  <use href="#f14a-per" x="726" y="300" width="34" height="34" class="ico"/>
+  <text x="768" y="314" class="t t-b">Personas</text>
+  <text x="768" y="332" class="t t-s t-m">consola del ACS</text>
+
+  
+  <line x1="234" y1="243" x2="420" y2="243" class="ln s-apl" style="stroke-width:2.4"/>
+  <text x="327" y="264" text-anchor="middle" class="t t-s k-apl">sesión TR-069</text>
+  <line x1="610" y1="232" x2="716" y2="196" class="ln s-apl" style="stroke-width:2"/>
+  <text x="640" y="200" class="t t-xs t-m">API</text>
+  <line x1="610" y1="258" x2="716" y2="312" class="ln s-apl" style="stroke-width:2"/>
+
+  
+  <line x1="420" y1="78" x2="330" y2="238" class="ln s-warm ln-d" style="stroke-width:1.6" marker-end="url(#f14a-fl)"/>
+  <line x1="470" y1="78" x2="500" y2="206" class="ln s-warm ln-d" style="stroke-width:1.6" marker-end="url(#f14a-fl)"/>
+  <line x1="390" y1="70" x2="180" y2="206" class="ln s-warm ln-d" style="stroke-width:1.6" marker-end="url(#f14a-fl)"/>
+  <line x1="580" y1="60" x2="760" y2="156" class="ln s-warm ln-d" style="stroke-width:1.6" marker-end="url(#f14a-fl)"/>
+
+  <g class="t t-b" text-anchor="middle">
+    <circle cx="392" cy="176" r="12" style="fill:var(--warm)"/><text x="392" y="181" style="fill:var(--card)">1</text>
+    <circle cx="540" cy="190" r="12" style="fill:var(--warm)"/><text x="540" y="195" style="fill:var(--card)">2</text>
+    <circle cx="140" cy="298" r="12" style="fill:var(--warm)"/><text x="140" y="303" style="fill:var(--card)">3</text>
+    <circle cx="236" cy="172" r="12" style="fill:var(--warm)"/><text x="236" y="177" style="fill:var(--card)">4</text>
+    <circle cx="690" cy="306" r="12" style="fill:var(--warm)"/><text x="690" y="311" style="fill:var(--card)">5</text>
+    <circle cx="690" cy="160" r="12" style="fill:var(--warm)"/><text x="690" y="165" style="fill:var(--card)">6</text>
+  </g>
+  <text x="70" y="324" class="t t-s">alguien se presenta</text>
+  <text x="70" y="338" class="t t-s">como este equipo</text>
+  <text x="30" y="168" class="t t-s">timbre y servicios</text>
+  <text x="30" y="182" class="t t-s">abiertos a Internet</text>
+  <text x="556" y="166" class="t t-s">ACS falso</text>
+
+  
+  <text x="14" y="420" class="t t-xs t-b t-m">LA DEFENSA DE CADA PUERTA</text>
+  <g class="t t-s">
+    <text x="14" y="444"><tspan class="t-b k-warm">1</tspan> Escuchar o cambiar la sesión → cifrar con TLS</text>
+    <text x="14" y="466"><tspan class="t-b k-warm">2</tspan> ACS falso → el equipo valida el certificado</text>
+    <text x="14" y="488"><tspan class="t-b k-warm">3</tspan> Equipo falso → clave única o TLS mutuo</text>
+    <text x="490" y="444"><tspan class="t-b k-warm">4</tspan> Puertos abiertos → nada de gestión hacia Internet</text>
+    <text x="490" y="466"><tspan class="t-b k-warm">5</tspan> Cuenta robada → roles, doble factor y registro</text>
+    <text x="490" y="488"><tspan class="t-b k-warm">6</tspan> API abusada → una credencial limitada por sistema</text>
+  </g>
+</svg></div><figcaption><b>Las seis puertas de la gestión remota.</b> Tres franjas: la casa del cliente a la izquierda, la red del operador en el medio y los sistemas del negocio a la derecha, con Internet arriba. Cada círculo rojo numerado es un lugar por donde se puede atacar, y las flechas punteadas salen del atacante: ① escuchar o cambiar la sesión entre el equipo y el ACS; ② hacerse pasar por el ACS; ③ hacerse pasar por un equipo con sus credenciales; ④ tocar el timbre o entrar a un servicio que el equipo deja abierto hacia Internet; ⑤ entrar a la consola del ACS con la cuenta de una persona; ⑥ usar la API hacia el norte desde un sistema que no debería. Abajo, la defensa que cierra cada puerta, en el orden en que la recorre el capítulo.</figcaption></figure></section>
+<section><h2>Cifrado con TLS y certificados</h2><div class="prose"><p>La sesión TR-069 del capítulo 3 viaja en HTTP. Si viaja <b>en claro</b>, cualquiera que pueda mirar el camino entre la casa y el ACS lee cada mensaje: el número de serie del equipo, su usuario y su clave de gestión y, en un cambio de Wi-Fi, la clave nueva que el agente le dictó al cliente. Peor todavía: puede <b>cambiar</b> los mensajes en vuelo. A esa posición se le dice <b>ataque de intermediario</b> (<i>man-in-the-middle</i>, MITM): alguien se mete en medio de la conversación y cada lado cree que habla directo con el otro.</p><p>La defensa es <b>TLS</b> (<i>Transport Layer Security</i>, seguridad de la capa de transporte), el mismo cifrado que protege la banca en línea, que convierte HTTP en <b>HTTPS</b>. TLS hace dos cosas distintas y las dos importan:</p><ol class="steps"><li><span><b>Cifra.</b> Lo que viaja se vuelve ilegible para quien mira el camino, y cualquier cambio en vuelo se detecta.</span></li><li><span><b>Identifica.</b> Antes de mandar nada, el ACS le muestra al equipo su <b>certificado digital</b> (<i>digital certificate</i>): un documento electrónico que dice «soy <code>acs.ejemplo.com</code>», firmado por una <b>autoridad de certificación</b> (<i>Certificate Authority</i>, CA) en la que el equipo confía.</span></li></ol></div><div class="analogia"><b>Imagínalo así</b><p>El cifrado es el sobre cerrado; el certificado es el carné con foto. Un sobre cerrado entregado a un desconocido no sirve de nada: el mensaje llega secreto, pero a la persona equivocada. Por eso el equipo, antes de entregar el sobre, mira el carné del que lo recibe y comprueba dos cosas: que el nombre sea el de su ACS y que el carné lo haya emitido alguien en quien confía.</p></div><div class="prose"><p>La segunda parte es la que más se descuida. Un equipo que cifra pero <b>no valida el certificado</b> acepta cualquier carné, también uno falso que el atacante fabricó en un minuto. Cifra perfectamente su conversación… con el atacante. La norma TR-069 pide que el equipo compruebe la firma del certificado y que el nombre del certificado coincida con el de la dirección del ACS (<code>Device.ManagementServer.URL</code>). Para eso el equipo trae de fábrica, o recibe del operador, la lista de autoridades en las que confía.</p><p>TLS puede ir un paso más allá: que <b>también el equipo</b> muestre un certificado. Se le dice <b>TLS mutuo</b> (<i>mutual TLS</i>, mTLS). El fabricante graba en cada equipo, en la línea de producción, un certificado propio con su número de serie, firmado por la autoridad del fabricante o del operador. Así el ACS no tiene que creerle al equipo lo que dice en el Inform: lo comprueba antes de leerlo.</p></div><figure class="fig fig-flujo" id="14-diagrama-2"><div class="lienzo"><svg viewBox="0 0 960 600" style="min-width:760px" role="img" aria-label="Flujo de una sesión TR-069 con TLS mutuo: el equipo propone cifrar, el ACS muestra su certificado y el equipo lo valida; el ACS pide el certificado del equipo y lo compara con el inventario; recién entonces viaja el Inform cifrado">
+  <defs>
+    <marker id="f14b-fl-apl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--c-apl)"/></marker>
+    <marker id="f14b-fl-tra" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--c-tra)"/></marker>
+    <symbol id="f14b-ont" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="10" rx="1.6"/><path d="M8 12h.01M11 12h.01M14 12h.01"/><path d="M12 18v3.5"/><circle cx="12" cy="4.5" r="1.6"/></g></symbol>
+    <symbol id="f14b-srv" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="7" rx="1.5"/><rect x="4" y="14" width="16" height="7" rx="1.5"/><path d="M8 6.5h.01M8 17.5h.01M12 6.5h5M12 17.5h5"/></g></symbol>
+  </defs>
+  <rect x="140" y="14" width="220" height="56" rx="10" class="caja"/><use href="#f14b-ont" x="150" y="26" width="32" height="32" class="ico"/>
+  <text x="190" y="38" class="t t-b">Equipo</text><text x="190" y="56" class="t t-s t-m">certificado de fábrica</text>
+  <rect x="550" y="14" width="220" height="56" rx="10" class="c-apl"/><use href="#f14b-srv" x="560" y="26" width="32" height="32" class="ico"/>
+  <text x="600" y="38" class="t t-b">ACS</text><text x="600" y="56" class="t t-s t-mono">acs.ejemplo.com</text>
+  <line x1="250" y1="70" x2="250" y2="560" class="vida"/>
+  <line x1="660" y1="70" x2="660" y2="560" class="vida"/>
+
+  
+  <line x1="250" y1="110" x2="658" y2="113" class="ln s-tra" style="stroke-width:2.2" marker-end="url(#f14b-fl-tra)"/>
+  <text x="262" y="102" class="t t-s">① «quiero cifrar» (<tspan class="t-mono">ClientHello</tspan>)</text>
+  <line x1="660" y1="156" x2="252" y2="159" class="ln s-tra" style="stroke-width:2.2" marker-end="url(#f14b-fl-tra)"/>
+  <text x="330" y="148" class="t t-s">② certificado: «soy <tspan class="t-mono">acs.ejemplo.com</tspan>»</text>
+  <rect x="20" y="176" width="226" height="74" rx="8" class="caja" style="stroke:var(--good)"/>
+  <text x="32" y="196" class="t t-s t-b">③ el equipo valida:</text>
+  <text x="32" y="212" class="t t-s">✓ firma de una CA conocida</text>
+  <text x="32" y="226" class="t t-s">✓ el nombre coincide con la URL</text>
+  <text x="32" y="240" class="t t-s">✓ no está vencido · si falla, corta</text>
+
+  
+  <line x1="660" y1="282" x2="252" y2="285" class="ln s-tra" style="stroke-width:2.2" marker-end="url(#f14b-fl-tra)"/>
+  <text x="340" y="274" class="t t-s">④ «muéstrame el tuyo» (<tspan class="t-mono">CertificateRequest</tspan>)</text>
+  <line x1="250" y1="326" x2="658" y2="329" class="ln s-tra" style="stroke-width:2.2" marker-end="url(#f14b-fl-tra)"/>
+  <text x="262" y="318" class="t t-s">⑤ certificado del equipo: serie <tspan class="t-mono">FEJ0001203</tspan></text>
+  <rect x="664" y="342" width="130" height="62" rx="8" class="caja" style="stroke:var(--good)"/>
+  <text x="672" y="362" class="t t-s t-b">el ACS valida</text>
+  <text x="672" y="378" class="t t-s">la firma y que la</text>
+  <text x="672" y="394" class="t t-s">serie esté en inventario</text>
+
+  
+  <line x1="250" y1="450" x2="658" y2="453" class="ln s-apl" style="stroke-width:2.6" marker-end="url(#f14b-fl-apl)"/>
+  <text x="262" y="442" class="t t-s">⑥ <tspan class="t-mono t-b">Inform</tspan> · ya cifrado</text>
+  <line x1="660" y1="500" x2="252" y2="503" class="ln s-apl" style="stroke-width:2.2" marker-end="url(#f14b-fl-apl)"/>
+  <text x="380" y="492" class="t t-s">⑦ <tspan class="t-mono t-b">InformResponse</tspan> · sigue la sesión del capítulo 3</text>
+
+  
+  <g class="t t-xs t-b">
+    <path d="M800 92v160" class="ln s-tra" style="stroke-width:3"/><text x="812" y="150" class="k-tra">SALUDO</text><text x="812" y="164" class="t-m">protege al equipo:</text><text x="812" y="178" class="t-m">no le habla a un ACS falso</text>
+    <path d="M800 266v142" class="ln s-tra" style="stroke-width:3"/><text x="812" y="320" class="k-tra">TLS MUTUO</text><text x="812" y="334" class="t-m">protege al ACS:</text><text x="812" y="348" class="t-m">no le cree a un equipo falso</text>
+    <path d="M800 430v86" class="ln s-apl" style="stroke-width:3"/><text x="812" y="466" class="k-apl">SESIÓN</text><text x="812" y="480" class="t-m">todo viaja cifrado</text>
+  </g>
+  <text x="480" y="588" text-anchor="middle" class="t t-s t-m">Violeta: el saludo TLS, antes de cualquier mensaje TR-069. Rosado: la sesión TR-069 dentro del túnel cifrado.</text>
+</svg></div><figcaption><b>Una sesión TR-069 con TLS mutuo.</b> Dos participantes: el equipo y el ACS; el tiempo corre hacia abajo. En el saludo (① a ③) el equipo propone cifrar, el ACS le muestra su certificado y el equipo lo valida: firma de una autoridad conocida, nombre <code>acs.ejemplo.com</code>, fecha vigente. Si algo falla, el equipo corta ahí y no manda nada. En la presentación del equipo (④ y ⑤) el ACS le pide su certificado y comprueba que el número de serie coincida con el del inventario. Recién en la sesión (⑥ y ⑦) viaja el Inform, ya cifrado. A la derecha, qué protege cada fase: la primera, que el equipo no le hable a un impostor; la segunda, que el ACS no le crea a uno.</figcaption></figure><div class="prose"><p>Mira tú la diferencia desde la silla del atacante. En este laboratorio te sientas en medio del camino y lees lo que pasa.</p></div><div class="lab" id="14-lab-1"><div class="lab-title"><span class="tag">Laboratorio</span><h3>Sesión con y sin TLS</h3></div><p class="hint">Elige cómo habla el equipo con el ACS (en claro, con TLS que no valida el certificado, con TLS que sí lo valida, con TLS mutuo) qué hace el atacante (solo mirar, hacerse pasar por el ACS o hacerse pasar por el equipo) y si la clave de gestión es única o la misma en toda la flota. Aprieta «Enviar el cambio de Wi-Fi» y mira, mensaje por mensaje, qué ve y qué logra quien está en el medio. Busca la combinación en la que hay candado y aun así el atacante gana.</p><style>
+[id="14-lab-1"] svg{min-width:520px;width:100%;height:auto;display:block;background:var(--card);border-radius:8px;font-family:var(--f-display)}
+[id="14-lab-1"] svg .g14a-caja{fill:var(--paper);stroke:var(--line);stroke-width:1.5}
+[id="14-lab-1"] svg .g14a-caja.acs{fill:var(--c-apl-s);stroke:var(--c-apl)}
+[id="14-lab-1"] svg .g14a-caja.mal{fill:var(--warm-soft);stroke:var(--warm)}
+[id="14-lab-1"] svg .g14a-n{fill:var(--ink);font-size:14px;font-weight:700}
+[id="14-lab-1"] svg .g14a-s{fill:var(--muted);font-size:11px}
+[id="14-lab-1"] svg .g14a-tubo{stroke:var(--line);stroke-width:10;stroke-linecap:round}
+[id="14-lab-1"] svg .g14a-tubo.cif{stroke:var(--good);opacity:.55}
+[id="14-lab-1"] svg .g14a-tubo.cif2{stroke:var(--warm);opacity:.5}
+[id="14-lab-1"] svg .g14a-et{fill:var(--ink);font-size:12px;font-weight:600}
+[id="14-lab-1"] svg .g14a-ok{fill:var(--good);font-size:12px;font-weight:700}
+[id="14-lab-1"] svg .g14a-no{fill:var(--warm);font-size:12px;font-weight:700}
+[id="14-lab-1"] svg .g14a-pkt{fill:var(--accent)}
+[id="14-lab-1"] .g14a-tabla{width:100%;border-collapse:collapse;font-size:.84rem}
+[id="14-lab-1"] .g14a-tabla th,[id="14-lab-1"] .g14a-tabla td{border-bottom:1px solid var(--line);padding:6px 6px;text-align:left;vertical-align:top}
+[id="14-lab-1"] .g14a-tabla th{font:600 .78rem var(--f-display);color:var(--muted)}
+[id="14-lab-1"] .g14a-tabla code{font:500 .76rem var(--f-mono);word-break:break-all;white-space:normal}
+[id="14-lab-1"] .g14a-tabla .mal{color:var(--warm);font-weight:600}
+[id="14-lab-1"] .g14a-tabla .bien{color:var(--good);font-weight:600}
+</style>
+<div class="opciones">
+  <label>Cómo habla el equipo con el ACS
+    <select id="g14a-modo">
+      <option value="claro">HTTP en claro, sin cifrar</option>
+      <option value="nova">HTTPS que no valida el certificado</option>
+      <option value="tls" selected>HTTPS que valida el certificado</option>
+      <option value="mtls">HTTPS con TLS mutuo (certificado también en el equipo)</option>
+    </select></label>
+  <label>Qué hace el atacante en el medio
+    <select id="g14a-ata">
+      <option value="mira">Solo mira el camino</option>
+      <option value="acs">Se hace pasar por el ACS</option>
+      <option value="cpe">Se hace pasar por el equipo (conoce su número de serie)</option>
+    </select></label>
+  <label>Clave de gestión de los equipos
+    <select id="g14a-clave">
+      <option value="unica">Única en cada equipo</option>
+      <option value="igual">La misma en toda la flota</option>
+    </select></label>
+</div>
+<div class="btns"><button type="button" id="g14a-ir" class="primary">Enviar el cambio de Wi-Fi</button></div>
+<div class="lab-desliza" style="overflow-x:auto"><svg id="g14a-svg" viewBox="0 0 600 170" role="img" aria-label="El camino entre el equipo y el ACS, con el atacante en el medio"></svg></div>
+<div class="tbl"><table class="g14a-tabla"><thead><tr><th>Mensaje</th><th>Lo que ve o hace el atacante</th></tr></thead><tbody id="g14a-filas"></tbody></table></div>
+<div class="readout texto" id="g14a-out" aria-live="polite"></div></div><div class="practica"><div class="practica-title"><span class="tag">En la terminal</span><h3>Mira el carné de un servidor y lo que hace un equipo bien configurado con uno falso</h3></div><p>Vas a pedirle su certificado a un servidor real y después a dos servidores de prueba con certificados defectuosos, publicados justamente para eso en badssl.com. Solo se conecta y se lee: no se envía nada. Necesitas <b>OpenSSL</b>, la herramienta de cifrado de línea de comandos. En macOS y Linux ya viene instalada; en Windows úsala desde <b>Git Bash</b> (viene con Git para Windows) o desde WSL.</p><div class="cmds"><div class="cmd-panel" data-so="win mac linux"><div class="cmd-l"><code>openssl s_client -connect usp.technology:443 -servername usp.technology -brief &lt;/dev/null</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>openssl s_client -connect usp.technology:443 -servername usp.technology &lt;/dev/null 2&gt;/dev/null | openssl x509 -noout -subject -issuer -dates</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>openssl s_client -connect expired.badssl.com:443 -servername expired.badssl.com -brief &lt;/dev/null</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>openssl s_client -connect self-signed.badssl.com:443 -servername self-signed.badssl.com -brief &lt;/dev/null</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>openssl s_client -connect self-signed.badssl.com:443 -servername self-signed.badssl.com -verify_return_error -brief &lt;/dev/null</code><button type="button" class="copiar">Copiar</button></div></div></div><ol class="steps"><li><span>Con el primer comando, busca la línea <code>Peer certificate</code> (de quién es el carné) y la línea <code>Verification</code> (si OpenSSL lo dio por bueno).</span></li><li><span>Con el segundo, anota quién lo emitió (<code>issuer</code>) y entre qué fechas vale (<code>notBefore</code> y <code>notAfter</code>).</span></li><li><span>Con el tercero y el cuarto, lee la línea <code>verify error</code>: un certificado vencido y uno firmado por sí mismo. Fíjate en que, aun así, OpenSSL dice <code>CONNECTION ESTABLISHED</code>.</span></li><li><span>Con el quinto, que repite el cuarto pero exige que la validación salga bien, mira cómo la conexión se corta antes de empezar.</span></li></ol><p><b>Qué observar:</b> el certificado dice a quién pertenece, quién lo firmó y hasta cuándo vale, y el cliente decide si lo acepta. Por defecto, OpenSSL avisa del problema pero sigue: es el comportamiento del equipo que «cifra pero no valida» del laboratorio, y el que aprovecha un intermediario. Con <code>-verify_return_error</code>, OpenSSL se porta como debe portarse un equipo bien configurado frente a un ACS falso: no manda ni un byte. Las fechas te dirán además que los certificados vencen, a veces en tres meses: un ACS con su certificado vencido deja de hablar con toda la flota a la vez, y por eso renovarlos es una tarea con calendario y alarma.</p></div></section>
+<section><h2>Credenciales únicas por equipo</h2><div class="prose"><p>El cifrado protege el camino. Falta saber <b>quién</b> está en cada punta. En TR-069 hay dos pares de usuario y clave en cada equipo, los dos en el objeto <code>Device.ManagementServer</code>:</p><ul><li><code>Username</code> y <code>Password</code>: con ellos <b>el equipo se presenta ante el ACS</b> en cada sesión.</li><li><code>ConnectionRequestUsername</code> y <code>ConnectionRequestPassword</code>: con ellos <b>el ACS se presenta ante el equipo</b> cuando le toca el timbre.</li></ul><p>El error clásico es que todos los equipos de un modelo salgan de fábrica con la misma clave, o con una clave que se calcula a partir del número de serie con una regla fácil de adivinar. Es cómodo y es grave: basta con abrir un solo equipo, o leer un manual publicado en Internet, para conocer la clave de cien mil. Con ella, un atacante puede presentarse ante el ACS como si fuera cualquier equipo y recibir su configuración, con la clave del Wi-Fi y la cuenta de voz incluidas, o tocarle el timbre a cualquier equipo cuyo puerto encuentre abierto.</p><p>La regla de Fibra Ejemplo es la del edificio: <b>cada puerta, su llave.</b> Hay tres formas de lograrlo, de menos a más robusta:</p><div class="tbl"><table><thead><tr><th>Forma</th><th>Cómo funciona</th><th>Lo que hay que cuidar</th></tr></thead><tbody><tr><td><b>Clave por equipo de fábrica</b></td><td>El fabricante graba una clave aleatoria distinta en cada equipo y le entrega al operador la lista</td><td>Que esa lista viaje y se guarde con el mismo cuidado que las claves del banco</td></tr><tr><td><b>Clave que el ACS cambia en la primera sesión</b></td><td>Después del <code>0 BOOTSTRAP</code>, el ACS escribe en el equipo un usuario y una clave nuevos, generados al azar, y los guarda</td><td>Que la primera sesión vaya cifrada y validada; si no, el atacante se lleva la clave nueva</td></tr><tr><td><b>Certificado por equipo</b></td><td>El TLS mutuo de la sección anterior: el equipo prueba quién es con un certificado que no se puede copiar sin abrir el equipo</td><td>Una autoridad de certificación propia o del fabricante, y un plan para equipos con certificados vencidos o revocados</td></tr></tbody></table></div><p>Ninguna clave debe quedar guardada en texto legible en el ACS ni aparecer en la pantalla del agente de atención, y la de gestión no tiene nada que ver con la del Wi-Fi que el cliente conoce. Ojo con el capítulo 12: cambiar las credenciales de gestión de la flota es uno de esos cambios que «cortan la rama donde está sentado el ACS», y se lanza con el piloto más chico y doble control.</p></div><div class="practica"><div class="practica-title"><span class="tag">En la terminal</span><h3>La clave del simulador, al descubierto</h3></div><p>Usa el GenieACS y el simulador que instalaste en la práctica del capítulo 3, y la captura de Wireshark que hiciste allí. Es tu propia computadora: nada sale a la red. En Windows, corre los comandos en WSL.</p><ol class="steps"><li><span>En Wireshark, abre la captura del capítulo 3 (o haz una nueva con el filtro <code>tcp.port == 7547</code>) y sigue el flujo HTTP del primer <code>POST</code>. Busca la cabecera <code>Authorization: Basic</code> y copia lo que viene después.</span></li><li><span>Decodifícala. Si copiaste <code>OEtBOFdBMTE1MTEwMDA0Mzo=</code>, que es lo que manda el simulador sin cambios, usa:</span></li></ol><div class="cmds"><div class="cmd-tabs" role="tablist" aria-label="Sistema operativo"><button type="button" role="tab" data-so="win">Windows</button><button type="button" role="tab" data-so="mac linux">macOS y Linux</button></div><div class="cmd-panel" role="tabpanel" data-so="win"><p class="cmd-nota">Windows (PowerShell)</p><div class="cmd-l"><code>[Text.Encoding]::ASCII.GetString([Convert]::FromBase64String('OEtBOFdBMTE1MTEwMDA0Mzo='))</code><button type="button" class="copiar">Copiar</button></div></div><div class="cmd-panel" role="tabpanel" data-so="mac linux"><div class="cmd-l"><code>echo OEtBOFdBMTE1MTEwMDA0Mzo= | base64 -d</code><button type="button" class="copiar">Copiar</button></div></div></div><ol class="steps" start="3" style="counter-reset:st 2"><li><span>Lanza el simulador y anota la dirección que imprime en la línea <code>listening for connection requests on http://…</code>. Es su timbre. En otra terminal, tócalo tú con <code>curl</code> y esa dirección, por ejemplo <code>curl -i http://127.0.0.1:40123/</code>, sin usuario ni clave.</span></li></ol><p><b>Qué observar:</b> lo que parecía un código es solo el usuario y la clave escritos en <b>Base64</b>, una forma de pasar texto a caracteres seguros que cualquiera revierte en un segundo: aparece el usuario <code>8KA8WA1151100043</code> seguido de dos puntos y una clave vacía. Sin TLS, eso viaja a la vista de cualquiera en el camino. Y el timbre del simulador te obedece sin pedirte nada: en su terminal verás <code>got connection request</code> y, enseguida, una sesión nueva con el evento <code>6 CONNECTION REQUEST</code>. El simulador es una herramienta de laboratorio y no se protege; un equipo real debe exigir usuario y clave en cada timbre, como cuenta la sección siguiente.</p></div></section>
+<section><h2>Proteger el timbre</h2><div class="prose"><p>El <i>Connection Request</i> del capítulo 3 es la única puerta por la que algo <b>entra</b> al equipo sin que el equipo lo haya pedido. Es pequeña, pero es una puerta, y se protege en capas:</p><ol class="steps"><li><span><b>Con usuario y clave.</b> El equipo solo atiende el timbre si trae las credenciales de <code>ConnectionRequestUsername</code> y <code>ConnectionRequestPassword</code>, usando la autenticación <b>Digest</b> de HTTP, que prueba que se conoce la clave sin mandarla.</span></li><li><span><b>Solo desde el ACS.</b> El equipo, o la red del operador, deja pasar el timbre únicamente si viene de las direcciones de los servidores del ACS, con una <b>lista de control de acceso</b> (<i>Access Control List</i>, ACL).</span></li><li><span><b>Por la red de gestión, no por Internet.</b> En fibra, lo habitual es que el timbre llegue por la VLAN de gestión del operador, con una dirección privada que desde Internet no existe. La conexión del cliente hacia Internet no debe tener ese puerto abierto.</span></li><li><span><b>Sin aceptar avalanchas.</b> El equipo ignora timbres que lleguen demasiado seguidos, y el timbre UDP de STUN va firmado para que nadie lo imite.</span></li></ol><p>Hay que recordar algo que ya sabes del capítulo 3: <b>por el timbre no viaja ninguna orden.</b> Aun si alguien lograra tocarlo, solo conseguiría que el equipo llame a su ACS de siempre. El daño de un timbre abierto no está en el timbre: está en todo lo demás que suele venir con un puerto de gestión abierto hacia Internet, como enseñó noviembre de 2016.</p></div></section>
+<section><h2>El ataque de 2016 por el puerto 7547</h2><div class="prose"><p><b>Mirai</b> es un programa malicioso que, desde septiembre de 2016, recorría Internet buscando cámaras y routers con claves de fábrica para convertirlos en una <b>botnet</b> (red de robots), miles de equipos infectados que obedecen a un solo dueño y que se usan, entre otras cosas, para tumbar sitios web con tráfico. Su código se publicó, y aparecieron variantes.</p><p>A fines de noviembre de 2016, una de esas variantes empezó a buscar el puerto <b>7547</b> abierto hacia Internet. En algunos modelos de router, ese puerto no solo atendía el timbre de TR-069: también respondía a <b>TR-064</b>, una norma hermana pensada para configurar el router <b>desde dentro de la casa</b>, por ejemplo desde un programa en la computadora del cliente. Esos equipos la dejaban expuesta hacia afuera, y uno de sus comandos, el que fija el servidor de hora, tenía una falla de <b>inyección de comandos</b> (<i>command injection</i>): si en lugar de un nombre de servidor se le mandaba una orden del sistema, el router la ejecutaba. La orden descargaba el programa malicioso y el router pasaba a buscar a otros.</p></div><figure class="fig fig-flujo" id="14-diagrama-3"><div class="lienzo"><svg viewBox="0 0 1000 560" style="min-width:780px" role="img" aria-label="Propagación de la variante de Mirai de 2016: un router infectado busca el puerto 7547 abierto, manda un comando TR-064 con una orden escondida, el router vulnerable descarga y ejecuta el programa del atacante y empieza a buscar a otros">
+  <defs>
+    <marker id="f14c-fl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--warm)"/></marker>
+    <marker id="f14c-fl-g" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--muted)"/></marker>
+  </defs>
+  <g class="t" text-anchor="middle">
+    <rect x="30" y="14" width="160" height="56" rx="10" class="caja" style="stroke:var(--warm)"/>
+    <text x="110" y="38" class="t-b">Router infectado</text><text x="110" y="56" class="t-s t-m">ya es un bot</text>
+    <rect x="250" y="14" width="160" height="56" rx="10" class="caja"/>
+    <text x="330" y="38" class="t-b">Router vulnerable</text><text x="330" y="56" class="t-s t-m">7547 abierto a Internet</text>
+    <rect x="470" y="14" width="160" height="56" rx="10" class="d-inet"/>
+    <text x="550" y="38" class="t-b">Servidor del atacante</text><text x="550" y="56" class="t-s t-m">guarda el programa</text>
+    <rect x="690" y="14" width="140" height="56" rx="10" class="caja"/>
+    <text x="760" y="38" class="t-b">Router siguiente</text><text x="760" y="56" class="t-s t-m">otra casa</text>
+  </g>
+  <line x1="110" y1="70" x2="110" y2="510" class="vida"/>
+  <line x1="330" y1="70" x2="330" y2="510" class="vida"/>
+  <line x1="550" y1="70" x2="550" y2="510" class="vida"/>
+  <line x1="760" y1="70" x2="760" y2="510" class="vida"/>
+
+  
+  <line x1="110" y1="112" x2="326" y2="114" class="ln s-warm ln-d" style="stroke-width:2" marker-end="url(#f14c-fl)"/>
+  <text x="120" y="104" class="t t-s">① ¿responde el 7547? (direcciones al azar)</text>
+  
+  <line x1="110" y1="176" x2="326" y2="178" class="ln s-warm" style="stroke-width:2.4" marker-end="url(#f14c-fl)"/>
+  <text x="120" y="160" class="t t-s">② comando TR-064 «fija el</text>
+  <text x="120" y="172" class="t t-s">servidor de hora» con una orden</text>
+  <text x="120" y="196" class="t t-s t-mono">NTPServer1 = `orden…`</text>
+  <line x1="330" y1="230" x2="114" y2="232" class="ln" style="stroke-width:1.6" marker-end="url(#f14c-fl-g)"/>
+  <text x="140" y="224" class="t t-s t-m">③ «hecho» (y ejecuta la orden)</text>
+  
+  <line x1="330" y1="292" x2="546" y2="294" class="ln s-warm" style="stroke-width:2.4" marker-end="url(#f14c-fl)"/>
+  <text x="340" y="284" class="t t-s">④ pide el programa</text>
+  <line x1="550" y1="340" x2="334" y2="342" class="ln s-warm" style="stroke-width:2.4" marker-end="url(#f14c-fl)"/>
+  <text x="360" y="332" class="t t-s">⑤ lo recibe y lo corre</text>
+  <rect x="270" y="356" width="120" height="30" rx="8" class="caja" style="stroke:var(--warm)"/>
+  <text x="330" y="376" text-anchor="middle" class="t t-s t-b k-warm">ahora es un bot</text>
+  
+  <line x1="330" y1="440" x2="756" y2="442" class="ln s-warm ln-d" style="stroke-width:2" marker-end="url(#f14c-fl)"/>
+  <text x="340" y="432" class="t t-s">⑥ empieza a buscar a otros: ¿responde el 7547?</text>
+
+  
+  <g class="t t-xs t-b">
+    <path d="M860 92v36" class="s-warm ln" style="stroke-width:3"/><text x="872" y="106" class="k-warm">BÚSQUEDA</text><text x="872" y="120" class="t-m">7547 cerrado</text><text x="872" y="132" class="t-m">hacia Internet</text>
+    <path d="M860 150v90" class="s-warm ln" style="stroke-width:3"/><text x="872" y="180" class="k-warm">ENTRADA</text><text x="872" y="194" class="t-m">TR-064 solo</text><text x="872" y="206" class="t-m">en la casa</text>
+    <path d="M860 270v120" class="s-warm ln" style="stroke-width:3"/><text x="872" y="318" class="k-warm">INFECCIÓN</text><text x="872" y="332" class="t-m">firmware sin</text><text x="872" y="344" class="t-m">la falla</text>
+    <path d="M860 420v40" class="s-warm ln" style="stroke-width:3"/><text x="872" y="436" class="k-warm">CONTAGIO</text><text x="872" y="450" class="t-m">el ciclo se repite</text>
+  </g>
+  <text x="500" y="540" text-anchor="middle" class="t t-s t-m">Rojo: lo que hace el atacante. A la derecha, la defensa que habría cortado cada fase. Un solo eslabón cerrado detiene la cadena.</text>
+</svg></div><figcaption><b>Cómo se propagó la variante de Mirai en 2016.</b> Cuatro participantes: un router ya infectado, un router vulnerable en otra casa, el servidor del atacante y el router siguiente. En la búsqueda (①) el infectado prueba direcciones de Internet al azar en el puerto 7547. En la entrada (② y ③) encuentra uno abierto y le manda un comando TR-064 legítimo, el del servidor de hora, con una orden escondida en el valor. En la infección (④ y ⑤) el router vulnerable ejecuta la orden, descarga el programa del servidor del atacante y lo corre. En el contagio (⑥) el recién infectado empieza a buscar a otros. A la derecha, la defensa que habría cortado cada fase: puerto cerrado hacia Internet, TR-064 solo en la red de la casa, firmware sin la falla.</figcaption></figure><div class="prose"><p>En un operador europeo, cerca de <b>novecientos mil</b> routers quedaron sin servicio. La paradoja es que allí el ataque <b>fracasó</b>: el programa no logró instalarse en esos equipos, pero los intentos en masa los hicieron colgarse una y otra vez. El operador, que no podía corregir la falla sin una versión nueva, publicó en uno o dos días un firmware que cerraba el puerto y lo distribuyó <b>por su propia gestión remota</b>, mientras pedía a los clientes que reiniciaran el equipo. Otros operadores, en otros países, tuvieron equipos afectados en los mismos días.</p><p>Las lecciones de 2016 son tres, y las tres son del curso:</p><ul><li><b>Lo que es de la casa no se publica hacia Internet.</b> Ni TR-064 ni la página de administración del router deberían responder desde afuera. La pregunta «¿qué puertos tiene abiertos mi flota hacia Internet?» se responde con datos, no con suposiciones.</li><li><b>El firmware es seguridad.</b> El problema se resolvió con una actualización, y se pudo distribuir rápido porque existía la gestión remota. La disciplina del capítulo 13 (tramos, vigilancia y vuelta atrás) se comprime en horas cuando hay un ataque en curso, y por eso conviene tenerla ensayada.</li><li><b>El problema de uno es el de todos.</b> Un router vulnerable no solo deja expuesta su casa: se vuelve un soldado contra los demás.</li></ul><p>Ahora revisa un equipo como lo haría un atacante: desde Internet.</p></div><div class="lab" id="14-lab-2"><div class="lab-title"><span class="tag">Laboratorio</span><h3>Superficie de ataque</h3></div><p class="hint">Tienes un equipo de la casa con seis servicios: la página de administración, el timbre TR-069, TR-064, SSH, Telnet y UPnP. Para cada uno, elige si responde solo en la casa, también desde Internet o si está apagado, y si la clave es única o de fábrica. Mira qué ve un escáner desde Internet, cuánto riesgo suma cada servicio y cuál de los ataques públicos te habría alcanzado.</p><style>
+[id="14-lab-2"] .g14b-lista{display:grid;gap:8px}
+[id="14-lab-2"] .g14b-fila{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--paper)}
+[id="14-lab-2"] .g14b-fila.exp{border-color:var(--warm)}
+[id="14-lab-2"] .g14b-fila b{font:600 .9rem var(--f-display)}
+[id="14-lab-2"] .g14b-fila small{display:block;color:var(--muted);font:500 .76rem var(--f-mono)}
+[id="14-lab-2"] .g14b-fila select{width:100%;font-size:.82rem}
+[id="14-lab-2"] .g14b-fila>div{flex:1 1 150px;min-width:0}
+[id="14-lab-2"] .g14b-fila>div:first-child{flex:2 1 220px}
+[id="14-lab-2"] .g14b-esc{margin:0;padding:10px 12px;border-radius:8px;background:var(--ink);color:var(--card);font:500 .78rem/1.5 var(--f-mono);white-space:pre-wrap;overflow-x:auto}
+[id="14-lab-2"] svg{width:100%;height:auto;display:block}
+[id="14-lab-2"] svg .g14b-fondo{fill:var(--grid)}
+[id="14-lab-2"] svg .g14b-bar{fill:var(--good)}
+[id="14-lab-2"] svg .g14b-bar.med{fill:var(--accent)}
+[id="14-lab-2"] svg .g14b-bar.alto{fill:var(--warm)}
+[id="14-lab-2"] svg .g14b-t{fill:var(--muted);font:500 11px var(--f-display)}
+</style>
+<div class="btns">
+  <button type="button" id="g14b-p1">Equipo de 2016 mal configurado</button>
+  <button type="button" id="g14b-p2">Equipo como lo deja Fibra Ejemplo</button>
+</div>
+<div class="g14b-lista" id="g14b-lista"></div>
+<div class="lab-desliza"><svg id="g14b-svg" viewBox="0 0 300 46" role="img" aria-label="Barra de riesgo del equipo según los servicios expuestos"></svg></div>
+<pre class="g14b-esc" id="g14b-esc" aria-label="Lo que ve un escáner desde Internet"></pre>
+<div class="readout texto" id="g14b-out" aria-live="polite"></div>
+<p class="hint">Los pesos del riesgo son de ejemplo, para comparar configuraciones; no son una medida estándar.</p></div><div class="practica"><div class="practica-title"><span class="tag">En el navegador</span><h3>Mira quién sigue tocando el puerto 7547</h3></div><p>El <b>Internet Storm Center</b> de SANS, un centro público que reúne los registros de miles de cortafuegos voluntarios, publica cuánto se escanea cada puerto. Vas a ver si el puerto de 2016 sigue en la mira. Es una página pública y de solo lectura.</p><ol class="steps"><li><span>Abre la página del <a href="https://isc.sans.edu/port.html?port=7547" target="_blank" rel="noopener">puerto 7547 en el Internet Storm Center</a>.</span></li><li><span>Mira el gráfico de actividad: cuántos <b>registros</b> (<i>reports</i>), <b>objetivos</b> (<i>targets</i>) y <b>orígenes</b> (<i>sources</i>) aparecen en los últimos días.</span></li><li><span>Cambia el número del puerto en la dirección por <code>23</code> (Telnet) y por <code>443</code> (HTTPS) y compara.</span></li></ol><p><b>Qué observar:</b> años después del ataque, miles de direcciones siguen probando el 7547 cada día, buscando el equipo que nadie actualizó. Para un operador eso significa que cualquier equipo que deje ese puerto abierto hacia Internet será encontrado en horas, no en meses. Los números cambian de un día a otro y dependen de quiénes reportan; lo que se repite es que el escaneo nunca se detiene.</p></div></section>
+<section><h2>Accesos al ACS: roles, registro y doble control</h2><div class="prose"><p>Hasta aquí, las puertas técnicas. La más usada por los atacantes, sin embargo, es la más simple: <b>la cuenta de una persona.</b> Una clave robada con un correo falso, una sesión abierta en una computadora compartida o un exempleado con su acceso todavía activo valen más que cualquier falla de TLS. En el capítulo 1 viste que cada área usa el ACS con un permiso distinto. Ahora toca ver cómo se sostiene eso:</p><ul><li><b>Roles</b> (<i>role-based access control</i>, RBAC, control de acceso basado en roles). Cada persona tiene un rol, y el rol dice qué puede hacer: atención ve la ficha y cambia el Wi-Fi de un equipo; soporte corre diagnósticos; ingeniería prepara campañas; solo unos pocos aprueban un cambio a la flota. Nadie tiene más de lo que su trabajo necesita: es el <b>principio de mínimo privilegio</b> (<i>least privilege</i>).</li><li><b>Doble factor</b> (<i>multi-factor authentication</i>, MFA). Para entrar al ACS no basta la clave: hace falta algo más, como un código del celular. Una clave robada sola ya no abre.</li><li><b>Registro de cada acción</b> (<i>audit log</i>). Quién cambió qué parámetro, en qué equipo, cuándo, desde dónde y con qué resultado. El registro se guarda fuera del alcance de quien lo genera, para que nadie borre sus propias huellas.</li><li><b>Doble control</b> (<i>four-eyes principle</i>). Lo vimos en el capítulo 12: una persona prepara la campaña masiva y otra distinta la aprueba. Lo mismo vale para subir un firmware o cambiar la dirección del ACS en la flota.</li><li><b>Sistemas con su propia llave.</b> La API hacia el norte del capítulo 2 también es una puerta: el CRM, la mesa de ayuda y el NMS entran con una credencial propia cada uno, limitada a lo que necesitan. La mesa de ayuda puede pedir un diagnóstico; no tiene por qué poder lanzar un firmware.</li><li><b>La consola, solo desde adentro.</b> La pantalla del ACS y su API no se publican hacia Internet; se llega a ellas desde la red interna o por una conexión privada cifrada (<i>VPN</i>).</li></ul></div><div class="caso"><b>Un caso real</b><p>En un operador FTTH de la región, la revisión anual de accesos encontró que una cuenta genérica del ACS, creada años atrás para un proveedor que hizo una integración, seguía activa y con permiso para cambios masivos. Nadie recordaba quién tenía la clave. No hubo un incidente, pero la revisión dejó tres reglas que ese operador sigue desde entonces: ninguna cuenta compartida, cada cuenta de un tercero con fecha de vencimiento, y una alerta en el NOC cada vez que alguien lanza una acción sobre más de cien equipos. La lección: los permisos se ensucian solos con el tiempo, y solo una revisión periódica los limpia.</p></div></section>
+<section><h2>La privacidad del cliente</h2><div class="prose"><p>El ACS no solo guarda la configuración del equipo. Como viste en los capítulos 10 y 11, también ve cuántos dispositivos hay en la casa y cómo se llaman, a qué hora se conectan, cuánto tráfico mueven y qué redes Wi-Fi tienen los vecinos. Junto, eso dice a qué hora sale la familia, cuántas personas viven allí, si hay niños y qué aparatos compraron. Es información del cliente, no del operador, y el operador la tiene <b>solo para darle servicio</b>.</p><p>Las reglas que suelen seguir los operadores cuidadosos son pocas y claras:</p><ul><li><b>Recoger lo necesario</b> (<i>data minimization</i>, minimización de datos). Si para dar soporte basta con saber cuántos dispositivos hay y con qué señal, no se guarda el historial de nombres de cada uno.</li><li><b>Guardar por un tiempo.</b> El detalle de la última semana sirve al soporte; el de hace dos años, casi nunca. Lo viejo se resume o se borra.</li><li><b>Separar al cliente del dato.</b> Para estudiar la flota (capítulo 11) no hace falta saber quién es quién: se reemplaza el número de cliente por un código, lo que se llama <b>seudonimizar</b> (<i>pseudonymization</i>).</li><li><b>Mostrar a cada uno lo suyo.</b> El agente de atención ve los dispositivos de la casa que está atendiendo, no puede buscar casas al azar, y su consulta queda en el registro.</li><li><b>Cumplir la ley y el contrato.</b> Cada país tiene su ley de protección de datos personales, y el contrato con el cliente dice qué se recoge y para qué.</li></ul></div><div class="ml"><b>En la práctica</b><p>Cuando un cliente llama y pregunta «¿ustedes ven lo que hago en Internet?», el agente puede responder con precisión: el operador ve qué equipos hay conectados a su Wi-Fi, con qué señal y cuánto tráfico mueven, para darle soporte; no ve qué páginas visita ni qué escribe, porque el tráfico de la web va cifrado de punta a punta. Decirlo con claridad, y que sea verdad, genera más confianza que cualquier promesa genérica.</p></div><div class="prose"><p>Fibra Ejemplo cierra la parte de seguridad con una lista corta que revisa cada trimestre: sesiones con TLS y certificado validado, credenciales distintas en cada equipo, timbre solo desde el ACS, ningún servicio de gestión abierto hacia Internet, cuentas personales con doble factor, doble control para lo masivo y datos de clientes recogidos con medida. Si quieres ir más hondo, el curso de <a href="https://aaramirez.github.io/seguridad-informatica/temario.html" target="_blank" rel="noopener">Seguridad informática</a> trata los ataques y las defensas en general, el de <a href="https://aaramirez.github.io/criptografia/temario.html" target="_blank" rel="noopener">Criptografía</a> explica cómo funcionan por dentro el cifrado y los certificados, y el de <a href="https://aaramirez.github.io/proteccion-de-datos/temario.html" target="_blank" rel="noopener">Protección de datos</a> cubre las leyes y las prácticas de privacidad.</p><p>La idea con la que termina el capítulo: <b>cifrado, identidad por equipo y doble control: el ACS se protege como lo que es, la llave de toda la red de acceso.</b></p></div><div class="quiz"><h3>Pruébate</h3><details><summary>¿Por qué un equipo que cifra con TLS pero no valida el certificado del ACS sigue expuesto?</summary><p>Porque acepta cualquier certificado, también uno falso de un intermediario: la conversación va cifrada, pero con el atacante, que la lee y la puede cambiar antes de pasarla al ACS verdadero.</p></details><details><summary>¿Qué agrega el TLS mutuo al TLS común?</summary><p>Que también el equipo prueba quién es con un certificado propio grabado en fábrica, de modo que el ACS no tiene que creer lo que el equipo dice en el Inform y un atacante no puede hacerse pasar por un equipo con solo conocer su número de serie.</p></details><details><summary>¿Qué problema tiene que todos los equipos de un modelo tengan la misma clave de gestión?</summary><p>Que basta con descubrirla en un equipo o en un manual para poder presentarse ante el ACS como cualquier equipo de la flota o tocarle el timbre a cualquiera que tenga el puerto abierto.</p></details><details><summary>Si alguien logra tocar el timbre de un equipo sin autorización, ¿puede darle órdenes por esa vía?</summary><p>No: por el timbre no viaja ninguna orden, solo un «llámame»; el equipo llama a su ACS de siempre. El riesgo de un puerto de gestión abierto está en los otros servicios que suelen responder en él, como TR-064 en 2016.</p></details><details><summary>¿Por qué el ataque de 2016 alcanzó a equipos de casas a través del puerto 7547?</summary><p>Porque algunos routers dejaban abierto ese puerto hacia Internet y respondían en él a TR-064, una norma pensada para configurar el equipo desde la casa, con un comando que tenía una falla de inyección de órdenes.</p></details><details><summary>¿Qué es el doble control y en qué acciones del ACS se aplica?</summary><p>Que una persona prepara una acción y otra distinta la aprueba; se usa en campañas masivas, en la liberación de firmware y en cambios que podrían dejar a la flota sin gestión, como la dirección del ACS o las credenciales.</p></details></div><div class="investiga"><h3>Para investigar</h3><p class="hint">Estas preguntas no se responden en el capítulo: búscalas por tu cuenta.</p><ol><li>¿Qué es una lista de revocación de certificados (CRL) y qué es OCSP, y por qué a un router de casa le cuesta consultarlas?<small>Pista: busca «certificate revocation CRL OCSP embedded devices».</small></li><li>¿Qué es un módulo de seguridad de hardware (HSM) y por qué las autoridades de certificación guardan allí sus claves?</li><li>¿Qué cambió en la ley de algunos países sobre las claves de fábrica en los aparatos conectados, como la ley de California de 2018 o la ley británica de seguridad de productos de 2022?<small>Pista: busca «SB-327 default passwords» y «PSTI Act».</small></li><li>¿Qué hace un equipo nacional de respuesta a incidentes (CSIRT o CERT) cuando aparece un ataque masivo contra routers, y cómo se coordina con los operadores?<small>Pista: busca «CSIRT nacional» y el nombre de tu país.</small></li><li>¿Cómo se coordina la publicación de una vulnerabilidad entre quien la descubre, el fabricante y los operadores (divulgación coordinada)?<small>Pista: busca «coordinated vulnerability disclosure».</small></li></ol></div><div class="vids"><span>Para saber más</span><a class="vid" href="https://www.broadband-forum.org/pdfs/tr-069-1-6-1.pdf" target="_blank" rel="noopener">TR-069: CPE WAN Management Protocol, con sus requisitos de seguridad (Broadband Forum, inglés) <small>norma</small></a><a class="vid" href="https://isc.sans.edu/port.html?port=7547" target="_blank" rel="noopener">Actividad de escaneo del puerto 7547 en el Internet Storm Center (inglés) <small>datos</small></a><a class="vid" href="https://badssl.com/" target="_blank" rel="noopener">badssl.com: servidores de prueba con certificados defectuosos (inglés) <small>herramienta</small></a><a class="vid" href="https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=7547" target="_blank" rel="noopener">Registro de puertos de la IANA: el 7547 de CWMP (inglés) <small>referencia</small></a></div></section>
+<label class="got"><input type="checkbox" id="got"> Lo tengo claro</label>
+<nav class="pager" id="pager" aria-label="Capítulo anterior y siguiente"></nav>
+</main>
+</div>
+<footer><span>Curso abierto de aaramirez.github.io.</span><span>Sitio publicado: <a href="https://github.com/aaramirez/gestion-remota-de-equipos" target="_blank" rel="noopener">github.com/aaramirez/gestion-remota-de-equipos</a></span></footer>
+</div>
+<script src="assets/lab.js"></script>
+<script>
+(function(){
+  const {$}=window.Lab;
+  const HEX='9f3a c1 07 e2 5b 88 0d 4f a6 31 7c d9 12 be 60 …';
+  function plan(){
+    const m=$('#g14a-modo').value,a=$('#g14a-ata').value,c=$('#g14a-clave').value;
+    const cif=m!=='claro';
+    let filas=[],gana=false,txt='',tubo=cif?'cif':'';
+    if(a==='mira'){
+      if(!cif){
+        filas=[['Inform del equipo','<code>SerialNumber FEJ0001203 · Authorization: Basic OEtBOFdB…</code> <span class="mal">lee la serie y la clave de gestión</span>'],
+          ['SetParameterValues del ACS','<code>KeyPassphrase = Rojas-2026-casa</code> <span class="mal">lee la clave nueva del Wi-Fi</span>'],
+          ['Respuesta del equipo','<code>Status 0</code> <span class="mal">sabe que el cambio quedó</span>']];
+        gana=true;txt='Sin cifrado, quien mira el camino lee todo: la clave nueva del Wi-Fi que el agente le dictó al cliente y la clave de gestión del equipo, con la que después podrá hacerse pasar por él.';
+      }else{
+        filas=[['Saludo TLS','<code>ClientHello · ServerHello · certificado de acs.ejemplo.com</code> sabe que el equipo habla con el ACS'],
+          ['Inform del equipo','<code>'+HEX+'</code> <span class="bien">ilegible</span>'],
+          ['SetParameterValues del ACS','<code>'+HEX+'</code> <span class="bien">ilegible</span>'],
+          ['Respuesta del equipo','<code>'+HEX+'</code> <span class="bien">ilegible</span>']];
+        txt='Con TLS, quien solo mira ve que hubo una conversación con acs.ejemplo.com, cuándo y de qué tamaño, pero no su contenido. '+(m==='nova'?'Ojo: este equipo no valida el certificado. Mientras el atacante solo mire, no pasa nada; prueba «Se hace pasar por el ACS».':'');
+      }
+    }else if(a==='acs'){
+      if(m==='claro'||m==='nova'){
+        tubo=m==='nova'?'cif2':'';
+        filas=[[m==='nova'?'Saludo TLS':'Conexión','<code>'+(m==='nova'?'certificado falso de «acs.ejemplo.com», firmado por el propio atacante':'el atacante responde en lugar del ACS')+'</code> <span class="mal">el equipo lo acepta</span>'],
+          ['Inform del equipo','<code>SerialNumber FEJ0001203 · Authorization: Basic …</code> <span class="mal">lo lee completo</span>'],
+          ['Orden del «ACS»','<code>SetParameterValues DNSServers = 203.0.113.66</code> <span class="mal">mete su propia orden</span>'],
+          ['Respuesta del equipo','<code>Status 0</code> <span class="mal">el equipo obedeció al impostor</span>']];
+        gana=true;txt=m==='nova'?'El candado no sirvió: el equipo cifró perfectamente su conversación… con el atacante. Como no comprobó el certificado, le entregó todo y obedeció su orden: ahora usa un servidor de nombres falso que puede mandar a la familia a páginas de banco imitadas.':'Sin cifrado ni certificado, el equipo no tiene cómo saber con quién habla. El atacante responde como si fuera el ACS y le da órdenes: aquí cambió el servidor de nombres por uno suyo.';
+      }else{
+        filas=[['Saludo TLS','<code>certificado falso de «acs.ejemplo.com»</code> <span class="bien">el equipo comprueba la firma: no es de una autoridad en la que confía</span>'],
+          ['Inform del equipo','<span class="bien">no se envía: el equipo corta antes de mandar un solo byte</span>']];
+        txt='El equipo valida el certificado y lo rechaza. El atacante no recibe nada y no puede dar órdenes. El equipo reintenta más tarde y, cuando el camino está limpio, llega al ACS verdadero.';
+      }
+    }else{
+      const sabeClave=(m==='claro')||(c==='igual');
+      if(m==='mtls'){
+        filas=[['Saludo TLS','<code>el ACS pide el certificado del equipo</code> <span class="bien">el atacante no tiene el de FEJ0001203: está grabado dentro del equipo</span>'],
+          ['Inform falso','<span class="bien">no llega: el ACS corta la conexión</span>']];
+        txt='Con TLS mutuo, conocer la serie y hasta la clave no alcanza: el ACS exige un certificado que solo tiene el equipo verdadero.';
+      }else if(sabeClave){
+        filas=[['Inform falso','<code>SerialNumber FEJ0001203 · Authorization con la clave '+(m==='claro'?'que copió del camino':'de fábrica, igual en toda la flota')+'</code> <span class="mal">el ACS lo acepta</span>'],
+          ['Configuración del cliente','<code>SSID, KeyPassphrase, cuenta de voz, usuario PPPoE…</code> <span class="mal">el ACS se la entrega al impostor</span>']];
+        gana=true;txt=m==='claro'?'El atacante copió la clave de gestión del camino y se presenta como el equipo: el ACS le entrega la configuración del cliente, con la clave del Wi-Fi y la cuenta de voz.':'La clave es la misma en toda la flota: basta con sacarla de un equipo cualquiera para presentarse como cualquier otro. TLS protege el camino, pero no sirve si la llave es de todos.';
+      }else{
+        filas=[['Inform falso','<code>SerialNumber FEJ0001203 · Authorization con una clave adivinada</code> <span class="bien">el ACS la rechaza</span>'],
+          ['Configuración del cliente','<span class="bien">no se entrega</span>']];
+        txt='Con una clave única por equipo y el camino cifrado, el atacante conoce la serie pero no la clave. El ACS lo rechaza y, si los intentos se repiten, levanta una alarma.';
+      }
+    }
+    return {m,a,filas,gana,txt,tubo};
+  }
+  function dibujar(p,t){
+    const ata=p.a!=='mira'?'Atacante en el medio':'Atacante mirando';
+    let h='<rect x="14" y="40" width="130" height="64" rx="10" class="g14a-caja"/><text x="79" y="68" text-anchor="middle" class="g14a-n">Equipo</text><text x="79" y="86" text-anchor="middle" class="g14a-s">FEJ0001203</text>'+
+      '<rect x="456" y="40" width="130" height="64" rx="10" class="g14a-caja acs"/><text x="521" y="68" text-anchor="middle" class="g14a-n">ACS</text><text x="521" y="86" text-anchor="middle" class="g14a-s">acs.ejemplo.com</text>'+
+      '<line x1="150" y1="72" x2="450" y2="72" class="g14a-tubo '+p.tubo+'"/>'+
+      '<rect x="230" y="112" width="140" height="44" rx="10" class="g14a-caja mal"/><text x="300" y="132" text-anchor="middle" class="g14a-et">'+ata+'</text><text x="300" y="148" text-anchor="middle" class="g14a-s">'+({mira:'copia lo que pasa',acs:'responde por el ACS',cpe:'habla por el equipo'})[p.a]+'</text>'+
+      '<line x1="300" y1="78" x2="300" y2="112" stroke="var(--warm)" stroke-width="2" stroke-dasharray="4 3"/>';
+    const lbl={claro:'en claro: se lee todo',nova:'cifrado, sin mirar el carné',tls:'cifrado y con carné validado',mtls:'cifrado, carné de los dos lados'}[p.m];
+    h+='<text x="300" y="30" text-anchor="middle" class="g14a-et">'+lbl+'</text>';
+    if(t!=null){const x=150+300*t;h+='<circle cx="'+x+'" cy="72" r="7" class="g14a-pkt pkt"/>';}
+    else h+='<text x="300" y="58" text-anchor="middle" class="'+(p.gana?'g14a-no':'g14a-ok')+'">'+(p.gana?'✗ el atacante gana':'✓ el atacante no logra nada')+'</text>';
+    $('#g14a-svg').innerHTML=h;
+  }
+  function mostrar(){
+    const p=plan();
+    $('#g14a-filas').innerHTML=p.filas.map(f=>'<tr><td>'+f[0]+'</td><td>'+f[1]+'</td></tr>').join('');
+    $('#g14a-out').innerHTML='<span class="'+(p.gana?'warn':'ok')+'">'+(p.gana?'El atacante gana.':'El atacante no logra nada.')+'</span><span>'+p.txt+'</span>';
+    dibujar(p);
+  }
+  let anim=null;
+  function enviar(){
+    const p=plan();
+    const quieto=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if(quieto){mostrar();return;}
+    if(anim)clearInterval(anim);
+    let t=0;
+    $('#g14a-filas').innerHTML='';$('#g14a-out').innerHTML='<span>Enviando…</span>';
+    anim=setInterval(()=>{t=Math.min(1,t+0.06);dibujar(p,t);if(t>=1){clearInterval(anim);anim=null;mostrar();}},50);
+  }
+  ['#g14a-modo','#g14a-ata','#g14a-clave'].forEach(s=>$(s).addEventListener('change',mostrar));
+  $('#g14a-ir').addEventListener('click',enviar);
+  mostrar();
+})();
+</script>
+<script>
+(function(){
+  const {$}=window.Lab;
+  const S=[
+    {id:'web',n:'Página de administración',p:'80, 443/tcp',pc:'80,443/tcp',peso:3,clave:true,ef:'Con la clave de fábrica, cualquiera entra a la configuración del router desde Internet.'},
+    {id:'cr',n:'Timbre TR-069 (Connection Request)',p:'7547/tcp',peso:1,clave:true,cl:['Con usuario y clave (Digest)','Sin usuario ni clave'],ef:'Cualquiera puede hacer que el equipo llame a su ACS; no da órdenes, pero abre la puerta a avalanchas de timbres.'},
+    {id:'t64',n:'TR-064 (configuración desde la casa)',p:'7547/tcp en algunos modelos',peso:5,clave:false,ef:'Es una gestión pensada para la casa: desde Internet, una falla en un comando basta para tomar el equipo, como en 2016.'},
+    {id:'ssh',n:'SSH (consola remota cifrada)',p:'22/tcp',peso:3,clave:true,ef:'Una consola con la clave de fábrica es el router entero en manos de quien la pruebe.'},
+    {id:'tel',n:'Telnet (consola remota sin cifrar)',p:'23/tcp',peso:4,clave:true,ef:'Telnet con clave de fábrica es exactamente lo que buscaba el Mirai original en 2016.'},
+    {id:'upnp',n:'UPnP (abre puertos a pedido)',p:'1900/udp',peso:3,clave:false,ef:'Desde Internet, UPnP se usa para amplificar ataques contra terceros y, en algunos equipos, para abrir puertos hacia la casa.'}
+  ];
+  const EX=[['off','Apagado'],['lan','Solo en la casa'],['wan','También desde Internet']];
+  const P1={web:['wan','fab'],cr:['wan','fab'],t64:['wan',''],ssh:['lan','fab'],tel:['wan','fab'],upnp:['wan','']};
+  const P2={web:['lan','uni'],cr:['wan','uni'],t64:['off',''],ssh:['off','uni'],tel:['off','uni'],upnp:['lan','']};
+  let estado=JSON.parse(JSON.stringify(P1));
+  function lista(){
+    $('#g14b-lista').innerHTML=S.map(s=>{
+      const e=estado[s.id];
+      const exp='<select id="g14b-e-'+s.id+'" aria-label="Exposición de '+s.n+'">'+EX.map(x=>'<option value="'+x[0]+'"'+(e[0]===x[0]?' selected':'')+'>'+x[1]+'</option>').join('')+'</select>';
+      const cl=s.clave?'<select id="g14b-c-'+s.id+'" aria-label="Clave de '+s.n+'"><option value="uni"'+(e[1]==='uni'?' selected':'')+'>'+(s.cl?s.cl[0]:'Clave única del equipo')+'</option><option value="fab"'+(e[1]==='fab'?' selected':'')+'>'+(s.cl?s.cl[1]:'Clave de fábrica')+'</option></select>':'<span class="hint">sin clave propia</span>';
+      return '<div class="g14b-fila'+(e[0]==='wan'?' exp':'')+'" id="g14b-f-'+s.id+'"><div><b>'+s.n+'</b><small>'+s.p+'</small></div><div>'+exp+'</div><div>'+cl+'</div></div>';
+    }).join('');
+    S.forEach(s=>{
+      $('#g14b-e-'+s.id).addEventListener('change',ev=>{estado[s.id][0]=ev.target.value;$('#g14b-f-'+s.id).classList.toggle('exp',ev.target.value==='wan');calc();});
+      if(s.clave)$('#g14b-c-'+s.id).addEventListener('change',ev=>{estado[s.id][1]=ev.target.value;calc();});
+    });
+    calc();
+  }
+  function calc(){
+    let r=0,esc=['$ escaneo desde Internet a 203.0.113.45','PUERTO        ESTADO    SERVICIO'],avisos=[],ataques=[];
+    S.forEach(s=>{
+      const [e,c]=estado[s.id];
+      if(e==='wan'){
+        const mult=(s.clave&&c==='fab')?3:1;
+        r+=s.peso*mult;
+        esc.push(((s.pc||s.p.split(' ')[0])+'              ').slice(0,14)+'abierto   '+s.n.split(' (')[0]+(s.clave&&c==='fab'?(s.cl?'  ← sin usuario ni clave':'  ← clave de fábrica'):''));
+        if(mult>1||!s.clave||s.id==='t64')avisos.push(s.ef);
+      }else if(e==='lan'){r+=s.peso*0.15;}
+    });
+    if(esc.length===2)esc.push('(nada responde: el equipo es invisible desde afuera)');
+    const g=estado;
+    if(g.tel[0]==='wan'&&g.tel[1]==='fab')ataques.push('Mirai original (septiembre de 2016): entra por Telnet con la clave de fábrica.');
+    if(g.t64[0]==='wan')ataques.push('Variante de Mirai de noviembre de 2016: comando TR-064 con una orden escondida, por el puerto 7547.');
+    if(g.web[0]==='wan'&&g.web[1]==='fab')ataques.push('Robo de configuración: entra a la página de administración con la clave del manual.');
+    if(g.upnp[0]==='wan')ataques.push('Reflexión y amplificación por UPnP: el equipo se vuelve un arma contra terceros.');
+    if(g.cr[0]==='wan'&&g.cr[1]==='fab')ataques.push('Avalancha de timbres: cualquiera obliga al equipo a llamar al ACS una y otra vez.');
+    const max=40,pct=Math.min(1,r/max),cls=pct>0.45?'alto':pct>0.15?'med':'';
+    $('#g14b-svg').innerHTML='<rect x="0" y="6" width="300" height="18" rx="9" class="g14b-fondo"/><rect x="0" y="6" width="'+Math.max(10,300*pct)+'" height="18" rx="9" class="g14b-bar '+cls+'"/><text x="0" y="40" class="g14b-t">riesgo bajo</text><text x="300" y="40" text-anchor="end" class="g14b-t">riesgo alto</text>';
+    $('#g14b-esc').textContent=esc.join('\n');
+    const sinTimbre=g.cr[0]==='off';
+    $('#g14b-out').innerHTML='<span class="'+(cls==='alto'?'warn':cls==='med'?'big':'ok')+'">Riesgo '+(cls==='alto'?'alto':cls==='med'?'medio':'bajo')+': '+(function(n){return n===0?'ningún servicio responde':n===1?'1 servicio responde':n+' servicios responden';})(esc.length-2>0&&esc[2][0]!=='('?esc.length-2:0)+' desde Internet.</span>'+
+      (ataques.length?'<span>Ataques públicos que te habrían alcanzado:</span>'+ataques.map(a=>'<span>• '+a+'</span>').join(''):'<span>Ninguno de los ataques públicos conocidos de este laboratorio te alcanzaría.</span>')+
+      (avisos.length?'<span>'+avisos[0]+'</span>':'')+
+      (sinTimbre?'<span class="warn">Con el timbre apagado, el ACS no puede despertar al equipo: cada cambio espera al Inform periódico (capítulo 3).</span>':g.cr[0]==='wan'&&g.cr[1]==='uni'?'<span>El timbre responde, pero con Digest y, en la práctica, solo desde las direcciones del ACS o por la red de gestión: es la única puerta de gestión que conviene dejar.</span>':'');
+  }
+  $('#g14b-p1').addEventListener('click',()=>{estado=JSON.parse(JSON.stringify(P1));lista();});
+  $('#g14b-p2').addEventListener('click',()=>{estado=JSON.parse(JSON.stringify(P2));lista();});
+  lista();
+})();
+</script>
+</body>
+</html>

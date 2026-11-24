@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="es">
+<head>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-KX76XF8R');</script>
+<!-- End Google Tag Manager -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Arquitectura y escala · Gestión remota de equipos (ACS) · Gestión remota de equipos (ACS)</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Cómo un operador configura, actualiza y diagnostica a distancia los equipos que tiene en casa de sus clientes: TR-069 y TR-369 a fondo, el modelo de datos TR-181, el aprovisionamiento sin visita, los cambios masivos, el firmware, los diagnósticos, la seguridad y la escala de un ACS.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400;1,8..60,600&display=swap">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KX76XF8R"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+<div class="wrap" data-page="arquitectura-y-escala">
+<header class="topbar"><a class="brand" href="index.html">Gestión <b>remota</b> de equipos</a><span class="eyebrow">Curso visual e interactivo · Industrias y finanzas</span><a class="al-sitio" href="https://aaramirez.github.io/">← Todos los cursos</a></header>
+<div class="layout">
+<nav class="toc" id="toc" aria-label="Ruta de aprendizaje"></nav>
+<main>
+<header class="page-head"><span class="num">CAPÍTULO 15 DE 16</span><h1>La arquitectura de un ACS y el peor día del año</h1><p class="lede">Por dentro, un ACS es un puñado de piezas que se reparten el trabajo. Este capítulo las abre, hace las cuentas para dimensionarlas y provoca a propósito el peor día: el regreso de la luz después de un corte, cuando todos los equipos llaman a la vez.</p></header>
+<section><div class="prose"><p>Es un jueves de febrero, a las 18:40. Una tormenta tumba una línea de alta tensión y una de las tres ciudades de Fibra Ejemplo se queda a oscuras. Cuarenta mil equipos se apagan en el mismo segundo. En el NOC, el tablero del ACS muestra una caída en picada: los equipos dejan de llamar. Nadie se alarma; es la luz, no la red.</p><p>A las 19:25 vuelve la energía. Los cuarenta mil equipos arrancan casi juntos, tardan un minuto en levantar la fibra y, como acaban de encenderse, <b>todos llaman al ACS para avisar que arrancaron</b>. En un día normal el ACS recibe unas treinta sesiones por segundo; en los siguientes dos minutos le llegan más de trescientas. Lo que pase a continuación depende de decisiones que alguien tomó meses antes: cuántos servidores hay, cómo están conectados entre sí y cómo se comportan los equipos cuando el ACS no les contesta.</p><p>Este capítulo abre el ACS por dentro, hace las cuentas para dimensionarlo y repite ese jueves en un simulador hasta que el regreso de la luz deje de ser una crisis.</p></div></section>
+<section><h2>Las piezas de un ACS</h2><div class="analogia"><b>Imagínalo así</b><p>Piensa en una pizzería con reparto. En el mostrador se atiende a cada repartidor que llega (los equipos que llaman). Detrás, un tablero de comandas guarda lo que hay que entregarle a cada uno la próxima vez que pase. Hay un archivo con la ficha de cada cliente y lo que pidió siempre. En la bodega están las cajas grandes que no caben en el mostrador. Una ventana da a la oficina, donde los encargados miran todo en pantallas. Y un teléfono recibe los pedidos que hacen otros negocios. Si el mostrador se llena, se abre un segundo mostrador; lo que no puede pasar es que haya dos archivos con fichas distintas del mismo cliente.</p></div><div class="prose"><p>Un ACS tiene esas mismas piezas, aunque cada producto les ponga otro nombre:</p><ul><li><b>El servidor de sesiones</b> (el mostrador). Atiende las sesiones TR-069 del capítulo 3: recibe el Inform, decide qué órdenes darle al equipo y registra las respuestas. Es la pieza que más trabaja y la que primero se satura.</li><li><b>La base de datos</b> (el archivo). Guarda la ficha de cada equipo: su árbol de parámetros con la hora de cada dato, sus etiquetas, su historial y la configuración que debería tener.</li><li><b>La cola de tareas</b> (el tablero de comandas). Las órdenes pendientes de cada equipo, esperando su próxima sesión. Es lo que hace que un cambio «tarde» sin perderse.</li><li><b>El servidor de archivos</b> (la bodega). Entrega los archivos grandes que el equipo descarga por su cuenta: el firmware del capítulo 13 o una configuración completa. Va aparte porque una descarga de 40 MB no debe ocupar el mostrador.</li><li><b>La interfaz</b> (la oficina). Las pantallas de las personas: buscar un equipo, ver su ficha, lanzar una campaña.</li><li><b>La API hacia el norte</b> (el teléfono). Por donde el CRM, la mesa de ayuda y el NMS le piden cosas al ACS sin pantallas, como viste en el capítulo 2.</li><li><b>Las reglas</b> (el recetario). Lo que el ACS hace solo cuando se cumple una condición: «a todo equipo nuevo de este modelo, cárgale este perfil». En GenieACS se llaman <i>presets</i> y <i>provisions</i>; en otras plataformas, políticas o perfiles.</li></ul></div><figure class="fig fig-arquitectura" id="15-diagrama-1"><div class="lienzo"><svg viewBox="0 0 960 460" style="min-width:760px" role="img" aria-label="Arquitectura de un ACS: los equipos de la casa hablan con el servidor de sesiones a través de un balanceador y descargan archivos del servidor de archivos; los servidores de sesiones comparten la base de datos, la cola de tareas y las reglas; las personas entran por la interfaz y los sistemas del negocio por la API hacia el norte">
+  <defs>
+    <marker id="f15a-fl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--muted)"/></marker>
+    <marker id="f15a-fl-apl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--c-apl)"/></marker>
+    <symbol id="f15a-ont" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="10" rx="1.6"/><path d="M8 12h.01M11 12h.01M14 12h.01"/><path d="M12 18v3.5"/><circle cx="12" cy="4.5" r="1.6"/></g></symbol>
+    <symbol id="f15a-db" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></g></symbol>
+  </defs>
+  <rect x="14" y="14" width="180" height="432" rx="12" class="d-casa"/>
+  <text x="26" y="36" class="t t-xs t-b k-casa">LAS CASAS</text>
+  <rect x="208" y="14" width="520" height="432" rx="12" class="d-oper"/>
+  <text x="220" y="36" class="t t-xs t-b k-oper">EL ACS, EN LA RED DEL OPERADOR</text>
+  <rect x="742" y="14" width="204" height="432" rx="12" class="d-sis"/>
+  <text x="754" y="36" class="t t-xs t-b k-sis">SISTEMAS DEL NEGOCIO</text>
+
+  
+  <g>
+    <rect x="34" y="90" width="140" height="44" rx="8" class="caja"/><use href="#f15a-ont" x="42" y="98" width="28" height="28" class="ico"/><text x="78" y="117" class="t t-s t-b">Equipo 1</text>
+    <rect x="34" y="146" width="140" height="44" rx="8" class="caja"/><use href="#f15a-ont" x="42" y="154" width="28" height="28" class="ico"/><text x="78" y="173" class="t t-s t-b">Equipo 2</text>
+    <text x="104" y="214" text-anchor="middle" class="t t-b t-m">⋮</text>
+    <rect x="34" y="228" width="140" height="44" rx="8" class="caja"/><use href="#f15a-ont" x="42" y="236" width="28" height="28" class="ico"/><text x="78" y="255" class="t t-s t-b">Equipo 100.000</text>
+  </g>
+
+  
+  <rect x="232" y="120" width="110" height="96" rx="10" class="caja"/>
+  <text x="287" y="160" text-anchor="middle" class="t t-s t-b">Balanceador</text>
+  <text x="287" y="176" text-anchor="middle" class="t t-xs t-m">reparte sesiones</text>
+  <line x1="174" y1="168" x2="230" y2="168" class="ln s-apl" style="stroke-width:2.4" marker-end="url(#f15a-fl-apl)"/>
+  <text x="182" y="160" class="t t-xs k-apl">TR-069</text>
+
+  <g>
+    <rect x="378" y="64" width="160" height="50" rx="10" class="c-apl"/><text x="458" y="86" text-anchor="middle" class="t t-s t-b">Servidor de sesiones 1</text><text x="458" y="102" text-anchor="middle" class="t t-xs t-mono">genieacs-cwmp · 7547</text>
+    <rect x="378" y="124" width="160" height="50" rx="10" class="c-apl"/><text x="458" y="146" text-anchor="middle" class="t t-s t-b">Servidor de sesiones 2</text><text x="458" y="162" text-anchor="middle" class="t t-xs t-mono">genieacs-cwmp · 7547</text>
+    <rect x="378" y="184" width="160" height="50" rx="10" class="c-apl"/><text x="458" y="206" text-anchor="middle" class="t t-s t-b">Servidor de sesiones 3</text><text x="458" y="222" text-anchor="middle" class="t t-xs t-mono">genieacs-cwmp · 7547</text>
+  </g>
+  <line x1="342" y1="150" x2="376" y2="90" class="ln"/><line x1="342" y1="168" x2="376" y2="150" class="ln"/><line x1="342" y1="186" x2="376" y2="208" class="ln"/>
+
+  
+  <rect x="232" y="290" width="306" height="140" rx="10" class="caja"/>
+  <text x="246" y="310" class="t t-xs t-b t-m">LO QUE COMPARTEN TODOS</text>
+  <use href="#f15a-db" x="246" y="322" width="34" height="34" class="ico"/>
+  <text x="288" y="336" class="t t-s t-b">Base de datos</text><text x="288" y="350" class="t t-xs t-m">fichas y árbol de cada equipo</text>
+  <text x="288" y="378" class="t t-s t-b">Cola de tareas</text><text x="288" y="392" class="t t-xs t-m">lo pendiente de cada equipo</text>
+  <text x="288" y="416" class="t t-s t-b">Reglas</text><text x="370" y="416" class="t t-xs t-m">presets y provisions</text>
+  <text x="452" y="336" class="t t-xs t-mono t-m">MongoDB</text>
+  <line x1="458" y1="234" x2="458" y2="288" class="ln" style="stroke-width:2"/>
+  <line x1="420" y1="234" x2="420" y2="288" class="ln" style="stroke-width:2"/>
+  <line x1="496" y1="234" x2="496" y2="288" class="ln" style="stroke-width:2"/>
+
+  
+  <rect x="566" y="64" width="146" height="62" rx="10" class="caja"/>
+  <text x="639" y="88" text-anchor="middle" class="t t-s t-b">Servidor de archivos</text>
+  <text x="639" y="104" text-anchor="middle" class="t t-xs t-m">firmware, configuraciones</text>
+  <text x="639" y="118" text-anchor="middle" class="t t-xs t-mono">genieacs-fs · 7567</text>
+  <path d="M174 112 C230 40 520 30 564 84" class="ln ln-d" style="stroke-width:1.6" marker-end="url(#f15a-fl)"/>
+  <text x="566" y="54" class="t t-xs t-m">descargas, fuera de la sesión</text>
+
+  
+  <rect x="566" y="250" width="146" height="56" rx="10" class="caja"/>
+  <text x="639" y="274" text-anchor="middle" class="t t-s t-b">Interfaz</text><text x="639" y="292" text-anchor="middle" class="t t-xs t-mono">genieacs-ui · 3000</text>
+  <rect x="566" y="330" width="146" height="56" rx="10" class="caja"/>
+  <text x="639" y="354" text-anchor="middle" class="t t-s t-b">API hacia el norte</text><text x="639" y="372" text-anchor="middle" class="t t-xs t-mono">genieacs-nbi · 7557</text>
+  <line x1="566" y1="278" x2="540" y2="320" class="ln"/><line x1="566" y1="358" x2="540" y2="358" class="ln"/>
+
+  <rect x="766" y="250" width="160" height="56" rx="10" class="caja"/>
+  <text x="846" y="274" text-anchor="middle" class="t t-s t-b">Personas</text><text x="846" y="292" text-anchor="middle" class="t t-xs t-m">atención, soporte, NOC</text>
+  <rect x="766" y="330" width="160" height="56" rx="10" class="caja"/>
+  <text x="846" y="354" text-anchor="middle" class="t t-s t-b">CRM, mesa de ayuda, NMS</text><text x="846" y="372" text-anchor="middle" class="t t-xs t-m">JSON por HTTP</text>
+  <line x1="766" y1="278" x2="714" y2="278" class="ln" marker-end="url(#f15a-fl)"/>
+  <line x1="766" y1="358" x2="714" y2="358" class="ln" marker-end="url(#f15a-fl)"/>
+</svg></div><figcaption><b>Las piezas de un ACS y quién habla con cada una.</b> A la izquierda, en la franja de la casa, los equipos, que solo hablan con dos piezas: el servidor de sesiones, por TR-069, y el servidor de archivos, para las descargas. En el centro, en la red del operador, el ACS por dentro: el balanceador reparte las sesiones entre varios servidores de sesiones iguales, que comparten la base de datos, la cola de tareas y las reglas. A la derecha, en la franja de los sistemas del negocio, las personas entran por la interfaz y los sistemas por la API; las dos escriben tareas en la cola y leen de la base. Dentro de cada pieza, su nombre y su puerto en GenieACS, un ACS de código abierto, como ejemplo.</figcaption></figure><div class="prose"><p>GenieACS, el ACS de código abierto de las prácticas, es un buen ejemplo porque cada pieza es un programa aparte que puedes ver correr: <code>genieacs-cwmp</code> es el servidor de sesiones y escucha en el puerto 7547; <code>genieacs-nbi</code>, la API hacia el norte, en el 7557; <code>genieacs-fs</code>, el servidor de archivos, en el 7567; <code>genieacs-ui</code>, la interfaz, en el 3000; y <b>MongoDB</b>, una base de datos de documentos, guarda las fichas, la cola de tareas y las reglas. Las plataformas comerciales juntan o reparten estas piezas de otra manera, pero las funciones son las mismas.</p></div><div class="practica"><div class="practica-title"><span class="tag">En la terminal</span><h3>Cuenta las piezas de tu ACS</h3></div><p>Usa el GenieACS de la práctica del capítulo 3, con sus tres servicios corriendo (<code>genieacs-cwmp</code>, <code>genieacs-nbi</code> y <code>genieacs-ui</code>) y la base de datos en Docker. Abre una terminal más para el servidor de archivos, que en el capítulo 3 no hizo falta. En Windows, todo dentro de WSL.</p><div class="cmds"><div class="cmd-tabs" role="tablist" aria-label="Sistema operativo"><button type="button" role="tab" data-so="win">Windows</button><button type="button" role="tab" data-so="mac">macOS</button><button type="button" role="tab" data-so="linux">Linux</button></div><div class="cmd-panel" role="tabpanel" data-so="win"><p class="cmd-nota">Windows (en WSL, con Ubuntu)</p><div class="cmd-l"><code>genieacs-fs</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>ss -ltn</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>curl -s 'http://127.0.0.1:7557/devices/?projection=_lastInform,_registered'</code><button type="button" class="copiar">Copiar</button></div></div><div class="cmd-panel" role="tabpanel" data-so="mac"><div class="cmd-l"><code>genieacs-fs</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>lsof -iTCP -sTCP:LISTEN -n -P</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>curl -s 'http://127.0.0.1:7557/devices/?projection=_lastInform,_registered'</code><button type="button" class="copiar">Copiar</button></div></div><div class="cmd-panel" role="tabpanel" data-so="linux"><div class="cmd-l"><code>genieacs-fs</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>ss -ltn</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>curl -s 'http://127.0.0.1:7557/devices/?projection=_lastInform,_registered'</code><button type="button" class="copiar">Copiar</button></div></div></div><ol class="steps"><li><span>Lanza <code>genieacs-fs</code> en su propia terminal y déjalo corriendo.</span></li><li><span>En otra terminal, lista los puertos que están escuchando y busca 7547, 7557, 7567, 3000 y 27017.</span></li><li><span>Con el <code>curl</code>, pídele a la API la lista de equipos, pero solo dos datos de cada uno: cuándo llamó por última vez y cuándo se registró.</span></li></ol><p><b>Qué observar:</b> cada puerto es una pieza del diagrama: 7547 el mostrador, 7557 el teléfono, 7567 la bodega, 3000 la oficina y 27017 el archivo (MongoDB). Si apagas una, solo se pierde lo suyo: sin <code>genieacs-ui</code> no hay pantallas, pero los equipos siguen llamando. La respuesta del <code>curl</code> llega en <b>JSON</b> (<i>JavaScript Object Notation</i>, notación de objetos de JavaScript), y el parámetro <code>projection</code> pide solo los campos que necesitas: un CRM bien integrado hace eso mismo para no traerse el árbol entero de cada equipo.</p></div></section>
+<section><h2>La API hacia el norte, por dentro</h2><div class="prose"><p>Para la mayoría de las áreas del operador, el ACS no es una pantalla: es un botón dentro del CRM o de la mesa de ayuda. Detrás de ese botón está la API hacia el norte, y cómo se use decide buena parte de la carga.</p><p>La forma más común es una <b>API REST</b> (<i>Representational State Transfer</i>, transferencia de estado representacional), un estilo de API web en el que cada cosa tiene una dirección (<code>/devices</code>, <code>/tasks</code>, <code>/presets</code>) y se pide con los verbos de HTTP: <code>GET</code> para leer, <code>POST</code> para crear, <code>DELETE</code> para borrar. Lo que se manda y se recibe va en JSON. Cuando el agente aprieta «Reiniciar» en el CRM, pasa esto:</p></div><figure class="fig fig-flujo" id="15-diagrama-2"><div class="lienzo"><svg viewBox="0 0 960 560" style="min-width:780px" role="img" aria-label="Flujo de un reinicio pedido desde el CRM: el CRM manda la tarea a la API, la API la guarda en la cola y toca el timbre; el equipo abre una sesión, el servidor de sesiones le entrega la tarea y guarda el resultado; la API contesta 200 o 202">
+  <defs>
+    <marker id="f15b-fl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--muted)"/></marker>
+    <marker id="f15b-fl-apl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--c-apl)"/></marker>
+  </defs>
+  <g class="t" text-anchor="middle">
+    <rect x="20" y="14" width="120" height="52" rx="10" class="d-sis"/><text x="80" y="36" class="t-b">CRM</text><text x="80" y="54" class="t-s t-m">botón «Reiniciar»</text>
+    <rect x="180" y="14" width="120" height="52" rx="10" class="caja"/><text x="240" y="36" class="t-b">API del ACS</text><text x="240" y="54" class="t-s t-m t-mono">nbi · 7557</text>
+    <rect x="340" y="14" width="120" height="52" rx="10" class="caja"/><text x="400" y="36" class="t-b">Cola y base</text><text x="400" y="54" class="t-s t-m">tareas pendientes</text>
+    <rect x="500" y="14" width="120" height="52" rx="10" class="c-apl"/><text x="560" y="36" class="t-b">Sesiones</text><text x="560" y="54" class="t-s t-mono">cwmp · 7547</text>
+    <rect x="660" y="14" width="120" height="52" rx="10" class="d-casa"/><text x="720" y="36" class="t-b">Equipo</text><text x="720" y="54" class="t-s t-m">FEJ0001203</text>
+  </g>
+  <line x1="80" y1="66" x2="80" y2="520" class="vida"/>
+  <line x1="240" y1="66" x2="240" y2="520" class="vida"/>
+  <line x1="400" y1="66" x2="400" y2="520" class="vida"/>
+  <line x1="560" y1="66" x2="560" y2="520" class="vida"/>
+  <line x1="720" y1="66" x2="720" y2="520" class="vida"/>
+
+  <line x1="80" y1="104" x2="236" y2="106" class="ln" style="stroke-width:2" marker-end="url(#f15b-fl)"/>
+  <text x="88" y="96" class="t t-s">① <tspan class="t-mono">POST /tasks</tspan> reboot</text>
+  <line x1="240" y1="146" x2="396" y2="148" class="ln" style="stroke-width:2" marker-end="url(#f15b-fl)"/>
+  <text x="248" y="138" class="t t-s">② guarda la tarea</text>
+
+  <line x1="240" y1="196" x2="716" y2="198" class="ln s-apl ln-d" style="stroke-width:2" marker-end="url(#f15b-fl-apl)"/>
+  <text x="420" y="188" class="t t-s">③ timbre: <tspan class="t-mono">GET</tspan> «llámame»</text>
+  <line x1="720" y1="246" x2="564" y2="248" class="ln s-apl" style="stroke-width:2.4" marker-end="url(#f15b-fl-apl)"/>
+  <text x="570" y="238" class="t t-s">④ <tspan class="t-mono">Inform</tspan> · 6 CONNECTION REQUEST</text>
+
+  <line x1="560" y1="296" x2="404" y2="298" class="ln" style="stroke-width:2" marker-end="url(#f15b-fl)"/>
+  <text x="410" y="288" class="t t-s">⑤ ¿qué tiene pendiente?</text>
+  <line x1="560" y1="346" x2="716" y2="348" class="ln s-apl" style="stroke-width:2.4" marker-end="url(#f15b-fl-apl)"/>
+  <text x="568" y="338" class="t t-s">⑥ <tspan class="t-mono">Reboot</tspan></text>
+  <line x1="720" y1="392" x2="564" y2="394" class="ln s-apl" style="stroke-width:2" marker-end="url(#f15b-fl-apl)"/>
+  <line x1="560" y1="406" x2="404" y2="408" class="ln" style="stroke-width:2" marker-end="url(#f15b-fl)"/>
+  <text x="410" y="384" class="t t-s">⑦ respuesta y registro</text>
+
+  <line x1="240" y1="466" x2="84" y2="468" class="ln" style="stroke-width:2.4" marker-end="url(#f15b-fl)"/>
+  <text x="90" y="458" class="t t-s">⑧ <tspan class="t-mono t-b">200</tspan> hecho, o <tspan class="t-mono t-b">202</tspan> en cola</text>
+
+  <g class="t t-xs t-b">
+    <path d="M820 88v70" class="ln" style="stroke-width:3"/><text x="832" y="118">PEDIDO</text><text x="832" y="132" class="t-m">milisegundos</text>
+    <path d="M820 178v80" class="ln s-apl" style="stroke-width:3"/><text x="832" y="212" class="k-apl">TIMBRE</text><text x="832" y="226" class="t-m">1 a 2 segundos</text>
+    <path d="M820 278v136" class="ln s-apl" style="stroke-width:3"/><text x="832" y="338" class="k-apl">EJECUCIÓN</text><text x="832" y="352" class="t-m">1 ida y vuelta</text><text x="832" y="364" class="t-m">por orden</text>
+    <path d="M820 444v40" class="ln" style="stroke-width:3"/><text x="832" y="460">RESPUESTA</text><text x="832" y="474" class="t-m">o 202 si no llamó</text>
+  </g>
+  <text x="480" y="546" text-anchor="middle" class="t t-s t-m">Gris: dentro del ACS y hacia el negocio (JSON). Rosado: TR-069 con el equipo. La API no le da órdenes al equipo: deja la tarea y solo toca el timbre.</text>
+</svg></div><figcaption><b>Un reinicio pedido desde el CRM.</b> Cinco participantes: el CRM, la API del ACS, la cola de tareas con la base, el servidor de sesiones y el equipo; el tiempo corre hacia abajo. En la fase de pedido (① y ②) el CRM manda un <code>POST</code> con la tarea y la API la guarda en la cola. En la de timbre (③ y ④) la API toca el timbre y el equipo abre una sesión con el evento <code>6 CONNECTION REQUEST</code>. En la de ejecución (⑤ a ⑦) el servidor de sesiones saca la tarea de la cola, se la da al equipo y guarda el resultado. En la respuesta (⑧) la API contesta <code>200</code> si todo pasó a tiempo o <code>202</code> si la tarea quedó esperando. A la derecha, cuánto tarda cada fase: milisegundos dentro del ACS, segundos con el equipo.</figcaption></figure><div class="prose"><p>Tres reglas separan una integración sana de una que tumba al ACS:</p><ol class="steps"><li><span><b>No preguntar a cada rato.</b> Si el CRM, para mostrar el estado de cada equipo, le pregunta al ACS por los cien mil cada minuto (lo que se llama sondeo, <i>polling</i>), genera más carga que todos los equipos juntos. Lo sano es preguntar cuando el agente abre la ficha o recibir avisos cuando algo cambia.</span></li><li><span><b>Pedir solo lo necesario.</b> Una ficha de equipo puede tener miles de parámetros. La pantalla de atención necesita veinte. La API permite pedir solo esos, como hiciste con <code>projection</code> en la práctica.</span></li><li><span><b>Una credencial y un límite por sistema.</b> Como viste en el capítulo 14, cada sistema entra con su propia llave. Además, cada uno tiene un tope de pedidos por segundo (<i>rate limit</i>), para que un error en el CRM no se convierta en un ataque contra el ACS.</span></li></ol></div></section>
+<section><h2>Dimensionar: equipos, intervalo y sesiones por segundo</h2><div class="prose"><p>Dimensionar es responder una pregunta concreta: <b>¿cuántos servidores de cada pieza hacen falta para que el ACS aguante, con margen, su carga más alta?</b> La cuenta base ya la hiciste en el capítulo 3:</p><p><b>sesiones por segundo = equipos ÷ intervalo del Inform en segundos</b></p><p>Fibra Ejemplo tiene cien mil equipos que llaman cada hora: 100.000 ÷ 3.600 ≈ <b>28 sesiones por segundo</b>. A eso se suman las sesiones extra: timbres de atención, diagnósticos, reinicios y campañas. Si en un día normal hay unas 20.000 tareas con timbre, son menos de una sesión por segundo más; si hay una campaña de firmware en curso, bastantes más.</p><p>La segunda cuenta es cuántas sesiones hay <b>abiertas al mismo tiempo</b>, que es lo que de verdad ocupa memoria y conexiones. La da una regla sencilla que se usa en cualquier fila, la <b>ley de Little</b> (<i>Little's law</i>):</p><p><b>sesiones simultáneas = sesiones por segundo × duración de cada sesión</b></p><p>Una sesión de rutina dura uno o dos segundos; una con diez órdenes, como la de un equipo recién instalado, puede durar diez o veinte, porque cada orden es una ida y vuelta por la red. Con 28 sesiones por segundo de dos segundos cada una, hay unas 56 abiertas a la vez. Si un cambio en las reglas hace que cada sesión dure ocho segundos, en lugar de dos, son 224: la misma cantidad de equipos, el cuádruple de carga. <b>La duración de la sesión pesa tanto como el número de equipos.</b></p><p>La tercera cuenta es la de la base de datos: cada sesión lee la ficha del equipo y escribe lo que cambió. Por eso, cuando un ACS se pone lento, muchas veces el cuello de botella no es el servidor de sesiones sino la base. Y una cuarta, aparte: la recolección masiva de datos del capítulo 11 no pasa por el servidor de sesiones sino por su propio colector, con sus propias cuentas.</p><p>Con eso, el número de servidores sale de dividir la carga más alta por lo que aguanta cada uno, y sumarle margen: lo habitual es que en el día normal ningún servidor pase de la mitad de su capacidad, y que si uno se cae, los demás puedan con su parte.</p></div><div class="lab" id="15-lab-2"><div class="lab-title"><span class="tag">Laboratorio</span><h3>Dimensionamiento</h3></div><p class="hint">Mueve el número de equipos, el intervalo del Inform, las tareas por sesión y las sesiones que aguanta cada servidor. Mira las sesiones por segundo, las simultáneas y cuántos servidores de sesiones hacen falta, con un margen para que la caída de uno no tumbe a los demás. Después prueba qué pasa si las reglas alargan cada sesión, y qué cuesta pasar de un Inform por hora a uno cada quince minutos.</p><style>
+[id="15-lab-2"] svg{min-width:480px;width:100%;height:auto;display:block;background:var(--card);border-radius:8px;font-family:var(--f-display)}
+[id="15-lab-2"] svg .g15b-srv{fill:var(--paper);stroke:var(--line);stroke-width:1.4}
+[id="15-lab-2"] svg .g15b-srv.res{stroke-dasharray:4 3}
+[id="15-lab-2"] svg .g15b-uso{fill:var(--accent);opacity:.75}
+[id="15-lab-2"] svg .g15b-uso.alto{fill:var(--warm)}
+[id="15-lab-2"] svg .g15b-tx{fill:var(--muted);font-size:11px}
+[id="15-lab-2"] svg .g15b-tv{fill:var(--ink);font:700 12px var(--f-mono)}
+</style>
+<div class="ctls">
+  <label class="ctl">Equipos <output id="g15b-nv">100.000</output><input type="range" id="g15b-n" min="0" max="7" step="1" value="3" aria-label="Número de equipos gestionados"></label>
+  <label class="ctl">Intervalo del Inform <output id="g15b-iv">1 h</output><input type="range" id="g15b-i" min="0" max="6" step="1" value="3" aria-label="Intervalo del Inform periódico"></label>
+  <label class="ctl">Órdenes por sesión, en promedio <output id="g15b-tv">1</output><input type="range" id="g15b-t" min="0" max="20" step="1" value="1" aria-label="Órdenes por sesión en promedio"></label>
+  <label class="ctl">Ida y vuelta por la red <output id="g15b-rv">150 ms</output><input type="range" id="g15b-r" min="20" max="500" step="10" value="150" aria-label="Tiempo de ida y vuelta entre el equipo y el ACS"></label>
+  <label class="ctl">Sesiones simultáneas por servidor <output id="g15b-kv">200</output><input type="range" id="g15b-k" min="50" max="1000" step="50" value="200" aria-label="Sesiones simultáneas que aguanta cada servidor de sesiones"></label>
+  <label class="ctl">Pico sobre el promedio <output id="g15b-pv">× 3</output><input type="range" id="g15b-p" min="1" max="12" step="1" value="3" aria-label="Cuántas veces el promedio llega la hora más cargada"></label>
+</div>
+<div class="lab-desliza" style="overflow-x:auto"><svg id="g15b-svg" viewBox="0 0 600 170" role="img" aria-label="Servidores de sesiones necesarios y cuánto se ocupa cada uno en la hora pico"></svg></div>
+<div class="readout texto" id="g15b-out" aria-live="polite"></div>
+<p class="hint">Cada sesión dura 4 idas y vueltas fijas (conexión, cifrado, Inform y cierre) más 2 por cada orden: la de pedirla y la de responderla. La regla de diseño es no pasar del 50 % en la hora pico y tener un servidor de reserva. Los números de capacidad son de ejemplo.</p></div></section>
+<section><h2>La tormenta de conexiones</h2><div class="prose"><p>Vuelve al jueves de la tormenta. Cuarenta mil equipos arrancan casi a la vez y cada uno llama al ACS con el evento <code>1 BOOT</code>. Si todos llegan en dos minutos, son 40.000 ÷ 120 ≈ <b>333 sesiones por segundo</b>, doce veces lo normal, y todas sesiones largas: después de un arranque, el ACS revisa que la configuración siga en su lugar. A esto se le llama <b>tormenta de conexiones</b> (<i>connection storm</i>, o también <i>thundering herd</i>, «manada en estampida»).</p><p>Si el ACS no da abasto, empieza a contestar tarde o a rechazar sesiones. Muchos ACS, cuando están saturados, responden con un HTTP <code>503</code> (<i>Service Unavailable</i>, servicio no disponible) para que el equipo vuelva más tarde. Y aquí aparece lo peligroso: <b>un equipo rechazado vuelve a llamar</b>. Si todos vuelven a llamar al mismo tiempo, la segunda ola es tan grande como la primera, el ACS vuelve a rechazar, y la tormenta se alimenta sola.</p><p>TR-069 previó este problema. Su <b>política de reintentos</b> (<i>session retry policy</i>) dice cuánto espera un equipo antes de reintentar una sesión fallida, con dos parámetros de <code>Device.ManagementServer</code>: una espera mínima (<code>CWMPRetryMinimumWaitInterval</code>, 5 segundos por defecto) y un multiplicador (<code>CWMPRetryIntervalMultiplier</code>, 2000 por defecto, que quiere decir 2,0). En cada reintento la espera <b>se duplica</b>, y además se elige <b>al azar</b> dentro de una ventana:</p></div><figure class="fig fig-comparacion" id="15-diagrama-3"><div class="lienzo"><svg viewBox="0 0 960 470" style="min-width:760px" role="img" aria-label="Ventanas de reintento de TR-069 con los valores por defecto: el primer reintento entre 5 y 10 segundos, el segundo entre 10 y 20, y así duplicando hasta el décimo, entre 2.560 y 5.120 segundos; a la derecha, a cuántos por segundo se reparten cuarenta mil equipos en cada ventana">
+  <text x="14" y="26" class="t t-xs t-b t-m">REINTENTO</text>
+  <text x="150" y="26" class="t t-xs t-b t-m">VENTANA EN LA QUE EL EQUIPO ELIGE AL AZAR CUÁNDO VOLVER (ESCALA LOGARÍTMICA)</text>
+  <text x="740" y="26" class="t t-xs t-b t-m">40.000 EQUIPOS EN LA VENTANA</text>
+  <line x1="150.0" y1="40" x2="150.0" y2="400" class="ln ln-d" style="stroke-width:.8"/><text x="150.0" y="420" text-anchor="middle" class="t t-s t-m">1 s</text>
+  <line x1="290.0" y1="40" x2="290.0" y2="400" class="ln ln-d" style="stroke-width:.8"/><text x="290.0" y="420" text-anchor="middle" class="t t-s t-m">10 s</text>
+  <line x1="430.0" y1="40" x2="430.0" y2="400" class="ln ln-d" style="stroke-width:.8"/><text x="430.0" y="420" text-anchor="middle" class="t t-s t-m">100 s</text>
+  <line x1="570.0" y1="40" x2="570.0" y2="400" class="ln ln-d" style="stroke-width:.8"/><text x="570.0" y="420" text-anchor="middle" class="t t-s t-m">1.000 s</text>
+  <line x1="710.0" y1="40" x2="710.0" y2="400" class="ln ln-d" style="stroke-width:.8"/><text x="710.0" y="420" text-anchor="middle" class="t t-s t-m">10.000 s</text>
+  <text x="398.9" y="438" text-anchor="middle" class="t t-xs k-tra">1 min</text><line x1="398.9" y1="400" x2="398.9" y2="428" class="ln s-tra" style="stroke-width:1"/>
+  <text x="538.9" y="438" text-anchor="middle" class="t t-xs k-tra">10 min</text><line x1="538.9" y1="400" x2="538.9" y2="428" class="ln s-tra" style="stroke-width:1"/>
+  <text x="647.9" y="438" text-anchor="middle" class="t t-xs k-tra">1 h</text><line x1="647.9" y1="400" x2="647.9" y2="428" class="ln s-tra" style="stroke-width:1"/>
+  <text x="24" y="67" class="t t-b">1.º</text>
+  <rect x="247.9" y="52" width="42.1" height="22" rx="4" class="c-tra"/>
+  <text x="298.0" y="67" class="t t-s">5 a 10 s</text>
+  <text x="900" y="67" text-anchor="end" class="t t-s t-mono k-warm">8.000 /s</text>
+  <text x="24" y="102" class="t t-b">2.º</text>
+  <rect x="290.0" y="87" width="42.1" height="22" rx="4" class="c-tra"/>
+  <text x="340.1" y="102" class="t t-s">10 a 20 s</text>
+  <text x="900" y="102" text-anchor="end" class="t t-s t-mono k-warm">4.000 /s</text>
+  <text x="24" y="137" class="t t-b">3.º</text>
+  <rect x="332.1" y="122" width="42.1" height="22" rx="4" class="c-tra"/>
+  <text x="382.3" y="137" class="t t-s">20 a 40 s</text>
+  <text x="900" y="137" text-anchor="end" class="t t-s t-mono k-warm">2.000 /s</text>
+  <text x="24" y="172" class="t t-b">4.º</text>
+  <rect x="374.3" y="157" width="42.1" height="22" rx="4" class="c-tra"/>
+  <text x="424.4" y="172" class="t t-s">40 a 80 s</text>
+  <text x="900" y="172" text-anchor="end" class="t t-s t-mono k-warm">1.000 /s</text>
+  <text x="24" y="207" class="t t-b">5.º</text>
+  <rect x="416.4" y="192" width="42.1" height="22" rx="4" class="c-tra"/>
+  <text x="466.6" y="207" class="t t-s">80 a 160 s</text>
+  <text x="900" y="207" text-anchor="end" class="t t-s t-mono k-warm">500 /s</text>
+  <text x="24" y="242" class="t t-b">6.º</text>
+  <rect x="458.6" y="227" width="42.1" height="22" rx="4" class="c-tra"/>
+  <text x="508.7" y="242" class="t t-s">160 a 320 s</text>
+  <text x="900" y="242" text-anchor="end" class="t t-s t-mono k-warm">250 /s</text>
+  <text x="24" y="277" class="t t-b">7.º</text>
+  <rect x="500.7" y="262" width="42.1" height="22" rx="4" class="c-tra"/>
+  <text x="550.9" y="277" class="t t-s">320 a 640 s</text>
+  <text x="900" y="277" text-anchor="end" class="t t-s t-mono ">125 /s</text>
+  <text x="24" y="312" class="t t-b">8.º</text>
+  <rect x="542.9" y="297" width="42.1" height="22" rx="4" class="c-tra"/>
+  <text x="593.0" y="312" class="t t-s">640 a 1.280 s</text>
+  <text x="900" y="312" text-anchor="end" class="t t-s t-mono ">62 /s</text>
+  <text x="24" y="347" class="t t-b">9.º</text>
+  <rect x="585.0" y="332" width="42.1" height="22" rx="4" class="c-tra"/>
+  <text x="577.0" y="347" text-anchor="end" class="t t-s">1.280 a 2.560 s</text>
+  <text x="900" y="347" text-anchor="end" class="t t-s t-mono ">31 /s</text>
+  <text x="24" y="382" class="t t-b">10.º</text>
+  <rect x="627.2" y="367" width="42.1" height="22" rx="4" class="c-tra"/>
+  <text x="619.2" y="382" text-anchor="end" class="t t-s">2.560 a 5.120 s</text>
+  <text x="900" y="382" text-anchor="end" class="t t-s t-mono ">16 /s</text>
+  <text x="14" y="460" class="t t-s t-m">Valores por defecto: espera mínima 5 s, multiplicador 2,0. Desde el 10.º reintento la ventana ya no crece. En rojo, más de lo que aguantaría un ACS de 150 sesiones por segundo.</text>
+</svg></div><figcaption><b>Las ventanas de reintento de TR-069.</b> Cada fila es un reintento, del primero al décimo; la barra muestra la ventana dentro de la cual el equipo elige al azar cuándo volver a llamar, con los valores por defecto (5 segundos y multiplicador 2,0). El primer reintento cae entre 5 y 10 segundos; el segundo, entre 10 y 20; el quinto, entre 80 y 160; desde el décimo, entre 2.560 y 5.120 segundos, y ahí se queda. La escala es logarítmica: cada fila ocupa el doble que la anterior. A la derecha, el efecto sobre cuarenta mil equipos: la misma cantidad de llamadas, repartida en ventanas cada vez más anchas.</figcaption></figure><div class="prose"><p>Las dos ideas juntas, <b>esperar cada vez más</b> (<i>exponential backoff</i>, retroceso exponencial) y <b>esperar al azar</b> (<i>jitter</i>, fluctuación), son las que desarman la tormenta: los equipos rechazados no vuelven en manada, sino desparramados. La misma idea se usa en el arranque. Muchos equipos, o el propio operador con su configuración, agregan un <b>retraso aleatorio</b> antes del primer Inform después de encender: si cada equipo espera un número al azar entre cero y diez minutos, los cuarenta mil se reparten en seiscientos segundos, unos 67 por segundo, en lugar de 333.</p><p>Hay otras defensas del lado del ACS: atender primero las sesiones cortas, posponer las tareas que no son urgentes después de un <code>1 BOOT</code> (la campaña de firmware puede esperar a mañana) y tener capacidad de reserva que se active en el peor día.</p><p>Pruébalo con la ciudad de Fibra Ejemplo.</p></div><div class="lab" id="15-lab-1"><div class="lab-title"><span class="tag">Laboratorio</span><h3>Simulador de tormenta</h3></div><p class="hint">Elige cuántos equipos tiene la ciudad, cuánto aguanta el ACS y si los equipos esperan un tiempo al azar antes de llamar. Aprieta «Cortar la luz» y después «Volver la luz». Mira las sesiones por segundo que llegan, cuántas se rechazan y cuánto tarda la ciudad en quedar al día. Prueba sin retraso aleatorio y sin reintentos crecientes: ¿la tormenta termina sola?</p><style>
+[id="15-lab-1"] button:disabled{opacity:.45;cursor:not-allowed}
+[id="15-lab-1"] svg{min-width:520px;width:100%;height:auto;display:block;background:var(--card);border-radius:8px;font-family:var(--f-display)}
+[id="15-lab-1"] svg .g15a-eje{stroke:var(--line);stroke-width:1}
+[id="15-lab-1"] svg .g15a-tx{fill:var(--muted);font-size:11px}
+[id="15-lab-1"] svg .g15a-int{fill:var(--warm);opacity:.28;stroke:var(--warm);stroke-width:1.2}
+[id="15-lab-1"] svg .g15a-ace{fill:none;stroke:var(--accent);stroke-width:2.2}
+[id="15-lab-1"] svg .g15a-cap{stroke:var(--good);stroke-width:2;stroke-dasharray:6 4}
+[id="15-lab-1"] svg .g15a-capt{fill:var(--good);font-size:11px;font-weight:600}
+[id="15-lab-1"] svg .g15a-osc{fill:var(--ink);opacity:.07}
+[id="15-lab-1"] svg .g15a-dia{fill:none;stroke:var(--ink);stroke-width:1.5;stroke-dasharray:2 3}
+</style>
+<div class="ctls">
+  <label class="ctl">Equipos de la ciudad <output id="g15a-nv">40.000</output><input type="range" id="g15a-n" min="10000" max="100000" step="5000" value="40000" aria-label="Equipos de la ciudad"></label>
+  <label class="ctl">El ACS aguanta <output id="g15a-cv">150 sesiones/s</output><input type="range" id="g15a-c" min="50" max="600" step="25" value="150" aria-label="Sesiones por segundo que aguanta el ACS"></label>
+  <label class="ctl">Retraso aleatorio al arrancar <output id="g15a-wv">sin retraso</output><input type="range" id="g15a-w" min="0" max="5" step="1" value="0" aria-label="Ventana del retraso aleatorio antes del primer Inform"></label>
+</div>
+<div class="opciones">
+  <label>Cuando el ACS los rechaza, los equipos reintentan…
+    <select id="g15a-r">
+      <option value="tr">con espera creciente y al azar (política de TR-069)</option>
+      <option value="fijo">cada 10 segundos, todos igual</option>
+    </select></label>
+</div>
+<div class="btns">
+  <button type="button" id="g15a-cortar">Cortar la luz</button>
+  <button type="button" id="g15a-volver" class="primary" disabled>Volver la luz</button>
+</div>
+<div class="lab-desliza" style="overflow-x:auto"><svg id="g15a-svg" viewBox="0 0 600 260" role="img" aria-label="Sesiones por segundo que llegan al ACS y que atiende, antes y después del corte de luz"></svg></div>
+<div class="legend"><span><i style="background:var(--warm);opacity:.6"></i>Llamadas que llegan</span><span><i style="background:var(--accent)"></i>Sesiones atendidas</span><span><i style="background:var(--good)"></i>Capacidad del ACS</span><span><i style="background:var(--ink);opacity:.5"></i>Equipos al día (%)</span></div>
+<div class="readout texto" id="g15a-out" aria-live="polite"></div>
+<p class="hint">Modelo simplificado: cada rechazo le cuesta al ACS una décima parte de una sesión; si le llegan muchas más llamadas de las que aguanta, gasta su tiempo en rechazar. Los equipos tardan entre 60 y 90 segundos en levantar la fibra después de volver la luz.</p></div><div class="prose"><p>Puedes ver una tormenta en miniatura en tu computadora.</p></div><div class="practica"><div class="practica-title"><span class="tag">En la terminal</span><h3>Una tormenta en miniatura con el simulador</h3></div><p>Usa el GenieACS y la carpeta <code>genieacs-sim</code> del capítulo 3. El simulador puede lanzar varios equipos a la vez (<code>-p</code>, cuántos) con una espera entre uno y otro (<code>-w</code>, en milisegundos). Vas a lanzar diez equipos de golpe y luego diez escalonados. Con diez basta: cada equipo simulado es un programa aparte y consume memoria. En Windows, dentro de WSL.</p><div class="cmds"><div class="cmd-panel" data-so="win mac linux"><div class="cmd-l"><code>./genieacs-sim -u http://127.0.0.1:7547/ -p 10 -w 0 --serial 100</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>./genieacs-sim -u http://127.0.0.1:7547/ -p 10 -w 3000 --serial 200</code><button type="button" class="copiar">Copiar</button></div></div></div><ol class="steps"><li><span>Deja a la vista la terminal de <code>genieacs-cwmp</code>: escribe una línea por cada pedido que recibe.</span></li><li><span>Lanza el primer comando. Mira cuántas líneas aparecen en el primer segundo en la terminal de <code>genieacs-cwmp</code>. Detenlo con Ctrl+C.</span></li><li><span>Lanza el segundo. Mira cómo llegan ahora los equipos: uno cada tres segundos.</span></li><li><span>Abre <code>http://localhost:3000</code>, entra a <i>Devices</i> y compara la columna de última llamada de los equipos <code>…000100</code> a <code>…000109</code> con la de <code>…000200</code> a <code>…000209</code>.</span></li></ol><p><b>Qué observar:</b> con <code>-w 0</code>, los diez equipos llegan en el mismo instante y el servidor de sesiones los atiende en paralelo: es la tormenta, en chico. Con <code>-w 3000</code>, la misma cantidad llega repartida en treinta segundos: es el efecto del retraso aleatorio, aunque aquí el reparto es parejo y no al azar. Fíjate en el evento de cada Inform: el simulador siempre se presenta con <code>2 PERIODIC</code>, nunca con <code>0 BOOTSTRAP</code> ni <code>1 BOOT</code>; en una tormenta real, los equipos llamarían con <code>1 BOOT</code>. Los equipos simulados siguen llamando cada cinco minutos, que es su intervalo de fábrica; detén el simulador con Ctrl+C cuando termines.</p></div><div class="caso"><b>Un caso real</b><p>Un operador FTTH de la región dimensionó su ACS para el promedio y, durante meses, funcionó sin problemas. El primer apagón grande de una ciudad lo dejó sin gestión por casi tres horas: los equipos rechazados reintentaban todos a la vez, porque su firmware usaba una espera fija y no la política creciente de la norma. Las conexiones a Internet de los clientes funcionaban, pero ninguna instalación nueva se pudo completar esa noche. La corrección tuvo tres partes: un firmware que respetaba la política de reintentos y agregaba un retraso aleatorio al arrancar, una regla en el ACS que dejaba para después cualquier tarea no urgente en las sesiones de arranque, y un ensayo anual del peor día con un simulador. La lección: el peor día se prueba antes de que llegue.</p></div></section>
+<section><h2>Alta disponibilidad: qué pasa si el ACS se cae</h2><div class="prose"><p>Antes de diseñar la disponibilidad conviene responder una pregunta que tranquiliza a todos: <b>si el ACS se cae, ¿se queda el cliente sin Internet?</b> No. El equipo de la casa guarda su configuración en su propia memoria, y la conexión del cliente depende de la OLT, el BNG y RADIUS, no del ACS. Un ACS caído no corta el servicio de nadie.</p><p>Lo que sí se pierde mientras está caído es todo lo que depende de él:</p><div class="tbl"><table><thead><tr><th>Se detiene</th><th>Quién lo nota</th></tr></thead><tbody><tr><td>Cambios de Wi-Fi, reinicios y diagnósticos desde atención</td><td>El agente y el cliente que llama</td></tr><tr><td>La instalación sin tocar del capítulo 7: el equipo nuevo no recibe su plan</td><td>El técnico, que no puede irse</td></tr><tr><td>Campañas y firmware</td><td>Ingeniería; se pausan solas</td></tr><tr><td>Datos frescos para la pantalla del agente y los tableros</td><td>Soporte y NOC</td></tr></tbody></table></div><p>Y hay un efecto diferido: cuando el ACS vuelve, todos los equipos que no pudieron llamar intentan ponerse al día. <b>Volver de una caída es otra tormenta</b>, y por eso las defensas de la sección anterior sirven también aquí.</p><p>Para que el ACS no se caiga, o se caiga poco, se aplican las ideas de <b>alta disponibilidad</b> (<i>high availability</i>, HA):</p><ul><li><b>Varios servidores de sesiones iguales</b> detrás de un <b>balanceador de carga</b> (<i>load balancer</i>), que reparte cada sesión al que esté libre. Si uno se cae, el balanceador deja de mandarle trabajo. Como una sesión son varios pedidos HTTP seguidos, todos deben llegar al mismo servidor, o los servidores deben compartir el estado de la sesión en la base.</li><li><b>Una base de datos con réplicas</b> (<i>replicas</i>): copias que se mantienen al día y toman el lugar de la principal si esta falla.</li><li><b>Dos sitios</b> (<i>sites</i>), en dos centros de datos distintos, para que un incendio o un corte en uno no apague el ACS.</li><li><b>Respaldos probados</b> de la base: la configuración de cien mil equipos es un activo, y un respaldo que nunca se probó restaurar no es un respaldo.</li></ul><p>El curso de <a href="https://aaramirez.github.io/sistemas-distribuidos/temario.html" target="_blank" rel="noopener">Sistemas distribuidos</a> explica a fondo cómo se replican los datos y qué se pierde cuando falla una red entre sitios.</p></div></section>
+<section><h2>Código abierto, comercial o en la nube</h2><div class="prose"><p>El capítulo 29 de <a href="https://aaramirez.github.io/telco/29-las-plataformas-de-gestion-en-la-practica.html" target="_blank" rel="noopener">Cómo funciona un telco</a> presenta los tres caminos para cualquier plataforma de gestión. Para un ACS, las diferencias concretas son estas:</p><div class="tbl"><table><thead><tr><th>Camino</th><th>Ejemplos del mercado</th><th>Lo que da</th><th>Lo que cuesta y lo que arriesga</th></tr></thead><tbody><tr><td><b>Código abierto</b></td><td>GenieACS para TR-069; Oktopus para TR-069 y TR-369</td><td>Sin licencias por equipo, se adapta a todo, se puede leer el código</td><td>Personas que lo instalen, lo escalen, lo aseguren y lo actualicen; el soporte es propio o contratado aparte. Hay que leer su licencia: la de GenieACS, por ejemplo, es la AGPL, que pide compartir el código modificado con quienes usan el programa a través de la red</td></tr><tr><td><b>Plataforma comercial</b> propia</td><td>Las de varios proveedores especializados y las de algunos fabricantes de equipos</td><td>Soporte, perfiles de muchos modelos listos, módulos de Wi-Fi y de aplicación para el cliente</td><td>Licencia por equipo gestionado; dependencia del proveedor; los perfiles de otras marcas pueden ser más pobres</td></tr><tr><td><b>Servicio en la nube</b> (<i>SaaS</i>)</td><td>Las mismas plataformas comerciales, operadas por el proveedor</td><td>Rápido de empezar, sin servidores propios, escala el proveedor</td><td>Pago mensual por equipo; los datos de las casas viven fuera; depende de Internet y del contrato</td></tr></tbody></table></div><p>No hay un camino correcto para todos. Un operador pequeño suele empezar en la nube o con código abierto bien acompañado; uno grande tiende a una plataforma comercial o a código abierto con un equipo propio. Antes de decidir, Fibra Ejemplo pregunta lo mismo a cualquier candidato: ¿soporta las tres marcas de su flota y su modelo de datos viejo?, ¿tiene una API completa?, ¿puede sacar todos sus datos si un día cambia?, ¿habla TR-369, el protocolo del capítulo 16?, y ¿cómo se comporta en el peor día?, con una prueba de tormenta en sus propios laboratorios.</p></div><div class="ml"><b>En la práctica</b><p>Para el área de finanzas, el costo de un ACS no es solo la licencia o los servidores. Hay que sumar la integración con el CRM y el inventario, las personas que lo operan, los perfiles de cada modelo nuevo y el ensayo anual del peor día. Del otro lado van las visitas evitadas del capítulo 1. Comparar caminos con la cuenta completa, a tres o cinco años, evita la sorpresa de una licencia barata con una operación cara, o al revés.</p></div><div class="prose"><p>La idea con la que termina el capítulo es la del jueves de la tormenta: <b>un ACS se dimensiona para el peor día, no para el promedio, y su caída no debe tumbar el servicio del cliente.</b></p></div><div class="quiz"><h3>Pruébate</h3><details><summary>¿Por qué el servidor de archivos de un ACS suele ir separado del servidor de sesiones?</summary><p>Porque las descargas de firmware o de configuraciones son archivos grandes que tardan; si las atendiera el servidor de sesiones, ocuparían las conexiones que necesitan las sesiones TR-069, que son muchas y cortas.</p></details><details><summary>Fibra Ejemplo tiene 100.000 equipos con un Inform cada hora y sesiones de 2 segundos. ¿Cuántas sesiones por segundo y cuántas simultáneas tiene en promedio?</summary><p>Unas 28 por segundo (100.000 ÷ 3.600) y unas 56 simultáneas (28 × 2), por la ley de Little.</p></details><details><summary>¿Por qué una tormenta de conexiones puede alimentarse sola?</summary><p>Porque el ACS saturado rechaza sesiones, y si los equipos rechazados reintentan todos al mismo tiempo, la segunda ola es tan grande como la primera y vuelve a saturarlo.</p></details><details><summary>¿Qué dos ideas tiene la política de reintentos de TR-069 para evitarlo?</summary><p>Que la espera entre reintentos crece (se duplica con los valores por defecto) y que el momento exacto se elige al azar dentro de una ventana, de modo que los equipos vuelven desparramados.</p></details><details><summary>Si el ACS se cae una hora, ¿qué les pasa a los clientes y qué se detiene?</summary><p>Los clientes siguen con Internet, porque la configuración está en el equipo y la conexión depende de la OLT, el BNG y RADIUS. Se detienen los cambios desde atención, los diagnósticos, las instalaciones nuevas y las campañas; y al volver, el ACS recibe una ola de equipos que se ponen al día.</p></details><details><summary>¿Por qué una integración que consulta a cada rato el estado de todos los equipos es un problema?</summary><p>Porque esa consulta constante (polling) puede generar más carga que los propios equipos; lo sano es consultar cuando hace falta, pedir solo los campos necesarios y poner un límite de pedidos a cada sistema.</p></details></div><div class="investiga"><h3>Para investigar</h3><p class="hint">Estas preguntas no se responden en el capítulo: búscalas por tu cuenta.</p><ol><li>¿Qué diferencia hay entre escalar «hacia arriba» (un servidor más grande) y «hacia los lados» (más servidores), y cuál conviene para cada pieza del ACS?<small>Pista: busca «vertical vs horizontal scaling».</small></li><li>¿Qué dice el teorema CAP sobre una base de datos repartida en dos sitios cuando se corta la red entre ellos?<small>Pista: busca «teorema CAP particiones de red».</small></li><li>¿Qué son los indicadores RPO y RTO y cómo se usan para decidir cuántos respaldos y réplicas necesita un sistema?<small>Pista: busca «RPO RTO recuperación ante desastres».</small></li><li>¿Cómo hacen los balanceadores de carga para que todos los pedidos de una misma sesión lleguen al mismo servidor (afinidad de sesión)?<small>Pista: busca «sticky sessions load balancer».</small></li><li>¿Qué es un generador de carga y cómo se diseña una prueba de estrés para un servidor web?<small>Pista: busca «load testing k6 Locust».</small></li></ol></div><div class="vids"><span>Para saber más</span><a class="vid" href="https://docs.genieacs.com/en/latest/" target="_blank" rel="noopener">Documentación de GenieACS: instalación, piezas y variables de configuración (inglés) <small>referencia</small></a><a class="vid" href="https://www.broadband-forum.org/pdfs/tr-069-1-6-1.pdf" target="_blank" rel="noopener">TR-069: CPE WAN Management Protocol, con la política de reintentos de sesión (Broadband Forum, inglés) <small>norma</small></a><a class="vid" href="https://aaramirez.github.io/telco/29-las-plataformas-de-gestion-en-la-practica.html" target="_blank" rel="noopener">Las plataformas de gestión en la práctica, capítulo 29 de Cómo funciona un telco <small>lectura</small></a><a class="vid" href="https://en.wikipedia.org/wiki/Little%27s_law" target="_blank" rel="noopener">Ley de Little (Wikipedia, inglés) <small>lectura</small></a></div></section>
+<label class="got"><input type="checkbox" id="got"> Lo tengo claro</label>
+<nav class="pager" id="pager" aria-label="Capítulo anterior y siguiente"></nav>
+</main>
+</div>
+<footer><span>Curso abierto de aaramirez.github.io.</span><span>Sitio publicado: <a href="https://github.com/aaramirez/gestion-remota-de-equipos" target="_blank" rel="noopener">github.com/aaramirez/gestion-remota-de-equipos</a></span></footer>
+</div>
+<script src="assets/lab.js"></script>
+<script>
+(function(){
+  const {$}=window.Lab;
+  const NS=[10000,20000,50000,100000,200000,500000,1000000,2000000];
+  const IS=[300,900,1800,3600,21600,43200,86400], IL=['5 min','15 min','30 min','1 h','6 h','12 h','24 h'];
+  const f=(x,d)=>x.toLocaleString('es',{maximumFractionDigits:d||0});
+  function calc(){
+    const N=NS[+$('#g15b-n').value], ii=+$('#g15b-i').value, I=IS[ii], O=+$('#g15b-t').value, R=+$('#g15b-r').value/1000, K=+$('#g15b-k').value, P=+$('#g15b-p').value;
+    $('#g15b-nv').textContent=f(N);$('#g15b-iv').textContent=IL[ii];$('#g15b-tv').textContent=O;$('#g15b-rv').textContent=f(R*1000)+' ms';$('#g15b-kv').textContent=f(K);$('#g15b-pv').textContent='× '+P;
+    const tasa=N/I, dur=(4+2*O)*R+0.05*(1+O), sim=tasa*dur, simP=sim*P;
+    const nec=Math.max(1,Math.ceil(simP/(K*0.5))), total=nec+1, uso=simP/(nec*K);
+    const escr=tasa*P*(1+O);
+    // servidores
+    const n=Math.min(total,16), w=Math.min(60,(540-(n-1)*8)/n);
+    let h='<text x="10" y="18" class="g15b-tx">servidores de sesiones en la hora pico (el último es la reserva)</text>';
+    for(let s=0;s<n;s++){
+      const x=30+s*(w+8), res=s===total-1, u=res?0:Math.min(1,uso);
+      h+='<rect x="'+x+'" y="34" width="'+w+'" height="96" rx="6" class="g15b-srv'+(res?' res':'')+'"/>';
+      if(!res)h+='<rect x="'+(x+3)+'" y="'+(127-90*u)+'" width="'+(w-6)+'" height="'+(90*u)+'" rx="3" class="g15b-uso'+(u>0.5?' alto':'')+'"/>';
+      if(w>=34)h+='<text x="'+(x+w/2)+'" y="148" text-anchor="middle" class="g15b-tx">'+(res?'reserva':f(u*100)+' %')+'</text>';
+    }
+    if(total>16)h+='<text x="590" y="90" text-anchor="end" class="g15b-tv">… y '+(total-16)+' más</text>';
+    $('#g15b-svg').innerHTML=h;
+    $('#g15b-out').innerHTML='<span class="big">'+f(tasa,tasa<10?1:0)+' sesiones por segundo en promedio; '+f(tasa*P,0)+' en la hora pico.</span>'+
+      '<span>Cada sesión dura unos '+f(dur,1)+' s, así que hay '+f(sim,0)+' abiertas a la vez en promedio y '+f(simP,0)+' en el pico (ley de Little).</span>'+
+      '<span class="'+(total>4?'warn':'ok')+'">Hacen falta '+nec+' servidor'+(nec>1?'es':'')+' de sesiones para quedar debajo del 50 %, más 1 de reserva: '+total+' en total.</span>'+
+      '<span>La base de datos recibe unas '+f(escr,0)+' escrituras por segundo en el pico (una por sesión y una por orden).</span>'+
+      (O>=8?'<span>Con tantas órdenes por sesión, la duración pesa más que el número de equipos: revisa las reglas antes de comprar servidores.</span>':'')+
+      (I<=900?'<span>Un Inform tan seguido multiplica la carga solo para tener datos frescos; el timbre es la herramienta para la urgencia (capítulo 3).</span>':'');
+  }
+  ['#g15b-n','#g15b-i','#g15b-t','#g15b-r','#g15b-k','#g15b-p'].forEach(s=>$(s).addEventListener('input',calc));
+  calc();
+})();
+</script>
+<script>
+(function(){
+  const {$}=window.Lab;
+  const VEN=[0,60,180,300,600,1200], VL=['sin retraso','0 a 1 min','0 a 3 min','0 a 5 min','0 a 10 min','0 a 20 min'];
+  const PRE=300, T=2700, COSTO=0.1;
+  const f=(x,d)=>x.toLocaleString('es',{maximumFractionDigits:d||0});
+  const dur=s=>s<90?f(s)+' s':s<5400?f(s/60,0)+' min':f(s/3600,1)+' h';
+  let estado='normal', res=null, anim=null, hasta=0;
+  function leer(){
+    const N=+$('#g15a-n').value,C=+$('#g15a-c').value,wi=+$('#g15a-w').value,r=$('#g15a-r').value;
+    $('#g15a-nv').textContent=f(N);$('#g15a-cv').textContent=f(C)+' sesiones/s';$('#g15a-wv').textContent=VL[wi];
+    return {N,C,W:VEN[wi],r};
+  }
+  function simular(p){
+    const K=12, pt=[], df=[], cur=new Float64Array(K);
+    for(let k=0;k<K;k++){pt.push(new Float64Array(T+2));df.push(new Float64Array(T+3));}
+    const add=(k,t,v)=>{if(t<=T)pt[Math.min(k,K-1)][t]+=v;};
+    const rango=(k,t0,t1,v)=>{if(t0>T)return;k=Math.min(k,K-1);df[k][t0]+=v;df[k][Math.min(t1,T)+1]-=v;};
+    // arranques: 60 a 90 s para levantar la fibra, más el retraso aleatorio en [0,W]
+    for(let t=60;t<=90+p.W;t++){
+      let d;
+      if(p.W===0)d=1/31;
+      else{const a=Math.max(60,t-p.W),b=Math.min(90,t);d=Math.max(0,b-a+1)/(31*(p.W+1));}
+      add(0,t,p.N*d);
+    }
+    const intent=new Float64Array(T+1),acep=new Float64Array(T+1),dia=new Float64Array(T+1);
+    let hechos=0,rech=0;
+    const v=new Float64Array(K);
+    for(let t=0;t<=T;t++){
+      let A=0;
+      for(let k=0;k<K;k++){cur[k]+=df[k][t];v[k]=Math.max(0,pt[k][t]+cur[k]);A+=v[k];}
+      const rut=hechos/3600;
+      const tot=A+rut;
+      let a=Math.min(tot,p.C);
+      if(tot>p.C)a=Math.max(0,(p.C-COSTO*tot)/(1-COSTO));
+      const fr=tot>0?a/tot:1;
+      for(let k=0;k<K;k++){
+        if(!v[k])continue;
+        const r=v[k]*(1-fr);hechos+=v[k]*fr;rech+=r;
+        if(r<1e-9)continue;
+        if(p.r==='fijo')add(k+1,t+10,r);
+        else{const n=Math.min(k+1,10),lo=5*Math.pow(2,n-1),hi=5*Math.pow(2,n);rango(k+1,t+lo,t+hi,r/(hi-lo+1));}
+      }
+      intent[t]=tot;acep[t]=a;dia[t]=Math.min(1,hechos/p.N);
+    }
+    let t99=-1;for(let t=0;t<=T;t++)if(dia[t]>=0.99){t99=t;break;}
+    let pico=0;for(let t=0;t<=T;t++)pico=Math.max(pico,intent[t]);
+    return {intent,acep,dia,t99,pico,rech};
+  }
+  function dibujar(p){
+    const X=t=>48+(t+PRE)/(T+PRE)*540;
+    const per=p.N/3600;
+    let ymax=Math.max(p.C*1.25,per*2);
+    if(res)for(let t=0;t<=hasta;t++)ymax=Math.max(ymax,res.intent[t]*1.05);
+    const Y=v=>220-Math.min(v,ymax)/ymax*190;
+    let h='<line x1="48" y1="220" x2="588" y2="220" class="g15a-eje"/><line x1="48" y1="30" x2="48" y2="220" class="g15a-eje"/>';
+    [0,0.5,1].forEach(q=>{const v=ymax*q;h+='<text x="44" y="'+(Y(v)+4)+'" text-anchor="end" class="g15a-tx">'+f(v)+'</text>';});
+    [0,10,20,30,40].forEach(m=>{const x=X(m*60);h+='<line x1="'+x+'" y1="220" x2="'+x+'" y2="224" class="g15a-eje"/><text x="'+x+'" y="238" text-anchor="'+(m===0?'start':'middle')+'" class="g15a-tx">'+(m===0?'vuelve la luz':'+'+m+' min')+'</text>';});
+    h+='<text x="8" y="18" class="g15a-tx">sesiones por segundo</text>';
+    // antes del corte
+    const xcut=X(-150);
+    h+='<path d="M48 '+Y(per)+'H'+xcut+'" class="g15a-ace"/>';
+    if(estado!=='normal'){h+='<rect x="'+xcut+'" y="30" width="'+(X(0)-xcut)+'" height="190" class="g15a-osc"/><text x="'+((xcut+X(0))/2)+'" y="46" text-anchor="middle" class="g15a-tx">sin luz</text><path d="M'+xcut+' 220H'+X(0)+'" class="g15a-ace"/>';}
+    else h+='<path d="M'+xcut+' '+Y(per)+'H588" class="g15a-ace"/>';
+    h+='<line x1="48" y1="'+Y(p.C)+'" x2="588" y2="'+Y(p.C)+'" class="g15a-cap"/><text x="584" y="'+(Y(p.C)-6)+'" text-anchor="end" class="g15a-capt">capacidad: '+f(p.C)+'/s</text>';
+    if(res&&hasta>0){
+      const paso=Math.max(1,Math.round(T/540));
+      let a='M'+X(0)+' 220',b='M'+X(0)+' '+Y(res.acep[0]),c='M'+X(0)+' '+(220-res.dia[0]*190);
+      for(let t=0;t<=hasta;t+=paso){a+='L'+X(t).toFixed(1)+' '+Y(res.intent[t]).toFixed(1);b+='L'+X(t).toFixed(1)+' '+Y(res.acep[t]).toFixed(1);c+='L'+X(t).toFixed(1)+' '+(220-res.dia[t]*190).toFixed(1);}
+      a+='L'+X(hasta).toFixed(1)+' 220Z';
+      h=h.replace('<line x1="48" y1="'+Y(p.C),'<path d="'+a+'" class="g15a-int"/><path d="'+c+'" class="g15a-dia"/><path d="'+b+'" class="g15a-ace"/><line x1="48" y1="'+Y(p.C));
+    }
+    $('#g15a-svg').innerHTML=h;
+  }
+  function informe(p){
+    const out=$('#g15a-out');
+    if(estado==='normal'){out.innerHTML='<span class="big">Día normal: unas '+f(p.N/3600,1)+' sesiones por segundo, muy por debajo de la capacidad.</span><span>Aprieta «Cortar la luz».</span>';return;}
+    if(estado==='cortado'){out.innerHTML='<span>Sin luz: los '+f(p.N)+' equipos están apagados y nadie llama. El servicio de Internet de esas casas no existe, pero tampoco hay nada que el ACS pueda hacer. Aprieta «Volver la luz».</span>';return;}
+    const r=res, sin=p.W===0;
+    const colapso=r.t99<0;
+    out.innerHTML='<span class="'+(r.pico>p.C?'warn':'ok')+'">Pico: '+f(r.pico)+' llamadas por segundo, '+f(r.pico/p.C,1)+' veces lo que aguanta el ACS.</span>'+
+      '<span>Rechazos en total: '+f(r.rech)+' ('+f(r.rech/p.N,1)+' por equipo).</span>'+
+      '<span class="'+(colapso?'warn':'big')+'">'+(colapso?'A los 45 minutos, la ciudad todavía no está al día: '+f(r.dia[T]*100)+' % de los equipos lograron su sesión.':'El 99 % de los equipos quedó al día en '+dur(r.t99)+'.')+'</span>'+
+      '<span>'+(p.r==='fijo'&&r.pico>p.C*1.5?'Con reintentos fijos, los rechazados vuelven todos juntos cada 10 s: la ola no se desarma y el ACS gasta su tiempo en rechazar. ':'')+(sin&&r.pico>p.C?'Sin retraso aleatorio, todos llegan en medio minuto. Prueba con «0 a 10 min».':(!sin&&r.pico<=p.C?'El retraso aleatorio repartió los arranques y el ACS nunca se saturó.':''))+'</span>';
+  }
+  function todo(){const p=leer();if(estado==='luz'){res=simular(p);hasta=T;}dibujar(p);informe(p);}
+  ['#g15a-n','#g15a-c','#g15a-w'].forEach(s=>$(s).addEventListener('input',todo));
+  $('#g15a-r').addEventListener('change',todo);
+  $('#g15a-cortar').addEventListener('click',()=>{if(anim)clearInterval(anim);anim=null;estado='cortado';res=null;hasta=0;$('#g15a-volver').disabled=false;todo();});
+  $('#g15a-volver').addEventListener('click',()=>{
+    const p=leer();estado='luz';res=simular(p);$('#g15a-volver').disabled=true;
+    const quieto=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if(quieto){hasta=T;dibujar(p);informe(p);return;}
+    let q=0;
+    $('#g15a-out').innerHTML='<span>Vuelve la luz…</span>';
+    anim=setInterval(()=>{q=Math.min(1,q+0.04);hasta=Math.round(T*q);dibujar(p);if(q>=1){clearInterval(anim);anim=null;informe(p);}},60);
+  });
+  todo();
+})();
+</script>
+</body>
+</html>

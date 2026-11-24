@@ -1,0 +1,498 @@
+<!doctype html>
+<html lang="es">
+<head>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-KX76XF8R');</script>
+<!-- End Google Tag Manager -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Las órdenes del ACS · Gestión remota de equipos (ACS) · Gestión remota de equipos (ACS)</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Cómo un operador configura, actualiza y diagnostica a distancia los equipos que tiene en casa de sus clientes: TR-069 y TR-369 a fondo, el modelo de datos TR-181, el aprovisionamiento sin visita, los cambios masivos, el firmware, los diagnósticos, la seguridad y la escala de un ACS.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400;1,8..60,600&display=swap">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KX76XF8R"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+<div class="wrap" data-page="las-ordenes-del-acs">
+<header class="topbar"><a class="brand" href="index.html">Gestión <b>remota</b> de equipos</a><span class="eyebrow">Curso visual e interactivo · Industrias y finanzas</span><a class="al-sitio" href="https://aaramirez.github.io/">← Todos los cursos</a></header>
+<div class="layout">
+<nav class="toc" id="toc" aria-label="Ruta de aprendizaje"></nav>
+<main>
+<header class="page-head"><span class="num">CAPÍTULO 04 DE 16</span><h1>Las órdenes: leer, escribir, crear, descargar y reiniciar</h1><p class="lede">Todo lo que un ACS le hace a un equipo cabe en un puñado de órdenes. Este capítulo las recorre una por una, con lo que el equipo contesta cuando puede, cuando no puede y cuando algo cambia por su cuenta.</p></header>
+<section><div class="prose"><p>En el capítulo 3 vimos la conversación: el equipo llama, se presenta, pide trabajo con un mensaje vacío y el ACS le manda órdenes dentro de sus respuestas. Ahora toca mirar las órdenes mismas.</p><p>Lo sorprendente es cuántas pocas son. Cuando el agente de Fibra Ejemplo cambia una clave, cuando ingeniería abre un puerto para una cámara de seguridad, cuando el NOC actualiza el firmware de cien mil equipos o cuando soporte reinicia uno que se colgó, por debajo el ACS usa siempre las mismas seis o siete órdenes, combinadas de distinta manera. Conocerlas es entender qué puede hacer un ACS y qué no.</p></div></section>
+<section><h2>RPC: pedirle a otro que ejecute algo</h2><div class="prose"><p>Cada orden de TR-069 es una <b>RPC</b> (<i>Remote Procedure Call</i>, llamada a procedimiento remoto): un pedido para que otra computadora ejecute una acción con unos datos dados y devuelva el resultado. La palabra suena técnica, pero la idea es de todos los días.</p></div><div class="analogia"><b>Imagínalo así</b><p>Piensa en la cocina de un restaurante con un menú cerrado. El mesero no puede pedir «algo rico»: tiene que elegir un plato del menú y llenar la comanda con lo que ese plato pide (término de la carne, acompañamiento, sin cebolla). La cocina contesta «listo» o «no se puede: se acabó el pescado». Y si el mesero pide algo que no está en el menú, la cocina ni lo intenta. En TR-069, el menú son los métodos de la norma, la comanda son sus argumentos y la respuesta de la cocina es la del equipo.</p></div><div class="prose"><p>Cada RPC tiene un nombre fijo (<code>SetParameterValues</code>), unos <b>argumentos</b> (<i>arguments</i>) también fijos y una respuesta con el mismo nombre más <code>Response</code> (<code>SetParameterValuesResponse</code>). Si el equipo no puede, en lugar de la respuesta devuelve una <b>falla</b> (<i>fault</i>) con un código numérico. La mayoría las manda el ACS al equipo; unas pocas van al revés, del equipo al ACS, como el <code>Inform</code> y el aviso de descarga terminada.</p></div><figure class="fig fig-esquema" id="04-diagrama-1"><div class="lienzo"><svg viewBox="0 0 920 470" style="min-width:740px" role="img" aria-label="El menú del ACS: órdenes del ACS al equipo agrupadas en leer, escribir, crear y borrar, transferir archivos, reiniciar y vigilar, cada una con un ejemplo; y a la derecha los mensajes del equipo al ACS: Inform, TransferComplete y GetRPCMethods">
+  <text x="20" y="28" class="t t-xs t-b t-m">DEL ACS AL EQUIPO · LAS ÓRDENES</text>
+  <text x="690" y="28" class="t t-xs t-b t-m">DEL EQUIPO AL ACS</text>
+
+  
+  <rect x="20" y="42" width="200" height="190" rx="12" class="c-red"/>
+  <text x="36" y="68" class="t t-xs t-b k-red">LEER</text>
+  <text x="36" y="96" class="t t-s t-mono t-b">GetParameterNames</text>
+  <text x="36" y="116" class="t t-s t-mono t-b">GetParameterValues</text>
+  <text x="36" y="150" class="t t-s t-m">qué hay y cuánto vale</text>
+  <text x="36" y="194" class="t t-s">Ej.: leer el firmware y</text>
+  <text x="36" y="210" class="t t-s">los equipos conectados</text>
+
+  <rect x="235" y="42" width="200" height="190" rx="12" class="c-apl"/>
+  <text x="251" y="68" class="t t-xs t-b k-apl">ESCRIBIR</text>
+  <text x="251" y="96" class="t t-s t-mono t-b">SetParameterValues</text>
+  <text x="251" y="150" class="t t-s t-m">todo o nada</text>
+  <text x="251" y="194" class="t t-s">Ej.: cambiar el nombre</text>
+  <text x="251" y="210" class="t t-s">y la clave del Wi-Fi</text>
+
+  <rect x="450" y="42" width="200" height="190" rx="12" class="c-enl"/>
+  <text x="466" y="68" class="t t-xs t-b k-enl">CREAR Y BORRAR</text>
+  <text x="466" y="96" class="t t-s t-mono t-b">AddObject</text>
+  <text x="466" y="116" class="t t-s t-mono t-b">DeleteObject</text>
+  <text x="466" y="150" class="t t-s t-m">instancias numeradas</text>
+  <text x="466" y="194" class="t t-s">Ej.: una regla de puertos</text>
+  <text x="466" y="210" class="t t-s">para una cámara</text>
+
+  
+  <rect x="20" y="248" width="200" height="190" rx="12" class="c-fis"/>
+  <text x="36" y="274" class="t t-xs t-b k-fis">TRANSFERIR ARCHIVOS</text>
+  <text x="36" y="302" class="t t-s t-mono t-b">Download</text>
+  <text x="36" y="322" class="t t-s t-mono t-b">Upload</text>
+  <text x="36" y="356" class="t t-s t-m">fuera de la sesión</text>
+  <text x="36" y="400" class="t t-s">Ej.: firmware 5.3; respaldo</text>
+  <text x="36" y="416" class="t t-s">de la configuración</text>
+
+  <rect x="235" y="248" width="200" height="190" rx="12" class="c-tra"/>
+  <text x="251" y="274" class="t t-xs t-b k-tra">REINICIAR</text>
+  <text x="251" y="302" class="t t-s t-mono t-b">Reboot</text>
+  <text x="251" y="322" class="t t-s t-mono t-b">FactoryReset *</text>
+  <text x="251" y="356" class="t t-s t-m">corta el servicio</text>
+  <text x="251" y="400" class="t t-s">Ej.: un equipo colgado</text>
+  <text x="251" y="416" class="t t-s">(y casi nunca fábrica)</text>
+
+  <rect x="450" y="248" width="200" height="190" rx="12" class="d-inet"/>
+  <text x="466" y="274" class="t t-xs t-b k-inet">VIGILAR</text>
+  <text x="466" y="302" class="t t-s t-mono t-b">SetParameterAttributes</text>
+  <text x="466" y="322" class="t t-s t-mono t-b">GetParameterAttributes</text>
+  <text x="466" y="356" class="t t-s t-m">notificación 0, 1 o 2</text>
+  <text x="466" y="400" class="t t-s">Ej.: avisar si el cliente</text>
+  <text x="466" y="416" class="t t-s">cambia el nombre del Wi-Fi</text>
+
+  
+  <rect x="680" y="42" width="220" height="396" rx="12" class="caja"/>
+  <text x="696" y="76" class="t t-s t-mono t-b">Inform</text>
+  <text x="696" y="94" class="t t-s t-m">abre cada sesión</text>
+  <line x1="696" y1="114" x2="884" y2="114" class="ln" style="stroke-width:1"/>
+  <text x="696" y="142" class="t t-s t-mono t-b">TransferComplete</text>
+  <text x="696" y="160" class="t t-s t-m">«terminé la descarga</text>
+  <text x="696" y="176" class="t t-s t-m">o la subida»</text>
+  <line x1="696" y1="196" x2="884" y2="196" class="ln" style="stroke-width:1"/>
+  <text x="696" y="224" class="t t-s t-mono t-b">GetRPCMethods</text>
+  <text x="696" y="242" class="t t-s t-m">«¿qué órdenes entiendes?»</text>
+  <text x="696" y="258" class="t t-s t-m">(lo usan los dos lados)</text>
+  <line x1="696" y1="278" x2="884" y2="278" class="ln" style="stroke-width:1"/>
+  <text x="696" y="306" class="t t-s">Las respuestas llevan el</text>
+  <text x="696" y="322" class="t t-s">nombre de la orden más</text>
+  <text x="696" y="338" class="t t-s t-mono">Response</text>
+  <text x="696" y="354" class="t t-s">o una falla con código.</text>
+  <text x="696" y="412" class="t t-s t-m">* opcional en la norma</text>
+</svg></div><figcaption><b>El menú del ACS.</b> A la izquierda, las órdenes que el ACS le manda al equipo, agrupadas por verbo y con un color cada grupo: leer, escribir, crear y borrar, transferir archivos, reiniciar, y vigilar (los atributos de notificación). A la derecha, los pocos mensajes que van del equipo al ACS: el <code>Inform</code> que abre cada sesión, el <code>TransferComplete</code> que avisa que terminó una descarga y el <code>GetRPCMethods</code>, con el que cualquiera de los dos le pregunta al otro qué órdenes entiende. Debajo de cada orden, un ejemplo de uso en Fibra Ejemplo. Las marcadas con un asterisco son opcionales en la norma: no todos los equipos las tienen.</figcaption></figure></section>
+<section><h2>Leer: GetParameterNames y GetParameterValues</h2><div class="prose"><p>Antes de cambiar algo, el ACS necesita saber qué hay. Para eso tiene dos órdenes de lectura, que trabajan sobre el <b>árbol de parámetros</b> del equipo, el modelo de datos que la parte 3 estudia a fondo. Por ahora basta con saber que cada dato tiene un nombre con puntos, como <code>Device.WiFi.SSID.1.SSID</code>, y que los nombres que terminan en punto son carpetas (<code>Device.WiFi.</code>).</p><p><b><code>GetParameterNames</code></b> pregunta qué hay en una carpeta. Recibe una ruta y un indicador, <code>NextLevel</code>: si vale <code>true</code>, el equipo devuelve solo lo que está justo adentro; si vale <code>false</code>, todo lo que cuelga de ahí, a cualquier profundidad. Para cada nombre, el equipo dice además si se puede escribir (<code>Writable</code>). Es la orden que usa un ACS para «conocer» a un equipo nuevo.</p><p><b><code>GetParameterValues</code></b> pide valores. Recibe una lista de nombres y devuelve cada uno con su valor y su <b>tipo</b> (<i>type</i>): texto (<code>xsd:string</code>), número sin signo (<code>xsd:unsignedInt</code>), verdadero o falso (<code>xsd:boolean</code>), fecha (<code>xsd:dateTime</code>). Si en la lista va una carpeta, el equipo devuelve todos los valores que tiene adentro.</p><p>Leer parece gratis, pero no lo es. Un equipo con Wi-Fi, voz y diagnósticos tiene miles de parámetros. Pedir el árbol entero cuesta segundos de trabajo del equipo y decenas de kilobytes por la red; hacerlo en cada sesión con cien mil equipos es una mala idea. Los buenos ACS leen poco y seguido lo que se usa a diario, y el árbol completo solo cuando hace falta.</p><p>Hay un detalle que sorprende a todos la primera vez: <b>las claves no se pueden leer.</b> Si el ACS pide <code>Device.WiFi.AccessPoint.1.Security.KeyPassphrase</code>, la clave del Wi-Fi, el equipo devuelve un texto vacío. La norma lo exige así para que una clave no viaje de vuelta por la red ni quede guardada en el ACS sin necesidad. Por eso, cuando un cliente olvida su clave, el agente no la «mira»: le pone una nueva.</p></div></section>
+<section><h2>Escribir: SetParameterValues</h2><div class="prose"><p><b><code>SetParameterValues</code></b> cambia valores. Recibe una lista de pares nombre y valor, y una <b>ParameterKey</b>, una etiqueta libre que el equipo guarda en <code>Device.ManagementServer.ParameterKey</code> después de aplicar el cambio. Con esa etiqueta, el ACS puede saber en cualquier sesión futura cuál fue el último cambio que el equipo aplicó, aunque la respuesta se haya perdido en el camino.</p><p>Cambiar la clave del Wi-Fi de un cliente de Fibra Ejemplo se ve así, sin el sobre SOAP:</p><div class="code-copia"><pre><code>&lt;cwmp:SetParameterValues&gt;
+  &lt;ParameterList&gt;
+    &lt;ParameterValueStruct&gt;
+      &lt;Name&gt;Device.WiFi.AccessPoint.1.Security.KeyPassphrase&lt;/Name&gt;
+      &lt;Value xsi:type="xsd:string"&gt;Girasol-del-patio-24&lt;/Value&gt;
+    &lt;/ParameterValueStruct&gt;
+  &lt;/ParameterList&gt;
+  &lt;ParameterKey&gt;clave-20261124-agente17&lt;/ParameterKey&gt;
+&lt;/cwmp:SetParameterValues&gt;</code></pre><button type="button" class="copiar copiar-todo">Copiar</button></div><p>El equipo contesta con un <b>estado</b> (<i>status</i>): <code>0</code> quiere decir «aplicado»; <code>1</code>, «guardado, pero se aplicará cuando me reinicie». El segundo caso es más común de lo que parece: algunos cambios de la conexión o del sistema solo toman efecto después de un reinicio, y el ACS tiene que decidir si lo provoca o espera.</p><p>La regla más importante de esta orden es que <b>es todo o nada.</b> Si la lista trae diez parámetros y uno solo está mal, el equipo no aplica ninguno y devuelve una falla. Para el operador, eso es una garantía: nunca queda un equipo «a medio cambiar», con el nombre del Wi-Fi nuevo y la clave vieja. Pero también obliga a armar bien cada lista: un parámetro que un modelo no tiene arruina el cambio entero en ese modelo, un problema que el capítulo 6 resuelve con perfiles por marca.</p></div><figure class="fig fig-flujo" id="04-diagrama-2"><div class="lienzo"><svg viewBox="0 0 920 470" style="min-width:740px" role="img" aria-label="Flujo de un cambio que falla: el ACS manda nombre y clave del Wi-Fi juntos; el equipo revisa cada valor y encuentra la clave demasiado corta; responde la falla 9003 con el detalle 9007 y no cambia nada; el ACS corrige la clave, vuelve a mandar los dos valores y recibe estado 0">
+  <defs>
+    <marker id="g42-fl-apl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--c-apl)"/></marker>
+    <marker id="g42-fl-w" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--warm)"/></marker>
+  </defs>
+  <rect x="40" y="14" width="180" height="50" rx="10" class="c-apl"/><text x="130" y="44" text-anchor="middle" class="t t-b">ACS</text>
+  <rect x="440" y="14" width="180" height="50" rx="10" class="caja"/><text x="530" y="44" text-anchor="middle" class="t t-b">Equipo · casa 1203</text>
+  <line x1="130" y1="64" x2="130" y2="440" class="vida"/>
+  <line x1="530" y1="64" x2="530" y2="440" class="vida"/>
+
+  <line x1="130" y1="112" x2="528" y2="116" class="ln s-apl" style="stroke-width:2.4" marker-end="url(#g42-fl-apl)"/>
+  <text x="142" y="96" class="t t-s">① <tspan class="t-mono t-b">SetParameterValues</tspan></text>
+  <text x="142" y="134" class="t t-xs t-mono t-m">SSID = Familia-Rojas · KeyPassphrase = abc12</text>
+
+  <rect x="400" y="150" width="260" height="70" rx="8" class="caja"/>
+  <text x="414" y="170" class="t t-s t-b">② revisa antes de tocar nada</text>
+  <text x="414" y="190" class="t t-s">SSID: 13 caracteres (1 a 32) <tspan style="fill:var(--good)">✓</tspan></text>
+  <text x="414" y="208" class="t t-s">clave: 5 caracteres (8 a 63) <tspan class="k-warm">✗</tspan></text>
+
+  <line x1="530" y1="252" x2="132" y2="256" class="ln s-warm" style="stroke-width:2.4" marker-end="url(#g42-fl-w)"/>
+  <text x="150" y="244" class="t t-s">③ falla <tspan class="t-mono t-b">9003</tspan> Invalid arguments</text>
+  <text x="150" y="274" class="t t-xs t-mono t-m">detalle: KeyPassphrase → 9007 Invalid parameter value</text>
+
+  <line x1="130" y1="330" x2="528" y2="334" class="ln s-apl" style="stroke-width:2.4" marker-end="url(#g42-fl-apl)"/>
+  <text x="142" y="322" class="t t-s">④ corrige y manda los dos de nuevo</text>
+  <text x="142" y="352" class="t t-xs t-mono t-m">SSID = Familia-Rojas · KeyPassphrase = (12 caracteres)</text>
+
+  <line x1="530" y1="400" x2="132" y2="404" class="ln s-apl" style="stroke-width:2" marker-end="url(#g42-fl-apl)"/>
+  <text x="150" y="392" class="t t-s">⑤ <tspan class="t-mono t-b">SetParameterValuesResponse</tspan> · Status 0</text>
+
+  
+  <rect x="690" y="100" width="210" height="190" rx="10" class="d-casa"/>
+  <text x="704" y="122" class="t t-xs t-b k-casa">ESTADO DEL EQUIPO</text>
+  <text x="704" y="146" class="t t-s t-b">Antes de ①</text>
+  <text x="704" y="164" class="t t-s t-mono">SSID: Casa-1203</text>
+  <text x="704" y="180" class="t t-s t-mono">clave: la vieja</text>
+  <text x="704" y="212" class="t t-s t-b">Después de ③</text>
+  <text x="704" y="230" class="t t-s t-mono">SSID: Casa-1203</text>
+  <text x="704" y="246" class="t t-s t-mono">clave: la vieja</text>
+  <text x="704" y="274" class="t t-s k-casa">idéntico: no cambió nada</text>
+  <rect x="690" y="310" width="210" height="110" rx="10" class="caja"/>
+  <text x="704" y="332" class="t t-s t-b">Después de ⑤</text>
+  <text x="704" y="352" class="t t-s t-mono">SSID: Familia-Rojas</text>
+  <text x="704" y="368" class="t t-s t-mono">clave: la nueva</text>
+  <text x="704" y="396" class="t t-s t-m">los dos cambios juntos</text>
+  <text x="460" y="462" text-anchor="middle" class="t t-s t-m">Todo ocurre en la misma sesión: una falla no la corta, y el ACS puede mandar la orden siguiente.</text>
+</svg></div><figcaption><b>Un cambio que falla, y por qué no se rompe nada.</b> Dos participantes, el ACS y el equipo; el tiempo corre hacia abajo. En ① el ACS manda en un solo <code>SetParameterValues</code> el nombre nuevo del Wi-Fi y una clave de cinco caracteres. En ② el equipo revisa cada valor antes de tocar nada: el nombre está bien; la clave, no, porque WPA2 exige entre 8 y 63. En ③ responde con la falla 9003 y, adentro, el detalle de cuál parámetro falló y por qué (9007, valor inválido). Los recuadros de la derecha muestran el estado del equipo: después de ③ es idéntico al de antes de ①. En ④ y ⑤ el ACS corrige la clave, vuelve a mandar los dos valores y recibe el estado 0.</figcaption></figure><div class="prose"><p>Ahora dale órdenes tú mismo a un equipo simulado. Prueba también las que fallan: son las que más enseñan.</p></div><div class="lab" id="04-lab-1"><div class="lab-title"><span class="tag">Laboratorio</span><h3>Consola del ACS</h3></div><p class="hint">Elige una orden, completa sus argumentos y envíala al equipo simulado de la casa 1203. Mira el pedido, la respuesta y cómo cambia el árbol del equipo. Prueba a escribir un parámetro de solo lectura, un canal que no existe o una clave de cinco letras, y mira qué falla devuelve.</p><style>
+[id="04-lab-1"] input[type=text]{font:500 .88rem var(--f-mono);padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--ink);width:100%;box-sizing:border-box;min-width:0}
+[id="04-lab-1"] .g4a-par{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:10px}
+[id="04-lab-1"] .g4a-par label{display:grid;gap:4px;font:600 .82rem var(--f-display);color:var(--muted);min-width:0}
+[id="04-lab-1"] .g4a-xml{margin:0;min-height:120px;max-height:230px;overflow:auto;padding:10px 12px;border-radius:8px;background:var(--paper);border:1px solid var(--line);font:500 .74rem/1.45 var(--f-mono);white-space:pre;color:var(--ink)}
+[id="04-lab-1"] .g4a-xml.err{border-color:var(--warm);background:var(--warm-soft)}
+[id="04-lab-1"] .g4a-xml.ok{border-color:var(--good)}
+[id="04-lab-1"] .g4a-tit{font:700 .72rem var(--f-display);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 4px}
+[id="04-lab-1"] .g4a-arbol{list-style:none;margin:0;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);font:500 .76rem/1.6 var(--f-mono);max-height:240px;overflow:auto}
+[id="04-lab-1"] .g4a-arbol li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;overflow-wrap:anywhere}
+[id="04-lab-1"] .g4a-arbol li i{font-style:normal;color:var(--muted)}
+[id="04-lab-1"] .g4a-arbol li.ro b{color:var(--muted)}
+[id="04-lab-1"] .g4a-arbol li.cambio{background:var(--good-soft);border-radius:4px}
+[id="04-lab-1"] .g4a-arbol li.carpeta{color:var(--muted)}
+</style>
+<div class="opciones">
+  <label>Orden
+    <select id="g4a-rpc">
+      <option value="GetParameterValues">GetParameterValues (leer)</option>
+      <option value="GetParameterNames">GetParameterNames (qué hay)</option>
+      <option value="SetParameterValues" selected>SetParameterValues (escribir)</option>
+      <option value="AddObject">AddObject (crear)</option>
+      <option value="DeleteObject">DeleteObject (borrar)</option>
+      <option value="Download">Download (firmware)</option>
+      <option value="Reboot">Reboot (reiniciar)</option>
+      <option value="FactoryReset">FactoryReset (volver a fábrica)</option>
+    </select></label>
+</div>
+<div class="g4a-par" id="g4a-args"></div>
+<datalist id="g4a-nombres"></datalist>
+<div class="btns"><button type="button" id="g4a-env" class="primary">Enviar al equipo</button><button type="button" id="g4a-ej">Ejemplo que falla</button><button type="button" id="g4a-reset">Equipo nuevo</button></div>
+<div class="g4a-par">
+  <div><p class="g4a-tit">Pedido del ACS</p><pre class="g4a-xml" id="g4a-ped" tabindex="0"></pre></div>
+  <div><p class="g4a-tit">Respuesta del equipo</p><pre class="g4a-xml" id="g4a-res" tabindex="0" aria-live="polite"></pre></div>
+</div>
+<div class="readout texto" id="g4a-out" aria-live="polite"></div>
+<p class="g4a-tit">El árbol del equipo de la casa 1203 (lo gris es de solo lectura)</p>
+<ul class="g4a-arbol" id="g4a-arbol"></ul></div></section>
+<section><h2>Crear y borrar: AddObject y DeleteObject</h2><div class="prose"><p>Algunas carpetas del árbol pueden tener varias copias: varias reglas de puertos, varias redes Wi-Fi, varios teléfonos. Cada copia es una <b>instancia</b> (<i>instance</i>) y se identifica con un número: <code>Device.NAT.PortMapping.1.</code>, <code>Device.NAT.PortMapping.2.</code> y así. Para manejarlas hay dos órdenes.</p><p><b><code>AddObject</code></b> crea una instancia nueva en una carpeta que lo permita. El ACS manda la ruta de la carpeta (<code>Device.NAT.PortMapping.</code>) y el equipo responde con el <b>número de instancia</b> (<i>InstanceNumber</i>) que le asignó, por ejemplo <code>3</code>. La instancia nace con valores por defecto, normalmente apagada; para usarla, el ACS la llena con un <code>SetParameterValues</code> en la misma sesión.</p><p><b><code>DeleteObject</code></b> borra una instancia: el ACS manda su ruta completa (<code>Device.NAT.PortMapping.3.</code>) y el equipo la elimina con todo lo que tiene adentro.</p><p>Un ejemplo de Fibra Ejemplo: un cliente instala una cámara de seguridad y quiere verla desde el celular cuando está fuera de casa. Soporte crea una <b>regla de redirección de puertos</b> (<i>port forwarding</i>): «lo que llegue desde Internet al puerto 8443 llévalo a la cámara, en <code>192.168.1.50</code>». Son dos órdenes en la misma sesión: un <code>AddObject</code> que devuelve la instancia 3 y un <code>SetParameterValues</code> que llena <code>Device.NAT.PortMapping.3.ExternalPort</code>, <code>InternalClient</code>, <code>InternalPort</code> y <code>Enable</code>. Si mañana el cliente se arrepiente, un <code>DeleteObject</code> la borra.</p><p>La red de invitados es un caso distinto que confunde a muchos: en la mayoría de los equipos <b>no se crea</b>, porque el fabricante ya la trae creada y apagada. Para ofrecerla basta con un <code>SetParameterValues</code> que la encienda y le ponga nombre y clave. Saber qué se crea y qué se enciende en cada modelo es, otra vez, trabajo de los perfiles del capítulo 6.</p></div></section>
+<section><h2>Descargar y subir: Download y Upload</h2><div class="prose"><p>Hay cosas que no caben en un parámetro: una versión nueva de firmware que pesa decenas de megabytes, un archivo de configuración completo, un registro de lo que pasó en el equipo. Para eso hay dos órdenes que no llevan el archivo, sino <b>una dirección</b> de dónde buscarlo o adónde dejarlo.</p><p><b><code>Download</code></b> le dice al equipo: «baja este archivo de esta dirección y haz con él lo que corresponda a su tipo». Los argumentos principales son el <b>tipo de archivo</b> (<code>1 Firmware Upgrade Image</code> para firmware, <code>3 Vendor Configuration File</code> para una configuración del fabricante), la <b>URL</b> (<i>Uniform Resource Locator</i>, la dirección web del archivo), su tamaño, una espera opcional antes de empezar (<code>DelaySeconds</code>) y una <b>CommandKey</b>, una etiqueta para reconocer después a qué orden corresponde el resultado.</p><p>La descarga no ocurre durante la sesión. El equipo contesta enseguida con un estado <code>1</code> («lo haré»), la sesión termina, y recién entonces el equipo baja el archivo de un <b>servidor de archivos</b> (<i>file server</i>), lo verifica, lo instala y, si es firmware, se reinicia. Cuando vuelve, abre una sesión nueva con los eventos <code>1 BOOT</code>, <code>7 TRANSFER COMPLETE</code> y <code>M Download</code>, y manda un <b><code>TransferComplete</code></b> con la CommandKey, la hora de inicio y fin y, si algo salió mal, el código de la falla.</p></div><figure class="fig fig-flujo" id="04-diagrama-3"><div class="lienzo"><svg viewBox="0 0 980 560" style="min-width:780px" role="img" aria-label="Flujo de una actualización de firmware en dos sesiones: en la primera el ACS manda Download y el equipo acepta con estado 1; fuera de la sesión el equipo baja el archivo del servidor de archivos, lo verifica, lo instala y se reinicia; en la segunda sesión vuelve con los eventos 1 BOOT, 7 TRANSFER COMPLETE y M Download, envía TransferComplete y el ACS responde">
+  <defs>
+    <marker id="g43-fl-apl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--c-apl)"/></marker>
+    <marker id="g43-fl-fis" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--c-fis)"/></marker>
+  </defs>
+  <rect x="40" y="14" width="180" height="50" rx="10" class="caja"/><text x="130" y="44" text-anchor="middle" class="t t-b">Equipo</text>
+  <rect x="340" y="14" width="180" height="50" rx="10" class="c-apl"/><text x="430" y="44" text-anchor="middle" class="t t-b">ACS</text>
+  <rect x="610" y="14" width="180" height="50" rx="10" class="c-fis"/><text x="700" y="36" text-anchor="middle" class="t t-b">Servidor de archivos</text><text x="700" y="54" text-anchor="middle" class="t t-s">fw.ejemplo.com</text>
+  <line x1="130" y1="64" x2="130" y2="530" class="vida"/>
+  <line x1="430" y1="64" x2="430" y2="530" class="vida"/>
+  <line x1="700" y1="64" x2="700" y2="530" class="vida"/>
+
+  
+  <line x1="130" y1="104" x2="428" y2="106" class="ln s-apl" style="stroke-width:2" marker-end="url(#g43-fl-apl)"/>
+  <text x="140" y="96" class="t t-s">① <tspan class="t-mono t-b">Inform</tspan> · 2 PERIODIC</text>
+  <line x1="430" y1="146" x2="132" y2="148" class="ln s-apl" style="stroke-width:2.4" marker-end="url(#g43-fl-apl)"/>
+  <text x="150" y="138" class="t t-s">② <tspan class="t-mono t-b">Download</tspan> · firmware 5.3</text>
+  <text x="150" y="166" class="t t-xs t-mono t-m">1 Firmware Upgrade Image · CommandKey fw53</text>
+  <line x1="130" y1="196" x2="428" y2="198" class="ln s-apl" style="stroke-width:2" marker-end="url(#g43-fl-apl)"/>
+  <text x="140" y="188" class="t t-s">③ <tspan class="t-mono t-b">DownloadResponse</tspan> · Status 1</text>
+  <text x="140" y="216" class="t t-xs t-m">«LO HARÉ»; LA SESIÓN SE CIERRA</text>
+
+  
+  <line x1="130" y1="262" x2="698" y2="264" class="ln s-fis" style="stroke-width:2.4" marker-end="url(#g43-fl-fis)"/>
+  <text x="140" y="254" class="t t-s">④ <tspan class="t-mono">GET https://fw.ejemplo.com/marca-a/5.3.bin</tspan></text>
+  <line x1="700" y1="302" x2="132" y2="304" class="ln s-fis" style="stroke-width:5" marker-end="url(#g43-fl-fis)"/>
+  <text x="460" y="296" class="t t-s">⑤ el archivo, unos 40 MB</text>
+  <rect x="60" y="324" width="300" height="56" rx="8" class="caja"/>
+  <text x="74" y="346" class="t t-s t-b">⑥ verifica, instala y se reinicia</text>
+  <text x="74" y="366" class="t t-s k-warm">1 a 2 minutos sin Internet en la casa</text>
+
+  
+  <line x1="130" y1="418" x2="428" y2="420" class="ln s-apl" style="stroke-width:2.4" marker-end="url(#g43-fl-apl)"/>
+  <text x="140" y="410" class="t t-s">⑦ <tspan class="t-mono t-b">Inform</tspan></text>
+  <text x="140" y="438" class="t t-xs t-mono t-m">1 BOOT · 7 TRANSFER COMPLETE · M Download</text>
+  <line x1="130" y1="470" x2="428" y2="472" class="ln s-apl" style="stroke-width:2" marker-end="url(#g43-fl-apl)"/>
+  <text x="140" y="462" class="t t-s">⑧ <tspan class="t-mono t-b">TransferComplete</tspan> · fw53, sin falla</text>
+  <line x1="430" y1="508" x2="132" y2="510" class="ln s-apl" style="stroke-width:2" marker-end="url(#g43-fl-apl)"/>
+  <text x="150" y="500" class="t t-s">⑨ <tspan class="t-mono t-b">TransferCompleteResponse</tspan></text>
+
+  <g class="t t-xs t-b">
+    <path d="M830 90v130" class="ln s-apl" style="stroke-width:3"/><text x="842" y="150" class="k-apl">SESIÓN 1</text><text x="842" y="164" class="t-m">segundos</text>
+    <path d="M830 244v142" class="ln s-fis" style="stroke-width:3"/><text x="842" y="308" class="k-fis">DESCARGA E</text><text x="842" y="322" class="k-fis">INSTALACIÓN</text><text x="842" y="336" class="t-m">minutos</text>
+    <path d="M830 400v120" class="ln s-apl" style="stroke-width:3"/><text x="842" y="456" class="k-apl">SESIÓN 2</text><text x="842" y="470" class="t-m">segundos</text>
+  </g>
+  <text x="14" y="300" class="t t-xs t-m" transform="rotate(-90 14 300)">EL TIEMPO CORRE HACIA ABAJO ↓</text>
+  <text x="460" y="550" text-anchor="middle" class="t t-s t-m">Entre ⑦ y ⑧ va el InformResponse del ACS, como en cualquier sesión; se omite para simplificar.</text>
+</svg></div><figcaption><b>Una actualización de firmware, en dos sesiones.</b> Tres participantes: el equipo, el ACS y el servidor de archivos; el tiempo corre hacia abajo. En la primera sesión (① a ③) el ACS manda <code>Download</code> con la URL del firmware y el equipo acepta con estado 1. Fuera de toda sesión (④ a ⑥) el equipo baja el archivo por HTTPS, lo verifica, lo instala y se reinicia: durante uno o dos minutos la casa no tiene Internet. En la segunda sesión (⑦ a ⑨) el equipo vuelve con el Inform que trae <code>1 BOOT</code>, <code>7 TRANSFER COMPLETE</code> y <code>M Download</code>, informa el resultado con <code>TransferComplete</code> y el ACS le contesta. A la derecha, cuánto tarda cada fase en un caso típico.</figcaption></figure><div class="prose"><p><b><code>Upload</code></b> es la orden inversa: «sube este archivo tuyo a esta dirección». Sirve para respaldar la configuración del equipo (<code>1 Vendor Configuration File</code>) o para llevarse sus registros (<code>2 Vendor Log File</code>) cuando soporte investiga una falla que no se reproduce. Sigue el mismo patrón: el equipo acepta, sube el archivo fuera de la sesión y avisa con un <code>TransferComplete</code>.</p><p>El capítulo 13 dedica todo su espacio al firmware, el cambio más delicado de todos; aquí importa la mecánica.</p></div></section>
+<section><h2>Reiniciar y volver a fábrica: Reboot y FactoryReset</h2><div class="prose"><p><b><code>Reboot</code></b> reinicia el equipo. Lleva una CommandKey y nada más. El equipo responde, espera a que la sesión termine y recién entonces se reinicia; al volver, llama con <code>1 BOOT</code> y <code>M Reboot</code>. Es la orden más usada por atención al cliente y la más abusada, por dos razones:</p><ul><li><b>Corta el servicio.</b> Durante uno o dos minutos la casa no tiene Internet ni teléfono. Si alguien está en una videollamada, la pierde.</li><li><b>Esconde el problema.</b> Un reinicio suele «arreglar» una falla por unas horas y la falla vuelve. Si el equipo se reinicia solo cada pocos días, la causa probable es su firmware, como vimos en el capítulo 1, y reiniciarlo una vez más no ayuda.</li></ul><p><b><code>FactoryReset</code></b> devuelve el equipo a como salió de fábrica: borra el nombre y la clave del Wi-Fi que eligió el cliente, las reglas de puertos, la línea de voz, todo. Es una orden opcional en la norma, y por buenas razones conviene usarla muy poco:</p><ul><li>El cliente pierde todo lo que configuró, y todos sus dispositivos se desconectan.</li><li>Si la dirección del ACS no estaba grabada en la configuración de fábrica del equipo, el equipo <b>pierde el camino al ACS</b> y queda fuera de gestión hasta que alguien vaya a la casa.</li><li>Si estaba grabada, el equipo vuelve a llamar con <code>0 BOOTSTRAP</code> y el ACS tiene que reconstruir su configuración completa, lo que funciona solo si el operador tiene bien armado el aprovisionamiento automático del capítulo 7.</li></ul></div><div class="ml"><b>En la práctica</b><p>Un buen guion de soporte pone el reinicio al final de una escalera, no al principio: primero leer el estado (¿llama al ACS?, ¿cuánto tiempo lleva encendido?, ¿cuántas veces se reinició esta semana?), después corregir lo que se vea mal con escrituras puntuales, y recién entonces reiniciar, avisándole al cliente que se cortará un par de minutos. La vuelta a fábrica queda reservada para soporte de segundo nivel y, en muchos operadores, exige confirmar que el equipo tiene la dirección del ACS en su configuración de fábrica.</p></div></section>
+<section><h2>Notificaciones activas y pasivas</h2><div class="prose"><p>Hasta aquí, el ACS pregunta y el equipo contesta. Pero muchas cosas cambian en el equipo sin que el ACS lo pida: el cliente le cambia el nombre al Wi-Fi desde la página local del router, la conexión se cae y vuelve con otra dirección IP, alguien conecta un televisor nuevo. ¿Cómo se entera el ACS?</p><p>Con los <b>atributos de notificación</b> (<i>notification attributes</i>). Cada parámetro tiene un atributo que el ACS puede cambiar con <b><code>SetParameterAttributes</code></b> (y leer con <code>GetParameterAttributes</code>). Tiene tres valores:</p><div class="tbl"><table><thead><tr><th>Valor</th><th>Nombre</th><th>Qué hace el equipo cuando el parámetro cambia</th></tr></thead><tbody><tr><td><code>0</code></td><td>Apagada (<i>off</i>)</td><td>Nada. El ACS solo se entera si lo lee.</td></tr><tr><td><code>1</code></td><td>Pasiva (<i>passive</i>)</td><td>Lo anota y lo incluye en el <b>próximo</b> Inform, sea cuando sea, con el evento <code>4 VALUE CHANGE</code>.</td></tr><tr><td><code>2</code></td><td>Activa (<i>active</i>)</td><td>Abre una sesión <b>enseguida</b> con el evento <code>4 VALUE CHANGE</code> y el valor nuevo.</td></tr></tbody></table></div><p>La activa parece siempre mejor, pero cada aviso es una sesión. Un parámetro que cambia a cada rato, como el tiempo encendido o el contador de bytes, con notificación activa haría que el equipo llamara sin parar. Por eso el equipo puede <b>rechazar</b> el pedido con la falla <code>9009</code> (<i>Notification request rejected</i>), y por eso la norma marca algunos parámetros como no aptos para notificación activa.</p><p>También existe lo contrario: parámetros que el equipo avisa <b>siempre</b>, aunque nadie lo pida, porque sin ellos el ACS perdería el control. El más importante es la dirección del timbre (<code>ConnectionRequestURL</code>): si cambia y el ACS no se entera, no podrá volver a despertar al equipo.</p></div><figure class="fig fig-comparacion" id="04-diagrama-4"><div class="lienzo"><svg viewBox="0 0 940 346" style="min-width:740px" role="img" aria-label="Comparación de notificaciones en un día: con el Inform cada seis horas y un cambio del nombre del Wi-Fi a las 9:40, con notificación apagada el ACS no se entera; con pasiva se entera a las 12:00; con activa el equipo abre una sesión extra a las 9:40 y el ACS se entera en segundos">
+  
+  <g class="t t-s t-m">
+    <text x="160" y="30" text-anchor="middle">0 h</text><text x="310" y="30" text-anchor="middle">6 h</text><text x="460" y="30" text-anchor="middle">12 h</text><text x="610" y="30" text-anchor="middle">18 h</text><text x="760" y="30" text-anchor="middle">24 h</text>
+  </g>
+  <line x1="402" y1="40" x2="402" y2="300" class="ln s-warm ln-d" style="stroke-width:1.6"/>
+  <text x="402" y="318" text-anchor="middle" class="t t-s k-warm">9:40 · el cliente cambia el nombre del Wi-Fi</text>
+
+  
+  <text x="20" y="84" class="t t-b">Apagada</text><text x="20" y="102" class="t t-s t-m">notificación 0</text>
+  <line x1="160" y1="88" x2="760" y2="88" class="ln" style="stroke-width:2"/>
+  <g class="ln s-apl" style="stroke-width:3"><path d="M160 74v28M310 74v28M460 74v28M610 74v28"/></g>
+  <path d="M402 70l-6 10h5l-4 10 10-13h-5l4-7z" style="fill:var(--warm)"/>
+  <text x="780" y="84" class="t t-s t-b">4 sesiones</text><text x="780" y="102" class="t t-s k-warm">no se entera</text>
+
+  
+  <text x="20" y="164" class="t t-b">Pasiva</text><text x="20" y="182" class="t t-s t-m">notificación 1</text>
+  <line x1="160" y1="168" x2="760" y2="168" class="ln" style="stroke-width:2"/>
+  <line x1="402" y1="168" x2="460" y2="168" class="ln s-warm" style="stroke-width:5"/>
+  <g class="ln s-apl" style="stroke-width:3"><path d="M160 154v28M310 154v28M460 154v28M610 154v28"/></g>
+  <path d="M402 150l-6 10h5l-4 10 10-13h-5l4-7z" style="fill:var(--warm)"/>
+  <circle cx="460" cy="168" r="7" style="fill:var(--good)"/>
+  <text x="468" y="150" class="t t-xs t-mono">4 VALUE CHANGE</text>
+  <text x="780" y="164" class="t t-s t-b">4 sesiones</text><text x="780" y="182" class="t t-s">se entera 2 h 20 min</text><text x="780" y="198" class="t t-s">después, a las 12:00</text>
+
+  
+  <text x="20" y="244" class="t t-b">Activa</text><text x="20" y="262" class="t t-s t-m">notificación 2</text>
+  <line x1="160" y1="248" x2="760" y2="248" class="ln" style="stroke-width:2"/>
+  <g class="ln s-apl" style="stroke-width:3"><path d="M160 234v28M310 234v28M460 234v28M610 234v28"/></g>
+  <path d="M402 230l-6 10h5l-4 10 10-13h-5l4-7z" style="fill:var(--warm)"/>
+  <path d="M408 234v28" class="ln s-apl" style="stroke-width:3;stroke-dasharray:4 2"/>
+  <circle cx="410" cy="248" r="7" style="fill:var(--good)"/>
+  <text x="420" y="276" class="t t-xs t-mono">sesión extra · 4 VALUE CHANGE</text>
+  <text x="780" y="244" class="t t-s t-b">5 sesiones</text><text x="780" y="262" class="t t-s">se entera en segundos</text>
+
+  <text x="160" y="336" class="t t-xs t-m">MARCAS ROSADAS: INFORM CADA 6 H · PUNTO VERDE: EL ACS SE ENTERA</text>
+</svg></div><figcaption><b>Cuándo se entera el ACS, según la notificación.</b> Tres líneas de tiempo de un mismo día, una por valor de notificación. Las marcas rosadas son las llamadas de rutina del equipo, cada seis horas; el rayo naranja es el momento en que el cliente cambia el nombre del Wi-Fi desde la página local, a las 9:40. Con la notificación apagada, el ACS no se entera en todo el día. Con la pasiva, se entera en la llamada de las 12:00, más de dos horas después. Con la activa, el equipo abre una sesión extra a las 9:40 y el ACS se entera en segundos. A la derecha, cuántas sesiones costó cada opción.</figcaption></figure><div class="lab" id="04-lab-2"><div class="lab-title"><span class="tag">Laboratorio</span><h3>Notificaciones: ¿cuándo se entera el ACS?</h3></div><p class="hint">Elige la notificación de cuatro parámetros (el nombre del Wi-Fi, la dirección IP de la conexión, los equipos conectados y el tiempo encendido) y el intervalo del Inform. Aprieta «Simular un día» y mira, en cada línea, cuándo cambió el valor y cuándo se enteró el ACS. Abajo, cuántas sesiones costó tu elección en un equipo y en cien mil.</p><style>
+[id="04-lab-2"] .g4b-fil{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));gap:10px}
+[id="04-lab-2"] svg{min-width:500px;width:100%;height:auto;display:block;background:var(--card);border-radius:8px;font-family:var(--f-display)}
+[id="04-lab-2"] svg .tx{fill:var(--ink);font-size:13px;font-weight:700}
+[id="04-lab-2"] svg .ts{fill:var(--muted);font-size:11px}
+[id="04-lab-2"] svg .lin{stroke:var(--line);stroke-width:2}
+[id="04-lab-2"] svg .inf{stroke:var(--c-apl);stroke-width:2.5}
+[id="04-lab-2"] svg .extra{stroke:var(--c-apl);stroke-width:2.5;stroke-dasharray:3 2}
+[id="04-lab-2"] svg .cam{fill:var(--warm)}
+[id="04-lab-2"] svg .sabe{fill:var(--good)}
+[id="04-lab-2"] svg .esp{stroke:var(--warm);stroke-width:3;stroke-opacity:.45}
+</style>
+<div class="g4b-fil" id="g4b-sel"></div>
+<div class="opciones">
+  <label>Intervalo del Inform periódico
+    <select id="g4b-int"><option value="1">cada 1 hora</option><option value="6" selected>cada 6 horas</option><option value="24">cada 24 horas</option></select></label>
+</div>
+<div class="btns"><button type="button" id="g4b-go" class="primary">Simular un día</button></div>
+<div class="lab-desliza" style="overflow-x:auto"><svg id="g4b-svg" viewBox="0 0 600 300" role="img" aria-label="Un día de un equipo: cuándo cambia cada parámetro y cuándo se entera el ACS"></svg></div>
+<div class="legend"><span><i style="background:var(--c-apl)"></i>llamada del equipo (punteada: sesión extra)</span><span><i style="background:var(--warm)"></i>el valor cambia</span><span><i style="background:var(--good)"></i>el ACS se entera</span></div>
+<div class="readout texto" id="g4b-out" aria-live="polite"></div></div></section>
+<section><h2>Fallas y códigos de error</h2><div class="prose"><p>Cuando el equipo no puede cumplir una orden, no la ignora: devuelve una <b>falla SOAP</b> (<i>SOAP fault</i>) con un código de cuatro cifras. Los que empiezan con <code>9</code> son del equipo; los que empiezan con <code>8</code>, del ACS cuando es él quien no puede atender un pedido del equipo. Los más frecuentes son estos:</p><div class="tbl"><table><thead><tr><th>Código</th><th>Nombre en la norma</th><th>Qué suele significar en la práctica</th></tr></thead><tbody><tr><td><code>9000</code></td><td><i>Method not supported</i></td><td>El equipo no tiene esa orden (por ejemplo, <code>FactoryReset</code>, que es opcional)</td></tr><tr><td><code>9001</code></td><td><i>Request denied</i></td><td>El equipo se niega sin dar más detalle</td></tr><tr><td><code>9002</code></td><td><i>Internal error</i></td><td>Algo falló adentro del equipo</td></tr><tr><td><code>9003</code></td><td><i>Invalid arguments</i></td><td>Algún argumento está mal; en <code>SetParameterValues</code> viene con el detalle por parámetro</td></tr><tr><td><code>9004</code></td><td><i>Resources exceeded</i></td><td>El equipo no tiene memoria o espacio para lo pedido</td></tr><tr><td><code>9005</code></td><td><i>Invalid parameter name</i></td><td>Ese nombre no existe en este equipo, típico de una marca que lo llama distinto</td></tr><tr><td><code>9006</code></td><td><i>Invalid parameter type</i></td><td>Se mandó texto donde iba un número, o al revés</td></tr><tr><td><code>9007</code></td><td><i>Invalid parameter value</i></td><td>El valor no está permitido: un canal que no existe, una clave muy corta</td></tr><tr><td><code>9008</code></td><td><i>Attempt to set a non-writable parameter</i></td><td>Se intentó escribir algo de solo lectura, como la versión de firmware</td></tr><tr><td><code>9009</code></td><td><i>Notification request rejected</i></td><td>El equipo no acepta notificación activa en ese parámetro</td></tr><tr><td><code>9010</code></td><td><i>File transfer failure</i></td><td>Falló una descarga o una subida (hay códigos más finos, del 9015 al 9019)</td></tr></tbody></table></div><p>Una falla no corta la sesión. El equipo la devuelve, el ACS la registra y puede mandar la orden siguiente. Lo que hace después depende del ACS: reintentar en la próxima sesión, avisar a una persona o marcar el equipo para revisión. En GenieACS, por ejemplo, una tarea que falló queda en una lista de fallas del equipo, con su código, y no se reintenta sola hasta que alguien la reactiva; las plataformas comerciales tienen políticas parecidas con otros nombres.</p><p>Para el negocio, los códigos de falla son una mina de información. Un <code>9005</code> repetido en un modelo dice que su perfil está mal. Una ola de <code>9010</code> en una campaña de firmware dice que el servidor de archivos no aguanta la carga. Leer las fallas por modelo y por día es una de las tareas más rentables del equipo que opera el ACS.</p></div><div class="practica"><div class="practica-title"><span class="tag">En la terminal</span><h3>Cambia el nombre del Wi-Fi de un equipo simulado, desde la interfaz y desde la API</h3></div><p>Usa el GenieACS y el simulador que instalaste en la práctica del capítulo 3, con sus servicios corriendo (<code>genieacs-cwmp</code>, <code>genieacs-nbi</code>, <code>genieacs-ui</code> y el simulador). El simulador usa el modelo de datos antiguo, así que el nombre del Wi-Fi está en <code>InternetGatewayDevice.LANDevice.1.WLANConfiguration.1.SSID</code>. En Windows, corre los comandos en WSL.</p><div class="cmds"><div class="cmd-tabs" role="tablist" aria-label="Sistema operativo"><button type="button" role="tab" data-so="win">Windows</button><button type="button" role="tab" data-so="mac linux">macOS y Linux</button></div><div class="cmd-panel" role="tabpanel" data-so="win"><p class="cmd-nota">Windows (en WSL, con Ubuntu)</p><div class="cmd-l"><code>curl -s 'http://127.0.0.1:7557/devices/?query=%7B%22_id%22%3A%22202BC1-BM632w-000000%22%7D&amp;projection=InternetGatewayDevice.LANDevice.1.WLANConfiguration.1.SSID'</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>curl -i 'http://127.0.0.1:7557/devices/202BC1-BM632w-000000/tasks?connection_request' -X POST --data '{"name":"setParameterValues","parameterValues":[["InternetGatewayDevice.LANDevice.1.WLANConfiguration.1.SSID","Fibra-Ejemplo-API","xsd:string"]]}'</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>curl -s 'http://127.0.0.1:7557/tasks/'</code><button type="button" class="copiar">Copiar</button></div></div><div class="cmd-panel" role="tabpanel" data-so="mac linux"><div class="cmd-l"><code>curl -s 'http://127.0.0.1:7557/devices/?query=%7B%22_id%22%3A%22202BC1-BM632w-000000%22%7D&amp;projection=InternetGatewayDevice.LANDevice.1.WLANConfiguration.1.SSID'</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>curl -i 'http://127.0.0.1:7557/devices/202BC1-BM632w-000000/tasks?connection_request' -X POST --data '{"name":"setParameterValues","parameterValues":[["InternetGatewayDevice.LANDevice.1.WLANConfiguration.1.SSID","Fibra-Ejemplo-API","xsd:string"]]}'</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>curl -s 'http://127.0.0.1:7557/tasks/'</code><button type="button" class="copiar">Copiar</button></div></div></div><ol class="steps"><li><span>En la interfaz (<code>http://localhost:3000</code>), abre el equipo <code>202BC1-BM632w-000000</code>, busca el parámetro <code>SSID</code>, edítalo con el lápiz y ponle <code>Fibra-Ejemplo-UI</code>. Mira la terminal del simulador: debería decir que recibió un timbre.</span></li><li><span>Con el primer comando, lee el SSID por la API y confirma que es el nuevo.</span></li><li><span>Con el segundo, cámbialo por la API. Fíjate en el código de la primera línea de la respuesta.</span></li><li><span>Detén el simulador con Ctrl+C y repite el segundo comando con otro nombre. Mira el código de respuesta y, con el tercer comando, la lista de tareas.</span></li><li><span>Vuelve a lanzar el simulador y repite el tercer comando.</span></li></ol><p><b>Qué observar:</b> con el simulador encendido, la API contesta <code>200</code>: el timbre funcionó, el equipo abrió una sesión y la tarea se cumplió en el momento. Con el simulador apagado, contesta <code>202</code>: el timbre no tuvo respuesta y la tarea quedó pendiente en la lista. Al volver el simulador, abre una sesión por su cuenta, recibe la tarea pendiente y la lista de tareas queda vacía. Es la diferencia del capítulo 3 entre un cambio inmediato y uno que «tarda», vista desde el registro del ACS. El simulador es permisivo y acepta casi cualquier valor, así que aquí no verás fallas <code>9007</code>; para eso está el laboratorio de la consola.</p></div></section>
+<section><h2>Las mismas órdenes, combinadas</h2><div class="prose"><p>Con estas piezas se arma todo lo demás del curso. La instalación sin visita del capítulo 7 es un <code>Inform</code> con <code>0 BOOTSTRAP</code> seguido de lecturas para reconocer el equipo y escrituras para cargar el plan. El diagnóstico del capítulo 9 es un <code>SetParameterValues</code> que arranca una prueba, un Inform con <code>8 DIAGNOSTICS COMPLETE</code> y un <code>GetParameterValues</code> que lee el resultado. Una campaña masiva del capítulo 12 es la misma escritura en miles de equipos, con lectura después para verificar. Y la actualización del capítulo 13 es un <code>Download</code> bien vigilado.</p><p>La idea que cierra este capítulo es esa: <b>seis o siete órdenes bien combinadas alcanzan para casi toda la gestión de un equipo.</b></p></div><div class="quiz"><h3>Pruébate</h3><details><summary>¿Qué diferencia hay entre GetParameterNames y GetParameterValues?</summary><p>GetParameterNames dice qué parámetros hay en una ruta y si se pueden escribir; GetParameterValues devuelve los valores y sus tipos.</p></details><details><summary>¿Por qué un agente no puede «ver» la clave del Wi-Fi de un cliente en el ACS?</summary><p>Porque la norma exige que los parámetros de claves devuelvan un texto vacío al leerlos, para que no viajen ni se guarden sin necesidad. Se puede poner una nueva, no leer la vieja.</p></details><details><summary>Un SetParameterValues trae diez parámetros y uno tiene un valor inválido. ¿Qué pasa con los otros nueve?</summary><p>Nada: la orden es todo o nada. El equipo no aplica ninguno y devuelve la falla 9003 con el detalle del parámetro que falló.</p></details><details><summary>¿Por qué un Download no termina dentro de la misma sesión?</summary><p>Porque bajar, verificar e instalar un archivo grande lleva tiempo y a veces exige reiniciar. El equipo acepta con estado 1, lo hace después y avisa el resultado con un TransferComplete en una sesión nueva, con el evento 7 TRANSFER COMPLETE.</p></details><details><summary>¿Qué riesgo tiene un FactoryReset que no tiene un Reboot?</summary><p>Borra todo lo que configuró el cliente y, si la dirección del ACS no está en la configuración de fábrica, el equipo queda fuera de gestión hasta que alguien vaya a la casa.</p></details><details><summary>¿Qué diferencia hay entre una notificación activa y una pasiva?</summary><p>Con la activa, el equipo abre una sesión enseguida para avisar el cambio; con la pasiva, lo guarda y lo incluye en el próximo Inform, cuando sea que llegue.</p></details></div><div class="investiga"><h3>Para investigar</h3><p class="hint">Estas preguntas no se responden en el capítulo: búscalas por tu cuenta.</p><ol><li>¿Qué tipos de dato define el estándar XML Schema (<code>xsd:string</code>, <code>xsd:unsignedInt</code>, <code>xsd:dateTime</code>…) y cómo se escribe una fecha en formato ISO 8601?<small>Pista: busca «XML Schema datatypes ISO 8601».</small></li><li>¿Qué diferencia hay entre WPA2 y WPA3, y por qué las dos piden claves de al menos 8 caracteres?<small>Pista: busca «WPA3 SAE vs WPA2 PSK».</small></li><li>¿Qué riesgos de seguridad tiene abrir un puerto hacia una cámara de la casa, y qué alternativas existen?<small>Pista: busca «port forwarding riesgos cámaras IP».</small></li><li>¿Cómo se comprueba que un archivo de firmware no fue alterado en el camino, con una suma de verificación o una firma digital?<small>Pista: busca «firmware code signing hash SHA-256».</small></li><li>¿Qué es una llamada a procedimiento remoto en otros sistemas, como gRPC o JSON-RPC, y en qué se parecen a TR-069?<small>Pista: busca «gRPC vs JSON-RPC».</small></li></ol></div><div class="vids"><span>Para saber más</span><a class="vid" href="https://www.broadband-forum.org/pdfs/tr-069-1-6-1.pdf" target="_blank" rel="noopener">TR-069: CPE WAN Management Protocol, enmienda 6 (Broadband Forum, inglés) <small>norma</small></a><a class="vid" href="https://cwmp-data-models.broadband-forum.org/" target="_blank" rel="noopener">Modelos de datos de CWMP publicados por el Broadband Forum (inglés) <small>referencia</small></a><a class="vid" href="https://docs.genieacs.com/en/latest/api-reference.html" target="_blank" rel="noopener">Referencia de la API de GenieACS: tareas (inglés) <small>referencia</small></a><a class="vid" href="https://aaramirez.github.io/telco/28-gestionar-el-equipo-en-casa-del-cliente.html" target="_blank" rel="noopener">Gestionar el equipo en casa del cliente, capítulo 28 de Cómo funciona un telco <small>lectura</small></a></div></section>
+<label class="got"><input type="checkbox" id="got"> Lo tengo claro</label>
+<nav class="pager" id="pager" aria-label="Capítulo anterior y siguiente"></nav>
+</main>
+</div>
+<footer><span>Curso abierto de aaramirez.github.io.</span><span>Sitio publicado: <a href="https://github.com/aaramirez/gestion-remota-de-equipos" target="_blank" rel="noopener">github.com/aaramirez/gestion-remota-de-equipos</a></span></footer>
+</div>
+<script src="assets/lab.js"></script>
+<script>
+(function(){
+  const {$}=window.Lab;
+  const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+  let D, sig, cambios=new Set();
+  function nuevo(){
+    D={
+      'Device.DeviceInfo.Manufacturer':{v:'Marca A',t:'string',w:false},
+      'Device.DeviceInfo.SoftwareVersion':{v:'5.2',t:'string',w:false},
+      'Device.DeviceInfo.UpTime':{v:'183422',t:'unsignedInt',w:false},
+      'Device.ManagementServer.PeriodicInformInterval':{v:'3600',t:'unsignedInt',w:true,min:30,max:86400},
+      'Device.ManagementServer.ParameterKey':{v:'',t:'string',w:false},
+      'Device.WiFi.Radio.1.Channel':{v:'6',t:'unsignedInt',w:true,min:1,max:13},
+      'Device.WiFi.SSID.1.SSID':{v:'Casa-1203',t:'string',w:true,len:[1,32]},
+      'Device.WiFi.AccessPoint.1.Security.KeyPassphrase':{v:'clave-vieja-1203',t:'string',w:true,len:[8,63],oculto:true},
+      'Device.Hosts.HostNumberOfEntries':{v:'7',t:'unsignedInt',w:false},
+      'Device.NAT.PortMapping.1.Enable':{v:'true',t:'boolean',w:true},
+      'Device.NAT.PortMapping.1.ExternalPort':{v:'8080',t:'unsignedInt',w:true,min:1,max:65535},
+      'Device.NAT.PortMapping.1.InternalClient':{v:'192.168.1.20',t:'string',w:true},
+      'Device.NAT.PortMapping.1.InternalPort':{v:'80',t:'unsignedInt',w:true,min:1,max:65535}
+    };
+    sig=2;cambios=new Set();
+  }
+  const PM=['Enable','ExternalPort','InternalClient','InternalPort'];
+  function arbol(){
+    const ks=Object.keys(D).sort((a,b)=>a.localeCompare(b,'en',{numeric:true}));
+    $('#g4a-arbol').innerHTML=ks.map(k=>{const p=D[k];return '<li class="'+(p.w?'':'ro ')+(cambios.has(k)?'cambio':'')+'"><b>'+k+'</b><i>'+(p.oculto?'(oculta)':esc(p.v)||'""')+'</i></li>';}).join('');
+    $('#g4a-nombres').innerHTML=ks.map(k=>'<option value="'+k+'">').join('')+'<option value="Device.WiFi."><option value="Device.NAT.PortMapping.">';
+  }
+  const campo=(id,lbl,val,list)=>'<label class="g4a-l">'+lbl+'<input type="text" id="'+id+'" value="'+esc(val)+'" spellcheck="false" autocomplete="off"'+(list?' list="g4a-nombres"':'')+'></label>';
+  function args(){
+    const r=$('#g4a-rpc').value;let h='';
+    if(r==='GetParameterValues')h=campo('g4a-a1','Nombre (o carpeta terminada en punto)','Device.WiFi.',1);
+    else if(r==='GetParameterNames')h=campo('g4a-a1','Ruta','Device.WiFi.',1)+'<label>NextLevel<select id="g4a-a2"><option value="true">true: solo el primer nivel</option><option value="false">false: todo lo de adentro</option></select></label>';
+    else if(r==='SetParameterValues')h=campo('g4a-a1','Nombre','Device.WiFi.SSID.1.SSID',1)+campo('g4a-a2','Valor','Familia-Rojas');
+    else if(r==='AddObject')h=campo('g4a-a1','Carpeta donde crear','Device.NAT.PortMapping.',1);
+    else if(r==='DeleteObject')h=campo('g4a-a1','Instancia a borrar','Device.NAT.PortMapping.1.',1);
+    else if(r==='Download')h='<label>Archivo (URL)<select id="g4a-a1"><option value="ok">https://fw.ejemplo.com/marca-a/ont-ax3000/5.3.bin</option><option value="otro">https://fw.ejemplo.com/marca-b/mesh-x/2.1.bin (otro modelo)</option><option value="404">https://fw.ejemplo.com/marca-a/ont-ax3000/9.9.bin (no existe)</option></select></label>';
+    else h='<p class="hint">Esta orden solo lleva una CommandKey.</p>';
+    $('#g4a-args').innerHTML=h;
+  }
+  const val=id=>{const e=$('#'+id);return e?e.value:'';};
+  const falla=(c,t,extra)=>'<soap-env:Fault>\n  <faultcode>Client</faultcode>\n  <faultstring>CWMP fault</faultstring>\n  <detail><cwmp:Fault>\n    <FaultCode>'+c+'</FaultCode>\n    <FaultString>'+t+'</FaultString>'+(extra||'')+'\n  </cwmp:Fault></detail>\n</soap-env:Fault>';
+  function validar(n,v){
+    const p=D[n];
+    if(!p)return[9005,'Invalid parameter name','Ese nombre no existe en este equipo. Revisa mayúsculas, puntos y el número de instancia.'];
+    if(!p.w)return[9008,'Attempt to set a non-writable parameter','Ese parámetro es de solo lectura: lo calcula el propio equipo.'];
+    if(p.t==='unsignedInt'){if(!/^\d+$/.test(v))return[9006,'Invalid parameter type','El parámetro es un número sin signo (xsd:unsignedInt) y mandaste texto.'];
+      if(+v<p.min||+v>p.max)return[9007,'Invalid parameter value','El valor debe estar entre '+p.min+' y '+p.max+(n.endsWith('Channel')?': en 2,4 GHz los canales van del 1 al 13.':'.')];}
+    if(p.t==='boolean'&&!/^(true|false|0|1)$/.test(v))return[9006,'Invalid parameter type','Este parámetro es verdadero o falso (xsd:boolean).'];
+    if(p.len&&(v.length<p.len[0]||v.length>p.len[1]))return[9007,'Invalid parameter value','Debe tener entre '+p.len[0]+' y '+p.len[1]+' caracteres; mandaste '+v.length+'.'];
+    return null;
+  }
+  function enviar(){
+    const r=$('#g4a-rpc').value;let ped='',res='',txt='',err=false;cambios=new Set();
+    const a1=val('g4a-a1').trim(),a2=val('g4a-a2');
+    if(r==='GetParameterValues'){
+      ped='<cwmp:GetParameterValues>\n  <ParameterNames>\n    <string>'+esc(a1)+'</string>\n  </ParameterNames>\n</cwmp:GetParameterValues>';
+      const ks=a1.endsWith('.')?Object.keys(D).filter(k=>k.startsWith(a1)):(D[a1]?[a1]:[]);
+      if(!ks.length){err=true;res=falla(9005,'Invalid parameter name');txt='No hay ningún parámetro con ese nombre o dentro de esa carpeta.';}
+      else{res='<cwmp:GetParameterValuesResponse>\n  <ParameterList>\n'+ks.map(k=>'    <ParameterValueStruct><Name>'+k+'</Name><Value xsi:type="xsd:'+D[k].t+'">'+(D[k].oculto?'':esc(D[k].v))+'</Value></ParameterValueStruct>').join('\n')+'\n  </ParameterList>\n</cwmp:GetParameterValuesResponse>';
+        txt=ks.length+' valor'+(ks.length>1?'es':'')+' leído'+(ks.length>1?'s':'')+'.'+(ks.some(k=>D[k].oculto)?' La clave del Wi-Fi vuelve vacía: la norma no deja leer claves.':'')+(a1.endsWith('.')?' Pediste una carpeta y el equipo devolvió todo lo que tiene adentro.':'');}
+    }else if(r==='GetParameterNames'){
+      ped='<cwmp:GetParameterNames>\n  <ParameterPath>'+esc(a1)+'</ParameterPath>\n  <NextLevel>'+a2+'</NextLevel>\n</cwmp:GetParameterNames>';
+      const bajo=Object.keys(D).filter(k=>k.startsWith(a1));
+      if(!a1.endsWith('.')||!bajo.length){err=true;res=falla(9005,'Invalid parameter name');txt='La ruta debe ser una carpeta existente, terminada en punto.';}
+      else{let ns;
+        if(a2==='true'){const s=new Set();bajo.forEach(k=>{const resto=k.slice(a1.length);const i=resto.indexOf('.');s.add(a1+(i<0?resto:resto.slice(0,i+1)));});ns=[...s];}
+        else ns=bajo;
+        res='<cwmp:GetParameterNamesResponse>\n  <ParameterList>\n'+ns.map(n=>'    <ParameterInfoStruct><Name>'+n+'</Name><Writable>'+(D[n]?D[n].w:false)+'</Writable></ParameterInfoStruct>').join('\n')+'\n  </ParameterList>\n</cwmp:GetParameterNamesResponse>';
+        txt=ns.length+' nombres. '+(a2==='true'?'Con NextLevel=true ves solo el primer nivel: los que terminan en punto son carpetas.':'Con NextLevel=false ves todo lo de adentro, a cualquier profundidad. En un equipo real pueden ser miles.');}
+    }else if(r==='SetParameterValues'){
+      const p=D[a1],tipo=p?p.t:'string';
+      ped='<cwmp:SetParameterValues>\n  <ParameterList>\n    <ParameterValueStruct>\n      <Name>'+esc(a1)+'</Name>\n      <Value xsi:type="xsd:'+tipo+'">'+esc(a2)+'</Value>\n    </ParameterValueStruct>\n  </ParameterList>\n  <ParameterKey>agente17-'+(Date.now()%10000)+'</ParameterKey>\n</cwmp:SetParameterValues>';
+      const v=validar(a1,a2);
+      if(v){err=true;res=falla(9003,'Invalid arguments','\n    <SetParameterValuesFault>\n      <ParameterName>'+esc(a1)+'</ParameterName>\n      <FaultCode>'+v[0]+'</FaultCode>\n      <FaultString>'+v[1]+'</FaultString>\n    </SetParameterValuesFault>');txt='Falla 9003 con el detalle '+v[0]+'. '+v[2]+' No se cambió nada.';}
+      else{p.v=a2;cambios.add(a1);D['Device.ManagementServer.ParameterKey'].v=ped.match(/<ParameterKey>(.*)</)[1];cambios.add('Device.ManagementServer.ParameterKey');
+        const reinicio=a1.endsWith('PeriodicInformInterval')?0:0;
+        res='<cwmp:SetParameterValuesResponse>\n  <Status>'+reinicio+'</Status>\n</cwmp:SetParameterValuesResponse>';
+        txt='Status 0: aplicado. El equipo también guardó la ParameterKey, para que el ACS sepa cuál fue el último cambio.'+(p.oculto?' Fíjate que en el árbol la clave sigue «oculta»: se puede escribir, no leer.':'');}
+    }else if(r==='AddObject'){
+      ped='<cwmp:AddObject>\n  <ObjectName>'+esc(a1)+'</ObjectName>\n  <ParameterKey>puerto-camara</ParameterKey>\n</cwmp:AddObject>';
+      if(a1!=='Device.NAT.PortMapping.'){err=true;res=falla(9005,'Invalid parameter name');txt='En este equipo solo Device.NAT.PortMapping. admite instancias nuevas. Una carpeta fija, como Device.WiFi., no se puede «crear».';}
+      else{const n=sig++;D[a1+n+'.Enable']={v:'false',t:'boolean',w:true};D[a1+n+'.ExternalPort']={v:'0',t:'unsignedInt',w:true,min:1,max:65535};D[a1+n+'.InternalClient']={v:'',t:'string',w:true};D[a1+n+'.InternalPort']={v:'0',t:'unsignedInt',w:true,min:1,max:65535};
+        PM.forEach(x=>cambios.add(a1+n+'.'+x));
+        res='<cwmp:AddObjectResponse>\n  <InstanceNumber>'+n+'</InstanceNumber>\n  <Status>0</Status>\n</cwmp:AddObjectResponse>';
+        txt='Instancia '+n+' creada, apagada y con valores por defecto. Ahora llénala con SetParameterValues: por ejemplo Device.NAT.PortMapping.'+n+'.ExternalPort = 8443.';}
+    }else if(r==='DeleteObject'){
+      ped='<cwmp:DeleteObject>\n  <ObjectName>'+esc(a1)+'</ObjectName>\n  <ParameterKey>borrar-regla</ParameterKey>\n</cwmp:DeleteObject>';
+      const m=a1.match(/^Device\.NAT\.PortMapping\.(\d+)\.$/);const ks=m?Object.keys(D).filter(k=>k.startsWith(a1)):[];
+      if(!ks.length){err=true;res=falla(9005,'Invalid parameter name');txt='Esa instancia no existe. Hay que dar la ruta completa con su número y el punto final, por ejemplo Device.NAT.PortMapping.1.';}
+      else{ks.forEach(k=>delete D[k]);res='<cwmp:DeleteObjectResponse>\n  <Status>0</Status>\n</cwmp:DeleteObjectResponse>';txt='Instancia borrada con todo lo que tenía adentro. Los números no se reutilizan enseguida: la próxima regla no será necesariamente la '+m[1]+'.';}
+    }else if(r==='Download'){
+      ped='<cwmp:Download>\n  <CommandKey>fw53</CommandKey>\n  <FileType>1 Firmware Upgrade Image</FileType>\n  <URL>'+$('#g4a-a1').selectedOptions[0].text.split(' ')[0]+'</URL>\n  <FileSize>41943040</FileSize>\n  <DelaySeconds>0</DelaySeconds>\n</cwmp:Download>';
+      const o=a1;
+      res='<cwmp:DownloadResponse>\n  <Status>1</Status>\n</cwmp:DownloadResponse>\n\n… la sesión termina; el equipo descarga …\n\nNueva sesión · Inform: '+(o==='ok'?'1 BOOT, 7 TRANSFER COMPLETE, M Download':'7 TRANSFER COMPLETE, M Download')+'\n<cwmp:TransferComplete>\n  <CommandKey>fw53</CommandKey>\n  <FaultStruct>\n    <FaultCode>'+(o==='ok'?0:o==='otro'?9018:9016)+'</FaultCode>\n    <FaultString>'+(o==='ok'?'':o==='otro'?'Download failure: file corrupted':'Download failure: unable to access file')+'</FaultString>\n  </FaultStruct>\n</cwmp:TransferComplete>';
+      if(o==='ok'){D['Device.DeviceInfo.SoftwareVersion'].v='5.3';D['Device.DeviceInfo.UpTime'].v='95';cambios.add('Device.DeviceInfo.SoftwareVersion');cambios.add('Device.DeviceInfo.UpTime');
+        txt='Status 1: «lo haré». El equipo bajó el archivo, lo instaló y se reinició; volvió con 1 BOOT y un TransferComplete sin falla. Firmware 5.3.';}
+      else{err=true;txt=o==='otro'?'El equipo bajó el archivo pero lo rechazó: no es una imagen para su modelo (9018). Sigue con la 5.2 y no se reinició. Por eso el capítulo 13 insiste en elegir el firmware por modelo y versión.':'El servidor de archivos no tiene ese archivo (9016). El equipo sigue igual. El error aparece recién en el TransferComplete, no en la respuesta a Download.';}
+    }else if(r==='Reboot'){
+      ped='<cwmp:Reboot>\n  <CommandKey>reinicio-agente17</CommandKey>\n</cwmp:Reboot>';
+      res='<cwmp:RebootResponse/>\n\n… la sesión termina; el equipo se reinicia (1 a 2 minutos sin Internet) …\n\nNueva sesión · Inform: 1 BOOT, M Reboot';
+      D['Device.DeviceInfo.UpTime'].v='62';cambios.add('Device.DeviceInfo.UpTime');
+      txt='El equipo se reinició al terminar la sesión y volvió con 1 BOOT y M Reboot. El tiempo encendido volvió a cero. La configuración no cambió.';
+    }else{
+      ped='<cwmp:FactoryReset/>';
+      res='<cwmp:FactoryResetResponse/>\n\n… el equipo borra su configuración y se reinicia …\n\nNueva sesión · Inform: 0 BOOTSTRAP, 1 BOOT';
+      nuevo();D['Device.WiFi.SSID.1.SSID'].v='MarcaA-5G3F';D['Device.WiFi.AccessPoint.1.Security.KeyPassphrase'].v='etiqueta';D['Device.ManagementServer.PeriodicInformInterval'].v='86400';
+      PM.forEach(x=>delete D['Device.NAT.PortMapping.1.'+x]);D['Device.DeviceInfo.UpTime'].v='58';sig=1;
+      ['Device.WiFi.SSID.1.SSID','Device.ManagementServer.PeriodicInformInterval','Device.DeviceInfo.UpTime'].forEach(k=>cambios.add(k));
+      err=true;txt='Volvió con 0 BOOTSTRAP: el nombre del Wi-Fi es el de fábrica, la regla de puertos desapareció y el intervalo es otro. Esta vez la dirección del ACS estaba en su configuración de fábrica y el equipo volvió a llamar; si no, habría quedado fuera de gestión.';
+    }
+    $('#g4a-ped').textContent=ped;$('#g4a-res').textContent=res;$('#g4a-res').className='g4a-xml '+(err?'err':'ok');
+    const tit=r==='FactoryReset'?' · hecho, y el cliente perdió su configuración':(err?' · algo no salió como se pidió':' · hecho');
+    $('#g4a-out').innerHTML='<span class="'+(err?'warn':'ok')+'">'+r+tit+'</span><span>'+txt+'</span>';
+    arbol();
+  }
+  const EJ=[['SetParameterValues','Device.WiFi.AccessPoint.1.Security.KeyPassphrase','abc12'],['SetParameterValues','Device.DeviceInfo.SoftwareVersion','6.0'],['SetParameterValues','Device.WiFi.Radio.1.Channel','14'],['SetParameterValues','Device.WiFi.Radio.1.Channel','seis'],['SetParameterValues','Device.WiFi.SSID.1.Nombre','Casa'],['DeleteObject','Device.NAT.PortMapping.7.']];
+  let ej=0;
+  $('#g4a-ej').addEventListener('click',()=>{const e=EJ[ej++%EJ.length];$('#g4a-rpc').value=e[0];args();$('#g4a-a1').value=e[1];if(e[2]!==undefined&&$('#g4a-a2'))$('#g4a-a2').value=e[2];enviar();});
+  $('#g4a-rpc').addEventListener('change',()=>{args();$('#g4a-ped').textContent='';$('#g4a-res').textContent='';$('#g4a-res').className='g4a-xml';$('#g4a-out').innerHTML='<span>Completa los argumentos y aprieta «Enviar al equipo».</span>';});
+  $('#g4a-env').addEventListener('click',enviar);
+  $('#g4a-reset').addEventListener('click',()=>{nuevo();arbol();$('#g4a-out').innerHTML='<span>Equipo como recién configurado.</span>';});
+  nuevo();args();arbol();
+  $('#g4a-out').innerHTML='<span>Completa los argumentos y aprieta «Enviar al equipo». «Ejemplo que falla» prueba, por turnos, seis errores típicos.</span>';
+})();
+</script>
+<script>
+(function(){
+  const {$}=window.Lab;
+  const P=[
+    {id:'ssid',n:'Nombre del Wi-Fi',p:'Device.WiFi.SSID.1.SSID',c:[9.67],q:'el cliente lo cambia desde la página local',def:'1'},
+    {id:'ip',n:'IP de la conexión',p:'Device.IP.Interface.1.IPv4Address.1.IPAddress',c:[3.2,15.5],q:'la conexión se cae y vuelve con otra',def:'2'},
+    {id:'hosts',n:'Equipos conectados',p:'Device.Hosts.HostNumberOfEntries',c:[6.9,7.1,7.4,7.8,8.2,8.6,12.4,13.1,17.6,18.2,18.5,19.3,20.1,21.7,22.9,23.4],q:'la familia entra y sale de casa',def:'0'},
+    {id:'up',n:'Tiempo encendido',p:'Device.DeviceInfo.UpTime',c:null,q:'cambia cada segundo',def:'0'}
+  ];
+  const sel={};
+  $('#g4b-sel').innerHTML=P.map(x=>'<label style="display:grid;gap:4px;font:600 .82rem var(--f-display);color:var(--muted)">'+x.n+'<select id="g4b-'+x.id+'"><option value="0">0 · apagada</option><option value="1">1 · pasiva</option><option value="2">2 · activa</option></select></label>').join('');
+  let aviso='';
+  P.forEach(x=>{sel[x.id]=x.def;const s=$('#g4b-'+x.id);s.value=x.def;s.addEventListener('change',()=>{
+    if(x.id==='up'&&s.value==='2'){s.value=sel.up;aviso='El equipo rechazó la notificación activa del tiempo encendido con la falla 9009 (Notification request rejected): llamaría al ACS cada segundo. El atributo quedó como estaba.';}
+    else{sel[x.id]=s.value;aviso='';}
+    dibujar();});});
+  const fh=h=>{const H=Math.floor(h),m=Math.round((h-H)*60);return H+':'+String(m).padStart(2,'0');};
+  const dur=h=>h<1/60?'segundos':h<1?Math.round(h*60)+' min':(Math.floor(h)+' h'+(Math.round((h%1)*60)?' '+Math.round((h%1)*60)+' min':''));
+  function dibujar(){
+    const I=+$('#g4b-int').value, X=h=>20+h/24*560;
+    const inf=[];for(let t=0.5;t<24;t+=I)inf.push(t);
+    let h='',extra=0,filas=[];
+    P.forEach((x,i)=>{
+      const y=40+i*66, a=sel[x.id];
+      h+='<text x="20" y="'+(y-14)+'" class="tx">'+x.n+'</text><text x="580" y="'+(y-14)+'" text-anchor="end" class="ts">'+['apagada','pasiva','activa'][+a]+' · '+x.q+'</text>';
+      h+='<line x1="20" y1="'+(y+10)+'" x2="580" y2="'+(y+10)+'" class="lin"/>';
+      inf.forEach(t=>h+='<line x1="'+X(t)+'" y1="'+y+'" x2="'+X(t)+'" y2="'+(y+20)+'" class="inf"/>');
+      if(!x.c){ // tiempo encendido: cambia siempre
+        h+='<rect x="20" y="'+(y+24)+'" width="560" height="4" class="cam"/>';
+        if(a==='1')inf.forEach(t=>h+='<circle cx="'+X(t)+'" cy="'+(y+10)+'" r="5" class="sabe"/>');
+        filas.push(x.n+': '+(a==='1'?'el ACS ve un valor nuevo en cada llamada de rutina, y siempre viejo.':'el ACS no se entera; si lo necesita, lo lee.'));
+        return;
+      }
+      let demoras=[];const sabidos=new Set();
+      x.c.forEach(t=>{
+        h+='<path d="M'+X(t)+' '+(y-4)+'l-4 7h3l-3 7 7-9h-3l3-5z" class="cam"/>';
+        if(a==='2'){extra++;h+='<line x1="'+(X(t)+3)+'" y1="'+y+'" x2="'+(X(t)+3)+'" y2="'+(y+20)+'" class="extra"/><circle cx="'+(X(t)+3)+'" cy="'+(y+10)+'" r="5" class="sabe"/>';demoras.push(0.003);}
+        else if(a==='1'){const n=inf.find(s=>s>t);const fin=n===undefined?24:n;h+='<line x1="'+X(t)+'" y1="'+(y+10)+'" x2="'+X(fin)+'" y2="'+(y+10)+'" class="esp"/>';if(n!==undefined){sabidos.add(n);demoras.push(n-t);}else demoras.push(null);}
+      });
+      sabidos.forEach(n=>h+='<circle cx="'+X(n)+'" cy="'+(y+10)+'" r="5" class="sabe"/>');
+      const ok=demoras.filter(d=>d!==null);
+      let d=a==='0'?x.n+': cambió '+x.c.length+' '+(x.c.length>1?'veces':'vez')+' y el ACS no se enteró.':a==='2'?x.n+': el ACS se enteró de los '+x.c.length+' cambios en segundos, a costa de '+x.c.length+' sesiones extra.':
+        x.n+': se enteró '+(sabidos.size<x.c.length?'de '+sabidos.size+' llamadas con cambios (solo ve el último valor de cada tramo)':'en la llamada siguiente')+'; demora promedio '+(ok.length?dur(ok.reduce((s,v)=>s+v,0)/ok.length):'—')+(ok.length<demoras.length?'; un cambio quedó para mañana':'')+'.';
+      filas.push(d);
+    });
+    h+='<text x="20" y="'+(40+4*66-6)+'" class="ts">0 h</text><text x="580" y="'+(40+4*66-6)+'" text-anchor="end" class="ts">24 h</text>';
+    $('#g4b-svg').setAttribute('viewBox','0 0 600 '+(40+4*66));$('#g4b-svg').innerHTML=h;
+    const tot=inf.length+extra;
+    $('#g4b-out').innerHTML=(aviso?'<span class="warn">'+aviso+'</span>':'')+'<span class="big">'+tot+' sesiones en el día ('+inf.length+' de rutina + '+extra+' por notificaciones activas)</span>'+
+      '<span>En 100.000 equipos: '+(tot*100000).toLocaleString('es')+' sesiones diarias'+(extra?', de las cuales '+(extra*100000).toLocaleString('es')+' son avisos.':'.')+'</span>'+filas.map(f=>'<span>'+f+'</span>').join('');
+  }
+  $('#g4b-int').addEventListener('change',dibujar);
+  $('#g4b-go').addEventListener('click',dibujar);
+  dibujar();
+})();
+</script>
+</body>
+</html>

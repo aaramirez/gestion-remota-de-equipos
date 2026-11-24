@@ -4,7 +4,7 @@ Cómo un operador configura, actualiza y diagnostica a distancia los equipos que
 
 **Ver en línea:** https://aaramirez.github.io/gestion-remota-de-equipos/
 
-Este repositorio solo tiene el sitio generado. El curso está en preparación: la tabla de contenido ya está publicada para revisión.
+Este repositorio solo tiene el sitio generado. Curso completo: 16 capítulos con laboratorios interactivos, diagramas y prácticas.
 
 | # | Capítulo |
 |---|---|

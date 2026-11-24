@@ -1,0 +1,545 @@
+<!doctype html>
+<html lang="es">
+<head>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-KX76XF8R');</script>
+<!-- End Google Tag Manager -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Diagnósticos remotos · Gestión remota de equipos (ACS) · Gestión remota de equipos (ACS)</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Cómo un operador configura, actualiza y diagnostica a distancia los equipos que tiene en casa de sus clientes: TR-069 y TR-369 a fondo, el modelo de datos TR-181, el aprovisionamiento sin visita, los cambios masivos, el firmware, los diagnósticos, la seguridad y la escala de un ACS.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400;1,8..60,600&display=swap">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KX76XF8R"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+<div class="wrap" data-page="diagnosticos-remotos">
+<header class="topbar"><a class="brand" href="index.html">Gestión <b>remota</b> de equipos</a><span class="eyebrow">Curso visual e interactivo · Industrias y finanzas</span><a class="al-sitio" href="https://aaramirez.github.io/">← Todos los cursos</a></header>
+<div class="layout">
+<nav class="toc" id="toc" aria-label="Ruta de aprendizaje"></nav>
+<main>
+<header class="page-head"><span class="num">CAPÍTULO 09 DE 16</span><h1>Diagnósticos remotos: el ACS en la llamada de soporte</h1><p class="lede">«El internet está lento» es la frase que más se oye en un operador. Este capítulo muestra qué mide el equipo de la casa por sí mismo, qué pruebas corre por orden del ACS y cómo se convierte todo eso en una pantalla que le permite al agente decidir sin enviar a nadie.</p></header>
+<section><div class="prose"><p>Son las ocho de la noche de un jueves en la mesa de ayuda de Fibra Ejemplo. Entra una llamada y el agente ya sabe lo que va a oír antes de que el cliente hable: «el internet está lento». Lo dicen el estudiante que no puede entrar a su clase en línea, la señora cuya serie se queda cargando y el señor que pagó 500 Mbps y ve 40 en su celular.</p><p>Detrás de esa misma frase hay problemas muy distintos. Algunos están en la casa y se arreglan en dos minutos; otros están en la fibra y piden un técnico; otros están en la red y le tocan al centro de operaciones, no al cliente. El agente tiene unos pocos minutos para saber cuál es. Sin datos, adivina: pide reiniciar, pide desconectar cables, agenda una visita «por las dudas». Con un ACS, mide.</p><p>Este capítulo trata de esa medición: qué sabe el equipo de la casa sobre sí mismo, qué pruebas puede correr cuando el ACS se lo pide, por qué esas pruebas valen más que la del celular del cliente y cómo se resume todo en una pantalla que cualquier agente entiende.</p></div></section>
+<section><h2>La llamada típica: «el internet está lento» y sus cuatro causas</h2><div class="analogia"><b>Imagínalo así</b><p>Piensa en un médico de cabecera que recibe a un paciente que dice «me siento mal». Antes de opinar, toma la temperatura, la presión y escucha el pecho. Esas mediciones no le dicen todo, pero le dicen dónde buscar y, sobre todo, dónde no. Y si tuviera un termómetro dentro de la casa del paciente, que le mandara los datos cuando él lo pide, podría hacer buena parte de la consulta por teléfono.</p></div><div class="prose"><p>El equipo de la casa es ese termómetro. Y lo primero que el agente tiene que aprender es que «lento» casi siempre cae en una de cuatro causas, cada una en un tramo distinto del camino:</p><ol class="steps"><li><span><b>El Wi-Fi.</b> Es la causa más común. El celular está lejos del equipo, detrás de dos paredes, en la banda de 2,4 GHz que comparte con los doce vecinos del edificio. La conexión de la casa está bien; el último tramo, por el aire, no.</span></li><li><span><b>El dispositivo del cliente.</b> Un celular de hace siete años, una computadora llena de programas o un televisor viejo no pueden recibir más de cierta velocidad, aunque la red se la entregue.</span></li><li><span><b>La línea.</b> La fibra llega con poca luz por un conector sucio o un cable doblado, o el equipo se reinicia solo por una falla. Aquí sí puede hacer falta un técnico.</span></li><li><span><b>La red o el destino.</b> La red del operador está congestionada en esa zona a esa hora, o el sitio que el cliente quiere ver está lento. No es de la casa, y mandar un técnico no sirve de nada.</span></li></ol><p>La primera tarea del diagnóstico es partir el camino en tramos y medir cada uno.</p></div><figure class="fig fig-arquitectura" id="09-diagrama-1"><div class="lienzo"><svg viewBox="0 0 940 420" style="min-width:760px" role="img" aria-label="El camino de los datos del celular al sitio web, en tres franjas: casa, red del operador e Internet, y debajo qué tramo cubre cada prueba: la del celular cubre todo, la del equipo va del equipo al servidor de pruebas del operador, la potencia óptica cubre solo la fibra y la señal de los dispositivos cubre solo el Wi-Fi">
+  
+  <rect x="14" y="14" width="318" height="168" rx="12" class="d-casa"/>
+  <text x="26" y="36" class="t t-xs t-b k-casa">LA CASA</text>
+  <rect x="342" y="14" width="420" height="168" rx="12" class="d-oper"/>
+  <text x="354" y="36" class="t t-xs t-b k-oper">RED DEL OPERADOR</text>
+  <rect x="772" y="14" width="154" height="168" rx="12" class="d-inet"/>
+  <text x="784" y="36" class="t t-xs t-b k-inet">INTERNET</text>
+
+  
+  <line x1="125" y1="96" x2="200" y2="96" class="ln ln-d" style="stroke-width:2"/>
+  <text x="162" y="88" text-anchor="middle" class="t t-s t-m">Wi-Fi</text>
+  <line x1="300" y1="96" x2="372" y2="96" class="ln s-fis" style="stroke-width:3"/>
+  <text x="336" y="146" text-anchor="middle" class="t t-s k-fis">fibra</text>
+  <line x1="462" y1="96" x2="498" y2="96" class="ln" style="stroke-width:2"/>
+  <line x1="588" y1="96" x2="626" y2="96" class="ln" style="stroke-width:2"/>
+  <path d="M543 124 V160 H848 V124" class="ln" style="stroke-width:2"/>
+  <text x="600" y="154" class="t t-s t-m">hacia el sitio web</text>
+
+  
+  <rect x="35" y="68" width="90" height="56" rx="10" class="caja"/>
+  <text x="80" y="92" text-anchor="middle" class="t t-b">Celular</text><text x="80" y="110" text-anchor="middle" class="t t-s t-m">del cliente</text>
+  <rect x="200" y="68" width="100" height="56" rx="10" class="c-apl"/>
+  <text x="250" y="92" text-anchor="middle" class="t t-b">Equipo</text><text x="250" y="110" text-anchor="middle" class="t t-s">ONT con Wi-Fi</text>
+  <rect x="372" y="68" width="90" height="56" rx="10" class="caja"/>
+  <text x="417" y="92" text-anchor="middle" class="t t-b">OLT</text><text x="417" y="110" text-anchor="middle" class="t t-s t-m">la central</text>
+  <rect x="498" y="68" width="90" height="56" rx="10" class="caja"/>
+  <text x="543" y="92" text-anchor="middle" class="t t-b">Red</text><text x="543" y="110" text-anchor="middle" class="t t-s t-m">routers, BNG</text>
+  <rect x="626" y="68" width="122" height="56" rx="10" class="caja"/>
+  <text x="687" y="92" text-anchor="middle" class="t t-b">Servidor</text><text x="687" y="110" text-anchor="middle" class="t t-s t-m">de pruebas propio</text>
+  <rect x="790" y="68" width="116" height="56" rx="10" class="caja"/>
+  <text x="848" y="92" text-anchor="middle" class="t t-b">Sitio web</text><text x="848" y="110" text-anchor="middle" class="t t-s t-m">en otro país</text>
+
+  
+  <text x="14" y="224" class="t t-xs t-b t-m">QUÉ TRAMO CUBRE CADA PRUEBA</text>
+
+  <text x="80" y="244" class="t t-s t-b">Prueba desde el celular del cliente</text>
+  <rect x="80" y="252" width="768" height="20" rx="6" class="d-inet"/>
+  <text x="464" y="266" text-anchor="middle" class="t t-s">mezcla los cuatro tramos: no dice cuál frena</text>
+
+  <text x="250" y="296" class="t t-s t-b">Prueba de velocidad desde el equipo (TR-143)</text>
+  <rect x="250" y="304" width="437" height="20" rx="6" class="c-apl"/>
+  <text x="468" y="318" text-anchor="middle" class="t t-s">lo que el operador vende: deja fuera el Wi-Fi y el dispositivo</text>
+
+  <text x="250" y="348" class="t t-s t-b">Potencia óptica</text>
+  <rect x="250" y="356" width="167" height="20" rx="6" class="c-fis"/>
+  <text x="333" y="370" text-anchor="middle" class="t t-s">solo la fibra</text>
+
+  <text x="80" y="400" class="t t-s t-b">Dispositivos y su señal</text>
+  <rect x="80" y="404" width="170" height="14" rx="5" class="d-casa"/>
+  <text x="262" y="415" class="t t-s">solo el Wi-Fi</text>
+
+  
+  <g class="ln ln-d" style="stroke-width:1">
+    <line x1="80" y1="124" x2="80" y2="196"/>
+    <line x1="250" y1="124" x2="250" y2="196"/>
+    <line x1="417" y1="124" x2="417" y2="196"/>
+    <line x1="687" y1="124" x2="687" y2="196"/>
+  </g>
+</svg></div><figcaption><b>Dónde mide cada prueba.</b> Arriba, el camino de los datos en tres franjas: la casa (el celular, el Wi-Fi y el equipo), la red del operador (la fibra, la OLT, la red y un servidor de pruebas propio) e Internet (el sitio que el cliente quiere ver). Debajo, una barra por prueba muestra qué tramo cubre. La prueba desde el celular cubre todo y por eso no sabe dónde está el problema. La prueba desde el equipo empieza en el equipo y termina en el servidor del operador: deja fuera el Wi-Fi y el dispositivo. La lectura de la potencia óptica cubre solo la fibra. La lista de dispositivos conectados y su señal cubre solo el Wi-Fi. Combinadas, señalan el tramo culpable.</figcaption></figure></section>
+<section><h2>Lo que el equipo puede medir por sí mismo</h2><div class="prose"><p>Antes de pedirle ninguna prueba, el equipo ya sabe mucho sobre su propio estado. Todo eso vive en el árbol TR-181 del capítulo 5, y el ACS lo lee con un <code>GetParameterValues</code> del capítulo 4. Estos son los datos que más usa un diagnóstico:</p><div class="tbl"><table><thead><tr><th>Qué se quiere saber</th><th>Dónde está en TR-181</th><th>Cómo se lee</th></tr></thead><tbody><tr><td>¿Tiene conexión a Internet?</td><td><code>Device.IP.Interface.1.Status</code></td><td><code>Up</code> es conectado; cualquier otra cosa, no</td></tr><tr><td>¿Cuánta luz le llega por la fibra?</td><td><code>Device.Optical.Interface.1.OpticalSignalLevel</code></td><td>En milésimas de dBm: <code>-21500</code> es −21,5 dBm</td></tr><tr><td>¿Cuánto lleva encendido?</td><td><code>Device.DeviceInfo.UpTime</code></td><td>En segundos: <code>420</code> es que se reinició hace 7 minutos</td></tr><tr><td>¿Está sobrecargado?</td><td><code>Device.DeviceInfo.ProcessStatus.CPUUsage</code></td><td>Porcentaje de uso del procesador</td></tr><tr><td>¿Quién está conectado y con qué señal?</td><td><code>Device.WiFi.AccessPoint.{i}.AssociatedDevice.{i}.SignalStrength</code></td><td>En dBm: más cerca de cero es mejor; −50 es excelente, −80 es muy débil</td></tr></tbody></table></div><p>La potencia óptica merece un comentario. La ONT de una red <b>GPON</b> (<i>Gigabit-capable Passive Optical Network</i>, red óptica pasiva con capacidad de gigabit) de clase B+ funciona con una luz recibida entre −8 y −27 dBm. Por debajo de −27 empieza a perder datos y a caerse; muy cerca de ese límite, cualquier curva del cable la empuja afuera. Es el número que más rápido separa «problema de la casa» de «problema de la fibra». También se puede leer desde la OLT, como vimos en el capítulo 2; leerla desde el ACS le ahorra al agente cambiar de herramienta.</p><p>Hay datos que el equipo no guarda como parámetro pero que el ACS reconstruye. Los <b>reinicios</b> son el mejor ejemplo: cada vez que el equipo arranca, su <code>Inform</code> trae el evento <code>1 BOOT</code>, y el ACS los cuenta. Un equipo con seis <code>1 BOOT</code> en un día tiene un problema: una fuente que falla, un firmware con un error o un corte de luz en la casa. El tiempo encendido de ese momento no lo muestra; la historia, sí.</p></div></section>
+<section><h2>Pruebas a pedido: ping, traceroute y velocidad desde el equipo (TR-143)</h2><div class="prose"><p>Leer el estado es mirar. A veces hace falta más: pedirle al equipo que haga algo y cuente qué pasó. TR-181 define varias pruebas que el equipo sabe correr:</p><ul><li><b>Ping</b> (<code>Device.IP.Diagnostics.IPPing</code>): el equipo manda unos cuantos mensajes cortos a una dirección y mide cuántos vuelven y cuánto tardan. Responde «¿llego?» y «¿con cuánta demora?», la <b>latencia</b> (<i>latency</i>).</li><li><b><i>Traceroute</b></i> (<code>Device.IP.Diagnostics.TraceRoute</code>, trazado de ruta): el equipo descubre por qué routers pasan sus datos hasta un destino y cuánto tarda cada salto. Sirve para ver dónde empieza la demora.</li><li><b>Prueba de velocidad de bajada y de subida</b> (<code>Device.IP.Diagnostics.DownloadDiagnostics</code> y <code>UploadDiagnostics</code>): el equipo descarga o sube un archivo a un servidor y mide cuántos bytes pasaron y en cuánto tiempo. Estas pruebas las define la norma <b>TR-143</b> del Broadband Forum, dedicada a medir el rendimiento del servicio desde el propio equipo.</li></ul><p>Todas siguen el mismo baile, y conviene verlo porque explica por qué una prueba «tarda»:</p></div><figure class="fig fig-flujo" id="09-diagrama-2"><div class="lienzo"><svg viewBox="0 0 1000 640" style="min-width:780px" role="img" aria-label="Flujo de una prueba de velocidad TR-143 pedida por el ACS: el agente la pide; en una primera sesión el ACS escribe la dirección del archivo y DiagnosticsState Requested y la sesión se cierra; el equipo descarga el archivo del servidor de pruebas y mide; en una segunda sesión el equipo avisa con 8 DIAGNOSTICS COMPLETE, el ACS lee los resultados y le muestra al agente 480 Mbps">
+  <defs>
+    <marker id="f9b-fl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--muted)"/></marker>
+    <marker id="f9b-fl-apl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--c-apl)"/></marker>
+    <marker id="f9b-fl-fis" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--c-fis)"/></marker>
+  </defs>
+
+  <rect x="30" y="14" width="140" height="52" rx="10" class="caja"/><text x="100" y="37" text-anchor="middle" class="t t-b">Agente</text><text x="100" y="54" text-anchor="middle" class="t t-s t-m">con el cliente al teléfono</text>
+  <rect x="260" y="14" width="140" height="52" rx="10" class="c-apl"/><text x="330" y="37" text-anchor="middle" class="t t-b">ACS</text><text x="330" y="54" text-anchor="middle" class="t t-s">acs.ejemplo.com</text>
+  <rect x="490" y="14" width="140" height="52" rx="10" class="caja"/><text x="560" y="37" text-anchor="middle" class="t t-b">Equipo</text><text x="560" y="54" text-anchor="middle" class="t t-s t-m">casa 1203</text>
+  <rect x="720" y="14" width="140" height="52" rx="10" class="d-oper"/><text x="790" y="37" text-anchor="middle" class="t t-b">Servidor</text><text x="790" y="54" text-anchor="middle" class="t t-s t-m">de pruebas propio</text>
+  <line x1="100" y1="66" x2="100" y2="596" class="vida"/>
+  <line x1="330" y1="66" x2="330" y2="596" class="vida"/>
+  <line x1="560" y1="66" x2="560" y2="596" class="vida"/>
+  <line x1="790" y1="66" x2="790" y2="596" class="vida"/>
+
+  
+  <line x1="100" y1="108" x2="327" y2="108" class="ln s-apl" style="stroke-width:2" marker-end="url(#f9b-fl-apl)"/>
+  <text x="110" y="100" class="t t-s">① prueba de velocidad, casa 1203</text>
+  <line x1="560" y1="156" x2="333" y2="156" class="ln s-apl" style="stroke-width:2.4" marker-end="url(#f9b-fl-apl)"/>
+  <text x="346" y="148" class="t t-s">② <tspan class="t-mono t-b">Inform</tspan> (tras el despertador)</text>
+  <text x="346" y="174" class="t t-s t-mono t-m">6 CONNECTION REQUEST</text>
+  <line x1="330" y1="208" x2="557" y2="208" class="ln s-apl" style="stroke-width:2.4" marker-end="url(#f9b-fl-apl)"/>
+  <text x="340" y="200" class="t t-s">③ <tspan class="t-mono t-b">SetParameterValues</tspan></text>
+  <text x="340" y="226" class="t t-s t-mono t-m">…DownloadURL = http://prueba.ejemplo.com/600MB</text>
+  <text x="340" y="242" class="t t-s t-mono t-m">…DiagnosticsState = Requested</text>
+  <line x1="560" y1="276" x2="333" y2="276" class="ln s-apl" style="stroke-width:2" marker-end="url(#f9b-fl-apl)"/>
+  <text x="346" y="268" class="t t-s">④ estado 0 y fin de la sesión</text>
+
+  
+  <line x1="560" y1="318" x2="787" y2="318" class="ln s-fis" style="stroke-width:2" marker-end="url(#f9b-fl-fis)"/>
+  <text x="570" y="310" class="t t-s">⑤ pedir el archivo</text>
+  <line x1="790" y1="356" x2="566" y2="372" class="ln s-fis" style="stroke-width:7" marker-end="url(#f9b-fl-fis)"/>
+  <text x="600" y="398" class="t t-s">⑥ 600 MB llegan en 10 s</text>
+  <text x="600" y="414" class="t t-s t-mono t-m">BOMTime … EOMTime</text>
+
+  
+  <line x1="560" y1="456" x2="333" y2="456" class="ln s-apl" style="stroke-width:2.4" marker-end="url(#f9b-fl-apl)"/>
+  <text x="346" y="448" class="t t-s">⑦ <tspan class="t-mono t-b">Inform</tspan></text>
+  <text x="346" y="474" class="t t-s t-mono t-m">8 DIAGNOSTICS COMPLETE</text>
+  <line x1="330" y1="504" x2="557" y2="504" class="ln s-apl" style="stroke-width:2" marker-end="url(#f9b-fl-apl)"/>
+  <text x="340" y="496" class="t t-s">⑧ <tspan class="t-mono t-b">GetParameterValues</tspan></text>
+  <line x1="560" y1="540" x2="333" y2="540" class="ln s-apl" style="stroke-width:2" marker-end="url(#f9b-fl-apl)"/>
+  <text x="346" y="532" class="t t-s t-mono">⑨ TestBytesReceived = 600000000</text>
+  <line x1="330" y1="580" x2="103" y2="580" class="ln s-apl" style="stroke-width:2" marker-end="url(#f9b-fl-apl)"/>
+  <text x="116" y="572" class="t t-s">⑩ «480 Mbps desde el equipo»</text>
+
+  <g class="t t-xs t-b">
+    <path d="M900 92v196" class="ln s-apl" style="stroke-width:3"/><text x="910" y="180" class="k-apl">SESIÓN 1</text><text x="910" y="194" class="t-m">la orden</text>
+    <path d="M900 300v124" class="ln s-fis" style="stroke-width:3"/><text x="910" y="356" class="k-fis">MEDICIÓN</text><text x="910" y="370" class="t-m">sin el ACS,</text><text x="910" y="384" class="t-m">línea libre</text>
+    <path d="M900 438v150" class="ln s-apl" style="stroke-width:3"/><text x="910" y="508" class="k-apl">SESIÓN 2</text><text x="910" y="522" class="t-m">el resultado</text>
+  </g>
+  <text x="14" y="330" class="t t-xs t-m" transform="rotate(-90 14 330)">EL TIEMPO CORRE HACIA ABAJO ↓</text>
+  <text x="480" y="626" text-anchor="middle" class="t t-s t-m">600.000.000 bytes × 8 / 10 s = 480 Mbps. De ① a ⑩ pasan entre veinte segundos y un minuto.</text>
+</svg></div><figcaption><b>Una prueba de velocidad pedida por el ACS (TR-143).</b> Cuatro participantes: el agente, el ACS, el equipo de la casa y el servidor de pruebas del operador; el tiempo corre hacia abajo. En la primera sesión (① a ④) el agente pide la prueba, el ACS despierta al equipo como en el capítulo 3, le escribe la dirección del archivo y pone <code>DiagnosticsState</code> en <code>Requested</code>, y la sesión se cierra. En la medición (⑤ y ⑥) el equipo, ya solo, descarga el archivo del servidor y anota los tiempos. En la segunda sesión (⑦ a ⑩) el equipo llama con el evento <code>8 DIAGNOSTICS COMPLETE</code>, el ACS lee los resultados y le muestra al agente la velocidad. Las flechas rosadas son TR-069; las naranjas, el tráfico de la prueba, que no pasa por el ACS.</figcaption></figure><div class="prose"><p>El detalle importante está en el medio: <b>el equipo no corre la prueba mientras habla con el ACS</b>. Primero recibe la orden, la sesión termina, el equipo mide con la línea libre y, cuando acaba, abre una sesión nueva para avisar con el evento <code>8 DIAGNOSTICS COMPLETE</code>. Por eso una prueba de velocidad tarda entre veinte segundos y un minuto desde que el agente aprieta el botón.</p><p>Los resultados de una prueba de bajada son tiempos y bytes, y la velocidad sale de una cuenta. El equipo informa, entre otros:</p><ul><li><code>BOMTime</code> (<i>Beginning of Measurement</i>, comienzo de la medición) y <code>EOMTime</code> (<i>End of Measurement</i>, fin de la medición), con precisión de microsegundos;</li><li><code>TestBytesReceived</code>, los bytes de la prueba que recibió entre esos dos momentos;</li><li><code>TotalBytesReceived</code>, todos los bytes que pasaron por la interfaz en ese lapso, de la prueba y de cualquier otra cosa.</li></ul><p>Si <code>TestBytesReceived</code> es 600.000.000 bytes y entre <code>BOMTime</code> y <code>EOMTime</code> pasaron 10 segundos, la velocidad es 600.000.000 × 8 / 10 = 480.000.000 bits por segundo: 480 Mbps. Y si <code>TotalBytesReceived</code> es mucho mayor que <code>TestBytesReceived</code>, alguien en la casa estaba usando la conexión al mismo tiempo, una película o una descarga, y la prueba salió más baja por eso, no por la red. Las versiones nuevas de la norma permiten además usar varias conexiones a la vez con <code>NumberOfConnections</code>, porque en planes rápidos una sola conexión no alcanza a llenar la línea.</p><p>En TR-369 (USP), el sucesor de TR-069 que verás en el capítulo 16, estas mismas pruebas se piden como comandos, por ejemplo <code>Device.IP.Diagnostics.IPPing()</code>, y el resultado llega en un solo mensaje sin esperar una sesión nueva. Los parámetros son los mismos.</p></div></section>
+<section><h2>Por qué la prueba desde el equipo vale más que la del celular del cliente</h2><div class="prose"><p>Cuando el cliente dice «hice una prueba de velocidad y me dio 40», mide algo real: lo que él vive. Pero esa cifra mezcla cuatro tramos (su dispositivo, el Wi-Fi, la red del operador e Internet hasta un servidor que puede estar en otro país) y no dice cuál de ellos frena. La prueba desde el equipo corta el camino en un punto fijo:</p><ul><li><b>Deja fuera el Wi-Fi y el dispositivo.</b> Si desde el equipo se miden 480 Mbps y en el celular 40, los 440 que faltan se pierden dentro de la casa.</li><li><b>Usa un servidor del operador.</b> El servidor de pruebas está dentro de la red de Fibra Ejemplo. La prueba mide lo que el operador vende, de la casa a su red, y no la congestión de un cable submarino.</li><li><b>Es repetible.</b> El mismo equipo, el mismo servidor, la misma prueba, a cualquier hora. Se puede comparar el lunes con el jueves y esta casa con la del vecino.</li></ul><p>Tiene también sus límites, y conviene conocerlos para no engañarse. Un equipo barato puede no tener procesador suficiente para medir 1 Gbps y dar menos de lo que la línea entrega. Y la prueba compite con el tráfico de la casa, que por eso se mira con <code>TotalBytesReceived</code>.</p><p>Compara tú las dos mediciones y mira dónde se pierde la velocidad.</p></div><div class="lab" id="09-lab-2"><div class="lab-title"><span class="tag">Laboratorio</span><h3>Prueba de velocidad en dos puntos</h3></div><p class="hint">Elige el plan, la banda del Wi-Fi, el celular del cliente, a cuántas paredes está del equipo y cuánta congestión tiene la red de la zona. Las barras comparan el plan, lo que mide el equipo (TR-143) y lo que mide el celular. La lectura dice cuánto se pierde en la red y cuánto dentro de la casa.</p><div class="opciones">
+  <label>Plan del cliente
+    <select id="g9b-plan"><option value="200">200 Mbps</option><option value="500" selected>500 Mbps</option></select></label>
+  <label>Banda del Wi-Fi
+    <select id="g9b-banda"><option value="24">2,4 GHz</option><option value="5" selected>5 GHz</option></select></label>
+  <label>Celular del cliente
+    <select id="g9b-cel">
+      <option value="4">Viejo: Wi-Fi 4, una antena</option>
+      <option value="5">Intermedio: Wi-Fi 5, dos antenas</option>
+      <option value="6" selected>Nuevo: Wi-Fi 6, dos antenas</option>
+    </select></label>
+</div>
+<div class="ctls">
+  <label class="ctl">Paredes entre el celular y el equipo <output id="g9b-par-o"></output>
+    <input id="g9b-par" type="range" min="0" max="4" step="1" value="2"></label>
+  <label class="ctl">Distancia al equipo <output id="g9b-dis-o"></output>
+    <input id="g9b-dis" type="range" min="1" max="20" step="1" value="10"></label>
+  <label class="ctl">Congestión de la red en la zona <output id="g9b-con-o"></output>
+    <input id="g9b-con" type="range" min="0" max="70" step="5" value="0"></label>
+</div>
+<canvas id="g9b-c" role="img" aria-label="Barras que comparan el plan, la velocidad medida desde el equipo y la medida desde el celular"></canvas>
+<div class="legend"><span><i style="background:var(--muted)"></i>plan contratado</span><span><i style="background:var(--c-apl)"></i>medido desde el equipo (TR-143)</span><span><i style="background:var(--accent)"></i>medido desde el celular</span></div>
+<div class="readout" id="g9b-out" aria-live="polite"></div>
+<p class="hint">Modelo simplificado: la señal baja con la distancia y unos 4 dB por pared en 2,4 GHz y 7 dB en 5 GHz; la velocidad útil del Wi-Fi es cerca del 60 % de la velocidad del enlace. Sirve para ver la forma del problema, no para predecir una casa real.</p></div><div class="prose"><p>Haz tú la misma comparación en tu casa: tu celular o tu computadora hacen de «prueba del cliente», en dos lugares distintos.</p></div><div class="practica"><div class="practica-title"><span class="tag">En el navegador</span><h3>Tu propia prueba en dos puntos</h3></div><p>Vas a medir la velocidad cerca y lejos de tu router con una prueba pública y gratuita. Solo se mide: no cambies nada en el router.</p><ol class="steps"><li><span>Con el celular o la computadora a un metro del router, abre <a href="https://speed.cloudflare.com/" target="_blank" rel="noopener">speed.cloudflare.com</a> y espera a que termine. Anota la velocidad de bajada, la de subida y la latencia.</span></li><li><span>Vete a la habitación más lejana de la casa, detrás de dos o tres paredes, y repite la prueba.</span></li><li><span>Si tu red tiene dos nombres (uno con «5G» o «5GHz» al final), repite las dos mediciones conectado a cada uno.</span></li></ol><p><b>Qué observar:</b> la diferencia entre la prueba cerca y la prueba lejos se pierde en el Wi-Fi, porque la línea es la misma. Es la misma cuenta que hace el agente cuando compara la prueba del equipo con la del celular del cliente. En la banda de 5 GHz la velocidad cerca del router suele ser mayor, y lejos suele caer más rápido. Los números cambian con el plan, el equipo y la hora.</p></div><div class="prose"><p>Y con un comando, puedes partir el camino en dos tramos tú mismo:</p></div><div class="practica"><div class="practica-title"><span class="tag">En la terminal</span><h3>Ping a tu router y ping a Internet</h3></div><p>Vas a medir la latencia hasta tu equipo, que es el tramo de tu casa, y hasta un servidor en Internet, que suma la red del operador. Antes, busca la dirección de tu puerta de enlace como en la primera práctica del capítulo 1 (suele ser <code>192.168.1.1</code> o <code>192.168.0.1</code>) y cámbiala en el comando si es otra.</p><div class="cmds"><div class="cmd-tabs" role="tablist" aria-label="Sistema operativo"><button type="button" role="tab" data-so="win">Windows</button><button type="button" role="tab" data-so="mac linux">macOS y Linux</button></div><div class="cmd-panel" role="tabpanel" data-so="win"><div class="cmd-l"><code>ping -n 10 192.168.1.1</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>ping -n 10 1.1.1.1</code><button type="button" class="copiar">Copiar</button></div></div><div class="cmd-panel" role="tabpanel" data-so="mac linux"><div class="cmd-l"><code>ping -c 10 192.168.1.1</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>ping -c 10 1.1.1.1</code><button type="button" class="copiar">Copiar</button></div></div></div><ol class="steps"><li><span>Anota el tiempo promedio de cada uno (en Windows, «Media»; en macOS y Linux, el segundo número de la línea <code>min/avg/max</code>).</span></li><li><span>Repite los dos comandos conectado por Wi-Fi lejos del router y, si puedes, con un cable.</span></li><li><span>Fíjate si alguna respuesta se pierde («tiempo de espera agotado» o <i>timeout</i>).</span></li></ol><p><b>Qué observar:</b> por cable, el ping al router suele dar 1 ms o menos; por Wi-Fi, unos pocos milisegundos, y bastante más si estás lejos. El ping a <code>1.1.1.1</code> suma el tramo del operador y de Internet. Si el ping al router ya es alto o pierde respuestas, el problema está en tu casa y no en la red: es la primera pregunta de cualquier guion de diagnóstico.</p></div></section>
+<section><h2>La pantalla del agente: pocos datos, en lenguaje de cliente</h2><div class="prose"><p>El ACS sabe cientos de cosas de cada equipo. Mostrarlas todas sería un error: el agente de primer nivel no es ingeniero, tiene a un cliente impaciente al teléfono y necesita decidir en minutos. La pantalla que funciona tiene tres rasgos:</p><ul><li><b>Pocos datos.</b> Seis u ocho indicadores, no ochenta: en línea o no, la luz de la fibra, reinicios recientes, dispositivos conectados y cuántos con señal débil, la última prueba de velocidad, el firmware.</li><li><b>Semáforos.</b> Cada indicador en verde, amarillo o rojo, con el umbral ya decidido por ingeniería. El agente no tiene que saber que −27,5 dBm es malo: lo ve en rojo.</li><li><b>Lenguaje de cliente.</b> No «<code>SignalStrength</code> −79 dBm», sino «el televisor del cuarto tiene señal débil». Así el agente puede leerle la frase al cliente tal cual.</li></ul><p>Detrás del semáforo están los números del árbol TR-181, para el soporte de segundo nivel que los necesite. Pero la primera pantalla no los muestra.</p></div></section>
+<section><h2>Guiones de diagnóstico: del síntoma a la acción</h2><div class="prose"><p>Un <b>guion de diagnóstico</b> (<i>troubleshooting script</i>) es el camino que sigue el agente para pasar del síntoma a la acción sin saltarse pasos. Se escribe una vez, con ingeniería y con los agentes más experimentados, y se mejora con cada caso que sale mal. El orden importa: primero lo barato y lo que descarta más causas.</p></div><figure class="fig fig-esquema" id="09-diagrama-3"><div class="lienzo"><svg viewBox="0 0 940 580" style="min-width:760px" role="img" aria-label="Guion de diagnóstico para internet lento: primero si el equipo está en línea, después si la luz de la fibra está en rango, después si la prueba desde el equipo da el plan; si la da, se revisa la señal de los dispositivos y el canal; si no, se pregunta si les pasa a los vecinos y si el equipo se reinicia solo">
+  <defs>
+    <marker id="f9c-fl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--muted)"/></marker>
+  </defs>
+  <g class="ln" style="stroke-width:1.6">
+    <line x1="470" y1="40" x2="470" y2="58" marker-end="url(#f9c-fl)"/>
+    <line x1="470" y1="100" x2="470" y2="128" marker-end="url(#f9c-fl)"/>
+    <line x1="610" y1="80" x2="676" y2="80" marker-end="url(#f9c-fl)"/>
+    <line x1="470" y1="170" x2="470" y2="198" marker-end="url(#f9c-fl)"/>
+    <line x1="610" y1="150" x2="676" y2="150" marker-end="url(#f9c-fl)"/>
+    <path d="M400 240 L230 286" marker-end="url(#f9c-fl)"/>
+    <path d="M540 240 L720 286" marker-end="url(#f9c-fl)"/>
+    <path d="M130 330 L105 376" marker-end="url(#f9c-fl)"/>
+    <path d="M260 330 L300 376" marker-end="url(#f9c-fl)"/>
+    <path d="M280 420 L235 466" marker-end="url(#f9c-fl)"/>
+    <path d="M350 420 L395 466" marker-end="url(#f9c-fl)"/>
+    <path d="M820 330 L825 376" marker-end="url(#f9c-fl)"/>
+    <path d="M680 330 L610 376" marker-end="url(#f9c-fl)"/>
+    <path d="M570 420 L555 466" marker-end="url(#f9c-fl)"/>
+    <path d="M640 420 L715 466" marker-end="url(#f9c-fl)"/>
+  </g>
+  
+  <g class="t t-s t-b t-m">
+    <text x="478" y="118">sí</text><text x="636" y="72">no</text>
+    <text x="478" y="188">sí</text><text x="636" y="142">no</text>
+    <text x="236" y="262">sí, da el plan</text><text x="650" y="262">no lo da</text>
+    <text x="96" y="356">no</text><text x="286" y="356">sí</text>
+    <text x="236" y="446">sí</text><text x="380" y="446">no</text>
+    <text x="830" y="356">sí</text><text x="626" y="356">no</text>
+    <text x="540" y="446">sí</text><text x="684" y="446">no</text>
+  </g>
+
+  <rect x="400" y="10" width="140" height="30" rx="15" class="caja"/>
+  <text x="470" y="30" text-anchor="middle" class="t t-b">«Está lento»</text>
+
+  <rect x="330" y="60" width="280" height="40" rx="20" class="c-apl"/>
+  <text x="470" y="85" text-anchor="middle" class="t t-b">① ¿El equipo está en línea?</text>
+  <rect x="680" y="60" width="240" height="40" rx="8" class="caja"/>
+  <text x="800" y="77" text-anchor="middle" class="t t-s">Otro guion: «sin servicio»;</text>
+  <text x="800" y="92" text-anchor="middle" class="t t-s">mirar la OLT (capítulo 1)</text>
+
+  <rect x="330" y="130" width="280" height="40" rx="20" class="c-apl"/>
+  <text x="470" y="155" text-anchor="middle" class="t t-b">② ¿Luz entre −8 y −27 dBm?</text>
+  <rect x="680" y="130" width="240" height="40" rx="8" class="c-fis"/>
+  <text x="800" y="147" text-anchor="middle" class="t t-s t-b">Técnico: fibra o conector,</text>
+  <text x="800" y="162" text-anchor="middle" class="t t-s">con la potencia en la orden</text>
+
+  <rect x="300" y="200" width="340" height="40" rx="20" class="c-apl"/>
+  <text x="470" y="225" text-anchor="middle" class="t t-b">③ ¿La prueba desde el equipo da el plan?</text>
+
+  <rect x="30" y="290" width="330" height="40" rx="20" class="c-apl"/>
+  <text x="195" y="315" text-anchor="middle" class="t t-b">④ ¿Los dispositivos tienen buena señal?</text>
+  <rect x="560" y="290" width="350" height="40" rx="20" class="c-apl"/>
+  <text x="735" y="315" text-anchor="middle" class="t t-b">④ ¿Les pasa a los vecinos del mismo puerto?</text>
+
+  <rect x="20" y="380" width="170" height="50" rx="8" class="c-enl"/>
+  <text x="105" y="401" text-anchor="middle" class="t t-s t-b">Pasar al 5 GHz u</text>
+  <text x="105" y="417" text-anchor="middle" class="t t-s">ofrecer un punto de malla</text>
+  <rect x="220" y="380" width="190" height="40" rx="20" class="c-apl"/>
+  <text x="315" y="405" text-anchor="middle" class="t t-b">⑤ ¿Canal saturado?</text>
+  <rect x="150" y="470" width="160" height="50" rx="8" class="c-enl"/>
+  <text x="230" y="491" text-anchor="middle" class="t t-s t-b">Cambiar el canal</text>
+  <text x="230" y="507" text-anchor="middle" class="t t-s">desde el ACS</text>
+  <rect x="320" y="470" width="160" height="50" rx="8" class="c-enl"/>
+  <text x="400" y="491" text-anchor="middle" class="t t-s t-b">Es el dispositivo:</text>
+  <text x="400" y="507" text-anchor="middle" class="t t-s">explicarle al cliente</text>
+
+  <rect x="740" y="380" width="180" height="50" rx="8" class="d-oper"/>
+  <text x="830" y="401" text-anchor="middle" class="t t-s t-b">NOC: incidente de zona</text>
+  <text x="830" y="417" text-anchor="middle" class="t t-s">sin visitas a las casas</text>
+  <rect x="500" y="380" width="200" height="40" rx="20" class="c-apl"/>
+  <text x="600" y="405" text-anchor="middle" class="t t-b">⑤ ¿Se reinicia solo?</text>
+  <rect x="480" y="470" width="160" height="50" rx="8" class="c-fis"/>
+  <text x="560" y="491" text-anchor="middle" class="t t-s t-b">Firmware vigente; si</text>
+  <text x="560" y="507" text-anchor="middle" class="t t-s">sigue, cambiar el equipo</text>
+  <rect x="650" y="470" width="170" height="50" rx="8" class="d-oper"/>
+  <text x="735" y="491" text-anchor="middle" class="t t-s t-b">Segundo nivel revisa</text>
+  <text x="735" y="507" text-anchor="middle" class="t t-s">la sesión en la red</text>
+
+  <g class="t t-s">
+    <rect x="300" y="550" width="14" height="14" rx="3" class="c-enl"/><text x="320" y="561">se resuelve en la llamada</text>
+    <rect x="490" y="550" width="14" height="14" rx="3" class="c-fis"/><text x="510" y="561">pide técnico o equipo</text>
+    <rect x="660" y="550" width="14" height="14" rx="3" class="d-oper"/><text x="680" y="561">pasa a operaciones</text>
+  </g>
+</svg></div><figcaption><b>El guion de «el internet está lento».</b> Se lee de arriba hacia abajo; cada óvalo rosado es una pregunta que se responde con un dato del ACS, sin pedirle nada al cliente. La primera es si el equipo está en línea; la segunda, si la luz de la fibra está en rango; la tercera, si la prueba de velocidad desde el equipo da el plan. Si da el plan, el problema está dentro de la casa y el guion sigue por la izquierda: señal de los dispositivos y canal del Wi-Fi. Si no lo da, sigue por la derecha: ¿le pasa a los vecinos? En verde, lo que se resuelve en la llamada; en naranja, lo que pide un técnico; en azul, lo que pasa al centro de operaciones.</figcaption></figure><div class="prose"><p>La pregunta más cara del guion es <b>cuándo escalar a campo</b>. Una visita cuesta mucho, como vimos en el capítulo 1, y una visita inútil cuesta el doble porque el cliente queda igual y enojado. Las razones buenas para mandar un técnico son pocas y medibles: la fibra fuera de rango o sin luz, un equipo que se reinicia solo aun con el firmware vigente, un equipo dañado, o un Wi-Fi que no llega aunque el equipo esté bien ubicado y configurado. En todos los casos, el técnico sale con el diagnóstico escrito en la orden de trabajo.</p><p>Ahora atiende tú la llamada.</p></div><div class="lab" id="09-lab-1"><div class="lab-title"><span class="tag">Laboratorio</span><h3>Atiende la llamada: «el internet está lento»</h3></div><p class="hint">Elige un cliente (o uno al azar) y usa las herramientas del ACS: cada una tarda unos segundos y suma un renglón a tu pantalla, con su semáforo. Cuando creas saber la causa, decide: ¿es el Wi-Fi, el dispositivo, la línea o la red? Intenta acertar en menos de dos minutos y sin mandar técnicos de más.</p><style>
+[id="09-lab-1"] .g9a-cli{font:500 .95rem var(--f-body);background:var(--paper);border-left:4px solid var(--accent);border-radius:0 8px 8px 0;padding:10px 12px}
+[id="09-lab-1"] .g9a-cli b{font-family:var(--f-display)}
+[id="09-lab-1"] .g9a-pant{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+[id="09-lab-1"] .g9a-pant li{display:grid;grid-template-columns:16px minmax(0,1fr);gap:10px;align-items:start;padding:8px 10px;border-radius:8px;background:var(--paper);font:500 .88rem var(--f-display)}
+[id="09-lab-1"] .g9a-pant li i{width:14px;height:14px;border-radius:50%;margin-top:3px;background:var(--good)}
+[id="09-lab-1"] .g9a-pant li.am i{background:var(--c-fis)}
+[id="09-lab-1"] .g9a-pant li.ro i{background:var(--warm)}
+[id="09-lab-1"] .g9a-pant li small{display:block;color:var(--muted);font:500 .74rem var(--f-mono);overflow-wrap:anywhere;margin-top:2px}
+[id="09-lab-1"] .g9a-vacia{color:var(--muted);font:italic .88rem var(--f-body)}
+[id="09-lab-1"] .g9a-reloj{font:700 1.3rem var(--f-mono);color:var(--accent)}
+[id="09-lab-1"] .g9a-tit{font:600 .72rem var(--f-display);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+</style>
+<div class="opciones">
+  <label>Cliente que llama
+    <select id="g9a-caso">
+      <option value="azar">Uno al azar (no sabes la causa)</option>
+      <option value="0">Cliente 2041</option>
+      <option value="1">Cliente 3318</option>
+      <option value="2">Cliente 1587</option>
+      <option value="3">Cliente 4410</option>
+      <option value="4">Cliente 2976</option>
+    </select></label>
+</div>
+<div class="btns"><button type="button" id="g9a-otra" class="primary">Otra llamada</button></div>
+<div class="g9a-cli" id="g9a-cli" aria-live="polite"></div>
+<div class="g9a-tit">Herramientas del ACS</div>
+<div class="btns" id="g9a-her">
+  <button type="button" data-h="ficha">Ficha: en línea, encendido, reinicios (10 s)</button>
+  <button type="button" data-h="luz">Luz de la fibra (10 s)</button>
+  <button type="button" data-h="disp">Dispositivos y su señal (15 s)</button>
+  <button type="button" data-h="vel">Prueba de velocidad desde el equipo (50 s)</button>
+  <button type="button" data-h="zona">Vecinos del mismo puerto (20 s)</button>
+</div>
+<div class="g9a-tit">Tu pantalla · <span class="g9a-reloj" id="g9a-reloj">0:00</span></div>
+<ul class="g9a-pant" id="g9a-pant" aria-live="polite"><li class="g9a-vacia" style="display:block">Todavía no mediste nada. Elige una herramienta.</li></ul>
+<div class="g9a-tit">Tu decisión</div>
+<div class="btns" id="g9a-dec">
+  <button type="button" data-d="wifi">Es el Wi-Fi: lo arreglo en la llamada</button>
+  <button type="button" data-d="disp">Es el dispositivo del cliente</button>
+  <button type="button" data-d="linea">Es la línea: mando un técnico</button>
+  <button type="button" data-d="red">Es la red: aviso al NOC</button>
+</div>
+<div class="readout texto" id="g9a-out" aria-live="polite"></div>
+<div class="readout" id="g9a-tot"></div></div></section>
+<section><h2>Lo que dicen los diagnósticos a escala: el problema es de una zona</h2><div class="prose"><p>Un diagnóstico mirado solo habla de una casa. Mil diagnósticos mirados juntos hablan de la red. Si en una tarde llegan seis llamadas de «lento» y las seis casas cuelgan del mismo puerto de la misma OLT, y además sus equipos marcan una luz de la fibra que bajó 4 dB desde ayer, el problema no está en ninguna de las seis casas: está en el tramo de fibra o en el <b>splitter</b> (divisor óptico) que comparten. Mandar seis técnicos a seis casas sería perder seis visitas.</p></div><figure class="fig fig-mapa" id="09-diagrama-4"><div class="lienzo"><svg viewBox="0 0 900 450" style="min-width:740px" role="img" aria-label="Un puerto de la OLT con un splitter de primer nivel y dos ramas de ocho casas. Ayer todas las casas tenían la luz de la fibra en rango. Hoy las ocho casas de la rama B tienen la luz cerca o fuera del límite, y seis de ellas llamaron; las de la rama A siguen bien">
+<defs><symbol id="f9d-tel" viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol></defs>
+<rect x="10" y="14" width="880" height="200" rx="12" class="caja"/>
+<text x="26" y="38" class="t t-xs t-b t-m">AYER</text>
+<rect x="26" y="94" width="80" height="44" rx="8" class="caja"/><text x="66" y="114" text-anchor="middle" class="t t-b">OLT</text><text x="66" y="130" text-anchor="middle" class="t t-s t-m">puerto 3</text>
+<line x1="106" y1="116" x2="160" y2="116" class="ln s-fis" style="stroke-width:3"/>
+<rect x="160" y="102" width="54" height="28" rx="6" class="c-fis"/><text x="187" y="121" text-anchor="middle" class="t t-s">1:2</text>
+<path d="M214 116 L250 76" class="ln s-fis" style="stroke-width:3"/>
+<rect x="250" y="62" width="70" height="28" rx="6" class="c-fis"/><text x="285" y="81" text-anchor="middle" class="t t-s">rama A</text>
+<line x1="320" y1="76" x2="860" y2="76" class="ln s-fis" style="stroke-width:1.5"/>
+<circle cx="370" cy="76" r="12" class="k-enl" style="stroke:var(--card);stroke-width:2"/>
+<text x="370" y="104" text-anchor="middle" class="t t-xs t-mono">−19,8</text>
+<circle cx="438" cy="76" r="12" class="k-enl" style="stroke:var(--card);stroke-width:2"/>
+<text x="438" y="104" text-anchor="middle" class="t t-xs t-mono">−20,4</text>
+<circle cx="506" cy="76" r="12" class="k-enl" style="stroke:var(--card);stroke-width:2"/>
+<text x="506" y="104" text-anchor="middle" class="t t-xs t-mono">−21,1</text>
+<circle cx="574" cy="76" r="12" class="k-enl" style="stroke:var(--card);stroke-width:2"/>
+<text x="574" y="104" text-anchor="middle" class="t t-xs t-mono">−20,0</text>
+<circle cx="642" cy="76" r="12" class="k-enl" style="stroke:var(--card);stroke-width:2"/>
+<text x="642" y="104" text-anchor="middle" class="t t-xs t-mono">−22,3</text>
+<circle cx="710" cy="76" r="12" class="k-enl" style="stroke:var(--card);stroke-width:2"/>
+<text x="710" y="104" text-anchor="middle" class="t t-xs t-mono">−21,7</text>
+<circle cx="778" cy="76" r="12" class="k-enl" style="stroke:var(--card);stroke-width:2"/>
+<text x="778" y="104" text-anchor="middle" class="t t-xs t-mono">−20,9</text>
+<circle cx="846" cy="76" r="12" class="k-enl" style="stroke:var(--card);stroke-width:2"/>
+<text x="846" y="104" text-anchor="middle" class="t t-xs t-mono">−21,5</text>
+<path d="M214 116 L250 164" class="ln s-fis" style="stroke-width:3"/>
+<rect x="250" y="150" width="70" height="28" rx="6" class="c-fis"/><text x="285" y="169" text-anchor="middle" class="t t-s">rama B</text>
+<line x1="320" y1="164" x2="860" y2="164" class="ln s-fis" style="stroke-width:1.5"/>
+<circle cx="370" cy="164" r="12" class="k-enl" style="stroke:var(--card);stroke-width:2"/>
+<text x="370" y="192" text-anchor="middle" class="t t-xs t-mono">−20,6</text>
+<circle cx="438" cy="164" r="12" class="k-enl" style="stroke:var(--card);stroke-width:2"/>
+<text x="438" y="192" text-anchor="middle" class="t t-xs t-mono">−21,9</text>
+<circle cx="506" cy="164" r="12" class="k-enl" style="stroke:var(--card);stroke-width:2"/>
+<text x="506" y="192" text-anchor="middle" class="t t-xs t-mono">−22,4</text>
+<circle cx="574" cy="164" r="12" class="k-enl" style="stroke:var(--card);stroke-width:2"/>
+<text x="574" y="192" text-anchor="middle" class="t t-xs t-mono">−21,0</text>
+<circle cx="642" cy="164" r="12" class="k-enl" style="stroke:var(--card);stroke-width:2"/>
+<text x="642" y="192" text-anchor="middle" class="t t-xs t-mono">−20,3</text>
+<circle cx="710" cy="164" r="12" class="k-enl" style="stroke:var(--card);stroke-width:2"/>
+<text x="710" y="192" text-anchor="middle" class="t t-xs t-mono">−22,8</text>
+<circle cx="778" cy="164" r="12" class="k-enl" style="stroke:var(--card);stroke-width:2"/>
+<text x="778" y="192" text-anchor="middle" class="t t-xs t-mono">−21,6</text>
+<circle cx="846" cy="164" r="12" class="k-enl" style="stroke:var(--card);stroke-width:2"/>
+<text x="846" y="192" text-anchor="middle" class="t t-xs t-mono">−22,1</text>
+<rect x="10" y="226" width="880" height="200" rx="12" class="caja"/>
+<text x="26" y="250" class="t t-xs t-b t-m">HOY</text>
+<rect x="26" y="306" width="80" height="44" rx="8" class="caja"/><text x="66" y="326" text-anchor="middle" class="t t-b">OLT</text><text x="66" y="342" text-anchor="middle" class="t t-s t-m">puerto 3</text>
+<line x1="106" y1="328" x2="160" y2="328" class="ln s-fis" style="stroke-width:3"/>
+<rect x="160" y="314" width="54" height="28" rx="6" class="c-fis"/><text x="187" y="333" text-anchor="middle" class="t t-s">1:2</text>
+<path d="M214 328 L250 288" class="ln s-fis" style="stroke-width:3"/>
+<rect x="250" y="274" width="70" height="28" rx="6" class="c-fis"/><text x="285" y="293" text-anchor="middle" class="t t-s">rama A</text>
+<line x1="320" y1="288" x2="860" y2="288" class="ln s-fis" style="stroke-width:1.5"/>
+<circle cx="370" cy="288" r="12" class="k-enl" style="stroke:var(--card);stroke-width:2"/>
+<text x="370" y="316" text-anchor="middle" class="t t-xs t-mono">−19,9</text>
+<circle cx="438" cy="288" r="12" class="k-enl" style="stroke:var(--card);stroke-width:2"/>
+<text x="438" y="316" text-anchor="middle" class="t t-xs t-mono">−20,5</text>
+<circle cx="506" cy="288" r="12" class="k-enl" style="stroke:var(--card);stroke-width:2"/>
+<text x="506" y="316" text-anchor="middle" class="t t-xs t-mono">−21,0</text>
+<circle cx="574" cy="288" r="12" class="k-enl" style="stroke:var(--card);stroke-width:2"/>
+<text x="574" y="316" text-anchor="middle" class="t t-xs t-mono">−20,1</text>
+<circle cx="642" cy="288" r="12" class="k-enl" style="stroke:var(--card);stroke-width:2"/>
+<text x="642" y="316" text-anchor="middle" class="t t-xs t-mono">−22,2</text>
+<circle cx="710" cy="288" r="12" class="k-enl" style="stroke:var(--card);stroke-width:2"/>
+<text x="710" y="316" text-anchor="middle" class="t t-xs t-mono">−21,8</text>
+<circle cx="778" cy="288" r="12" class="k-enl" style="stroke:var(--card);stroke-width:2"/>
+<text x="778" y="316" text-anchor="middle" class="t t-xs t-mono">−20,9</text>
+<circle cx="846" cy="288" r="12" class="k-enl" style="stroke:var(--card);stroke-width:2"/>
+<text x="846" y="316" text-anchor="middle" class="t t-xs t-mono">−21,4</text>
+<path d="M214 328 L250 376" class="ln s-fis" style="stroke-width:3"/>
+<rect x="250" y="362" width="70" height="28" rx="6" class="c-fis"/><text x="285" y="381" text-anchor="middle" class="t t-s">rama B</text>
+<line x1="320" y1="376" x2="860" y2="376" class="ln s-fis" style="stroke-width:1.5"/>
+<circle cx="370" cy="376" r="12" class="k-fis" style="stroke:var(--card);stroke-width:2"/>
+<text x="370" y="404" text-anchor="middle" class="t t-xs t-mono">−26,3</text>
+<circle cx="438" cy="376" r="12" class="k-warm" style="stroke:var(--card);stroke-width:2"/>
+<text x="438" y="404" text-anchor="middle" class="t t-xs t-mono">−28,1</text>
+<use href="#f9d-tel" x="446" y="346" width="16" height="16" class="ico"/>
+<circle cx="506" cy="376" r="12" class="k-warm" style="stroke:var(--card);stroke-width:2"/>
+<text x="506" y="404" text-anchor="middle" class="t t-xs t-mono">−28,6</text>
+<use href="#f9d-tel" x="514" y="346" width="16" height="16" class="ico"/>
+<circle cx="574" cy="376" r="12" class="k-warm" style="stroke:var(--card);stroke-width:2"/>
+<text x="574" y="404" text-anchor="middle" class="t t-xs t-mono">−27,4</text>
+<use href="#f9d-tel" x="582" y="346" width="16" height="16" class="ico"/>
+<circle cx="642" cy="376" r="12" class="k-fis" style="stroke:var(--card);stroke-width:2"/>
+<text x="642" y="404" text-anchor="middle" class="t t-xs t-mono">−26,5</text>
+<circle cx="710" cy="376" r="12" class="k-warm" style="stroke:var(--card);stroke-width:2"/>
+<text x="710" y="404" text-anchor="middle" class="t t-xs t-mono">−28,9</text>
+<use href="#f9d-tel" x="718" y="346" width="16" height="16" class="ico"/>
+<circle cx="778" cy="376" r="12" class="k-warm" style="stroke:var(--card);stroke-width:2"/>
+<text x="778" y="404" text-anchor="middle" class="t t-xs t-mono">−27,8</text>
+<use href="#f9d-tel" x="786" y="346" width="16" height="16" class="ico"/>
+<circle cx="846" cy="376" r="12" class="k-warm" style="stroke:var(--card);stroke-width:2"/>
+<text x="846" y="404" text-anchor="middle" class="t t-xs t-mono">−28,4</text>
+<use href="#f9d-tel" x="854" y="346" width="16" height="16" class="ico"/>
+<g class="t t-s"><circle cx="300" cy="438" r="6" class="k-enl"/><text x="312" y="442">en rango</text><circle cx="400" cy="438" r="6" class="k-fis"/><text x="412" y="442">cerca del límite</text><circle cx="530" cy="438" r="6" class="k-warm"/><text x="542" y="442">bajo −27 dBm</text><use href="#f9d-tel" x="640" y="430" width="16" height="16" class="ico"/><text x="660" y="442">llamó por lentitud</text></g>
+</svg></div><figcaption><b>Una zona, no una casa.</b> Un puerto de la OLT reparte la fibra con un splitter 1:2 en dos ramas, A y B, de ocho casas cada una. Cada círculo es un equipo, con la luz que le llega según el ACS: verde dentro de rango, naranja cerca del límite, rojo por debajo de −27 dBm. Arriba, ayer: todos en verde. Abajo, hoy: las ocho casas de la rama B bajaron juntas, y solo ellas; el teléfono marca las que llamaron. Que bajen juntas las del mismo tramo apunta al tramo compartido, no a las casas. Seis de ellas llamaron; las otras dos todavía no lo notan.</figcaption></figure><div class="prose"><p>Por eso el ACS no es solo una herramienta de la llamada: es una fuente de datos para el <b>NOC</b> (<i>Network Operations Center</i>, centro de operaciones de red). Cuando el guion llega a «¿le pasa a los vecinos?», la respuesta sale de agrupar los equipos por OLT, puerto y zona, con las etiquetas que el inventario y el ACS mantienen al día (capítulo 8). Si le pasa a muchos, el agente no agenda visitas: abre o se suma a un <b>incidente masivo</b> (<i>major incident</i>) y le da al cliente un mensaje honesto, «estamos trabajando en una falla de tu zona».</p></div><div class="caso"><b>Un caso real</b><p>En un operador FTTH de la región, la mesa de ayuda empezó a cruzar cada llamada con el puerto de la OLT del cliente. En la primera semana encontraron algo que nadie había buscado: buena parte de las visitas por «internet lento» de un barrio salían a casas de la misma rama de fibra, donde un empalme se degradaba con la humedad. Una sola reparación en la calle resolvió reclamos que se venían atendiendo uno por uno, con técnicos que cambiaban equipos sanos. La lección: el patrón aparece cuando se miran los diagnósticos juntos, y el ACS tiene los datos para verlo. El capítulo 11 lleva esa idea más lejos, con equipos que reportan solos cada pocos minutos.</p></div><div class="prose"><p>El capítulo 42 de <a href="https://aaramirez.github.io/telco/42-no-tengo-internet.html" target="_blank" rel="noopener">Cómo funciona un telco</a> recorre el reclamo de «no tengo Internet» de punta a punta, con todos los sistemas del operador. Aquí nos quedamos con la regla de este capítulo: <b>medir desde el equipo antes de opinar, y mostrarle al agente solo lo que necesita para decidir.</b></p></div><div class="quiz"><h3>Pruébate</h3><details><summary>¿Cuáles son las cuatro causas más comunes de «el internet está lento»?</summary><p>El Wi-Fi, el dispositivo del cliente, la línea (fibra o equipo) y la red del operador o el sitio de destino.</p></details><details><summary>Un equipo GPON de clase B+ informa <code>OpticalSignalLevel</code> = −28400. ¿Qué significa y qué se hace?</summary><p>−28,4 dBm, por debajo del límite de −27 dBm: llega poca luz por la fibra. Es un problema de la línea; si no le pasa a los vecinos del mismo puerto, se manda un técnico con ese dato en la orden.</p></details><details><summary>¿Por qué una prueba de velocidad pedida por el ACS tarda casi un minuto?</summary><p>Porque el equipo no mide durante la sesión: recibe la orden, la sesión termina, mide con la línea libre y abre una sesión nueva con el evento <code>8 DIAGNOSTICS COMPLETE</code> para que el ACS lea los resultados.</p></details><details><summary>Una prueba TR-143 recibió 300.000.000 bytes de prueba en 5 segundos. ¿Qué velocidad midió?</summary><p>300.000.000 × 8 / 5 = 480.000.000 bits por segundo, es decir, 480 Mbps.</p></details><details><summary>El equipo mide 480 Mbps y el celular del cliente, 45. ¿Dónde está el problema?</summary><p>Dentro de la casa: en el Wi-Fi o en el dispositivo. La red entrega el plan hasta el equipo.</p></details><details><summary>Seis clientes del mismo puerto de la OLT llaman por lentitud y sus equipos muestran una caída de luz igual. ¿Qué hace el agente?</summary><p>No agenda seis visitas: escala al NOC un incidente de zona, porque el problema está en el tramo de fibra o el splitter que comparten.</p></details></div><div class="investiga"><h3>Para investigar</h3><p class="hint">Estas preguntas no se responden en el capítulo: búscalas por tu cuenta.</p><ol><li>¿Qué es el protocolo ICMP y por qué algunos servidores y routers no responden al ping?<small>Pista: busca «ICMP echo request» y «ICMP rate limiting».</small></li><li>¿Por qué una sola conexión TCP a veces no alcanza a llenar una línea rápida, y qué tiene que ver la ventana de TCP?<small>Pista: busca «TCP window size bandwidth-delay product».</small></li><li>¿Qué es el <i>bufferbloat</i> y por qué una prueba de velocidad puede dar bien mientras las videollamadas se cortan?<small>Pista: busca «bufferbloat latency under load».</small></li><li>¿Qué es un dBm y por qué la luz de la fibra y la señal del Wi-Fi se miden en una escala logarítmica?<small>Pista: busca «dBm decibel milliwatt».</small></li><li>¿Cómo funciona la prueba <code>UDPEchoConfig</code> de TR-143 y para qué sirve medir con UDP en lugar de descargar un archivo?<small>Pista: busca «TR-143 UDP echo».</small></li></ol></div><div class="vids"><span>Para saber más</span><a class="vid" href="https://www.broadband-forum.org/pdfs/tr-143-1-1-0.pdf" target="_blank" rel="noopener">TR-143: Enabling Network Throughput Performance Tests and Statistical Monitoring (Broadband Forum, inglés) <small>norma</small></a><a class="vid" href="https://cwmp-data-models.broadband-forum.org/tr-181-2-18-0-cwmp.html" target="_blank" rel="noopener">Modelo de datos TR-181 en línea (Broadband Forum, inglés) <small>referencia</small></a><a class="vid" href="https://aaramirez.github.io/telco/42-no-tengo-internet.html" target="_blank" rel="noopener">No tengo Internet, capítulo 42 de Cómo funciona un telco <small>lectura</small></a></div></section>
+<label class="got"><input type="checkbox" id="got"> Lo tengo claro</label>
+<nav class="pager" id="pager" aria-label="Capítulo anterior y siguiente"></nav>
+</main>
+</div>
+<footer><span>Curso abierto de aaramirez.github.io.</span><span>Sitio publicado: <a href="https://github.com/aaramirez/gestion-remota-de-equipos" target="_blank" rel="noopener">github.com/aaramirez/gestion-remota-de-equipos</a></span></footer>
+</div>
+<script src="assets/lab.js"></script>
+<script>
+(function(){
+  const {$,tok,canvasWidget}=window.Lab;
+  // velocidad máxima del enlace (Mbps) según celular y banda
+  const PHY={4:{24:72,5:150},5:{24:144,5:867},6:{24:287,5:1201}};
+  const v=id=>$(id).value;
+  function calc(){
+    const plan=+v('#g9b-plan'),banda=v('#g9b-banda'),cel=v('#g9b-cel'),par=+v('#g9b-par'),dis=+v('#g9b-dis'),con=+v('#g9b-con');
+    const equipo=Math.round(plan*0.97*(1-con/100));
+    const rssi=Math.round((banda==='5'?-38:-32)-20*Math.log10(dis)-par*(banda==='5'?7:4));
+    const f=rssi>=-60?1:rssi>=-67?0.75:rssi>=-72?0.5:rssi>=-78?0.25:rssi>=-85?0.08:0;
+    const wifi=Math.round(PHY[cel][banda]*f*0.6);
+    const celular=Math.min(equipo,wifi);
+    return {plan,banda,cel,par,dis,con,equipo,rssi,wifi,celular};
+  }
+  const dibujar=canvasWidget($('#g9b-c'),w=>w<520?0.62:0.3,(ctx,w,h)=>{
+    const d=calc();
+    ctx.clearRect(0,0,w,h);
+    const L=w<520?92:120,R=60,T=10,filas=[['Plan',d.plan,tok('--muted')],['Equipo',d.equipo,tok('--c-apl')],['Celular',d.celular,tok('--accent')]];
+    const bh=(h-T*2)/3,tope=520;
+    ctx.font='600 13px '+tok('--f-display');ctx.textBaseline='middle';
+    filas.forEach(([n,val,col],i)=>{
+      const y=T+i*bh+bh*0.18,alto=bh*0.64,ancho=(w-L-R)*val/tope;
+      ctx.fillStyle=tok('--ink');ctx.textAlign='right';ctx.fillText(n,L-10,y+alto/2);
+      ctx.fillStyle=tok('--grid');ctx.fillRect(L,y,w-L-R,alto);
+      ctx.fillStyle=col;ctx.fillRect(L,y,Math.max(2,ancho),alto);
+      ctx.fillStyle=tok('--ink');ctx.textAlign='left';ctx.font='600 12px '+tok('--f-mono');ctx.fillText(val+' Mbps',L+Math.max(2,ancho)+6,y+alto/2);ctx.font='600 13px '+tok('--f-display');
+    });
+  });
+  function leer(){
+    const d=calc();
+    $('#g9b-par-o').textContent=d.par;$('#g9b-dis-o').textContent=d.dis+' m';$('#g9b-con-o').textContent=d.con+' %';
+    const enRed=d.plan-d.equipo,enCasa=d.equipo-d.celular;
+    let h='<span>Señal en el celular: '+d.rssi+' dBm · enlace Wi-Fi útil: '+d.wifi+' Mbps</span>';
+    h+='<span class="big">Se pierden '+enRed+' Mbps en la red y '+enCasa+' Mbps dentro de la casa</span>';
+    if(d.celular===0)h+='<span class="warn">El celular no llega a conectarse: la señal es demasiado débil.</span>';
+    if(enRed>d.plan*0.2)h+='<span class="warn">La prueba desde el equipo no da el plan: el problema está antes de la casa. Si les pasa a los vecinos, es para el NOC.</span>';
+    if(enCasa>d.equipo*0.3&&d.celular>0){
+      if(d.wifi<PHY[d.cel][d.banda]*0.6*0.5)h+='<span class="warn">El equipo recibe bien, pero la señal no llega: se pierde en el aire. Acercar el celular, pasar a 5 GHz o sumar un punto de malla.</span>';
+      else h+='<span class="warn">La señal es buena, pero el celular no puede más: su Wi-Fi es el límite.</span>';
+    }
+    if(enRed<=d.plan*0.2&&enCasa<=d.equipo*0.3)h+='<span class="ok">Las dos mediciones están cerca del plan: el cliente recibe lo que paga.</span>';
+    $('#g9b-out').innerHTML=h;
+    dibujar();
+  }
+  ['#g9b-plan','#g9b-banda','#g9b-cel','#g9b-par','#g9b-dis','#g9b-con'].forEach(s=>$(s).addEventListener('input',leer));
+  leer();
+})();
+</script>
+<script>
+(function(){
+  const {$}=window.Lab;
+  const PLAN=500;
+  const CASOS=[
+    {c:'wifi',dice:'«Pago 500 megas y en el cuarto de atrás no puedo ver una serie. Antes andaba.»',
+     ficha:['v','En línea · encendido hace 23 días · sin reinicios','Device.IP.Interface.1.Status = Up · UpTime = 1987200'],
+     luz:['v','Luz de la fibra: −20,8 dBm (en rango)','OpticalSignalLevel = -20800'],
+     disp:['r','9 dispositivos · el televisor del cuarto: señal −81 dBm en 2,4 GHz, canal 6 con 11 redes vecinas','AssociatedDevice.4.SignalStrength = -81'],
+     vel:['v','Desde el equipo: 478 Mbps de bajada (plan 500)','TestBytesReceived / (EOMTime − BOMTime)'],
+     zona:['v','Los 15 vecinos del puerto: luz y velocidad normales','—'],
+     por:'Todo está bien hasta el equipo. El problema es el último tramo, por el aire: el televisor está lejos, en la banda de 2,4 GHz y en un canal saturado. Se cambia el canal desde el ACS, se le sugiere pasar a 5 GHz o, si no llega, un punto de malla (capítulo 10).'},
+    {c:'linea',dice:'«Se me corta a cada rato, y cuando vuelve anda lentísimo.»',
+     ficha:['a','En línea · encendido hace 40 minutos · 5 reinicios hoy (eventos 1 BOOT)','UpTime = 2400'],
+     luz:['r','Luz de la fibra: −28,4 dBm (fuera de rango: el mínimo es −27)','OpticalSignalLevel = -28400'],
+     disp:['v','6 dispositivos con buena señal','—'],
+     vel:['a','Desde el equipo: 160 Mbps, con cortes durante la prueba','—'],
+     zona:['v','Los 15 vecinos del puerto: luz normal, entre −19 y −23 dBm','—'],
+     por:'Llega poca luz y solo a esta casa: los vecinos del mismo puerto están bien. Es un conector sucio, una curva en el cable o un empalme dentro de la casa. Va un técnico, con la potencia anotada en la orden.'},
+    {c:'red',dice:'«Desde las siete de la tarde todo anda lento, todos los días.»',
+     ficha:['v','En línea · encendido hace 12 días · sin reinicios','—'],
+     luz:['v','Luz de la fibra: −21,4 dBm (en rango)','OpticalSignalLevel = -21400'],
+     disp:['v','5 dispositivos con buena señal, en 5 GHz','—'],
+     vel:['r','Desde el equipo: 140 Mbps de bajada (plan 500)','—'],
+     zona:['r','23 de 32 vecinos del puerto miden menos de 200 Mbps desde las 19:00','—'],
+     por:'La prueba desde el equipo no da el plan, la fibra está bien y les pasa a casi todos los vecinos, a la misma hora. Es congestión en la red de la zona: lo resuelve el NOC (más capacidad), no un técnico en la casa.'},
+    {c:'disp',dice:'«Mi computadora no pasa de 70 megas. Mi hijo con su celular dice que a él le anda bien.»',
+     ficha:['v','En línea · encendido hace 8 días · sin reinicios','—'],
+     luz:['v','Luz de la fibra: −19,9 dBm (en rango)','OpticalSignalLevel = -19900'],
+     disp:['a','7 dispositivos con buena señal · la computadora conectada a 72 Mbps (Wi-Fi 4, una antena) a −52 dBm','AssociatedDevice.2.LastDataDownlinkRate = 72000'],
+     vel:['v','Desde el equipo: 486 Mbps de bajada (plan 500)','—'],
+     zona:['v','Los 15 vecinos del puerto: normales','—'],
+     por:'La red da el plan y la computadora tiene muy buena señal, pero su tarjeta de Wi-Fi es vieja y no puede pasar de 72 Mbps. No hay nada que arreglar en la red: se le explica al cliente y, si quiere, se le sugiere un cable o un adaptador más nuevo.'},
+    {c:'wifi',dice:'«Desde que se mudó el vecino de arriba, el internet anda mal en toda la casa.»',
+     ficha:['v','En línea · encendido hace 31 días · sin reinicios','—'],
+     luz:['v','Luz de la fibra: −22,0 dBm (en rango)','OpticalSignalLevel = -22000'],
+     disp:['a','8 dispositivos con señal buena, pero muchos reintentos: el canal 36 lo comparte una red vecina muy fuerte','AssociatedDevice.{i}.Retransmissions = 41 de 100'],
+     vel:['v','Desde el equipo: 471 Mbps de bajada (plan 500)','—'],
+     zona:['v','Los 15 vecinos del puerto: normales','—'],
+     por:'La señal es buena, pero el canal del Wi-Fi lo comparte una red vecina muy fuerte y la mitad de los paquetes hay que repetirlos. Cambiar el canal desde el ACS lo resuelve en la llamada; el capítulo 10 muestra cómo elegirlo.'}
+  ];
+  const T={ficha:10,luz:10,disp:15,vel:50,zona:20};
+  const NOM={wifi:'el Wi-Fi',disp:'el dispositivo del cliente',linea:'la línea',red:'la red de la zona'};
+  let caso,k,t,usadas,cerrado,hist={ok:0,n:0,vis:0};
+  function reloj(){$('#g9a-reloj').textContent=Math.floor(t/60)+':'+String(t%60).padStart(2,'0');}
+  function nuevo(){
+    const v=$('#g9a-caso').value;
+    k=v==='azar'?Math.floor(Math.random()*CASOS.length):+v;caso=CASOS[k];
+    t=0;usadas=new Set();cerrado=false;
+    $('#g9a-cli').innerHTML='<b>Cliente al teléfono, plan de '+PLAN+' Mbps:</b> '+caso.dice;
+    $('#g9a-pant').innerHTML='<li class="g9a-vacia" style="display:block">Todavía no mediste nada. Elige una herramienta.</li>';
+    $('#g9a-out').innerHTML='';
+    document.querySelectorAll('#g9a-her button,#g9a-dec button').forEach(b=>{b.disabled=false;b.setAttribute('aria-pressed','false');});
+    reloj();
+  }
+  function medir(h){
+    if(cerrado||usadas.has(h))return;
+    usadas.add(h);t+=T[h];reloj();
+    const [s,txt,par]=caso[h];
+    const ul=$('#g9a-pant');if(ul.querySelector('.g9a-vacia'))ul.innerHTML='';
+    const li=document.createElement('li');li.className=s==='r'?'ro':s==='a'?'am':'';
+    li.innerHTML='<i aria-hidden="true"></i><span>'+txt+(par&&par!=='—'?'<small>'+par+'</small>':'')+'</span>';
+    li.setAttribute('aria-label',(s==='r'?'rojo: ':s==='a'?'amarillo: ':'verde: ')+txt);
+    ul.appendChild(li);
+    const b=document.querySelector('#g9a-her [data-h="'+h+'"]');b.disabled=true;b.setAttribute('aria-pressed','true');
+  }
+  function decidir(d){
+    if(cerrado)return;cerrado=true;
+    document.querySelectorAll('#g9a-her button,#g9a-dec button').forEach(b=>b.disabled=true);
+    document.querySelector('#g9a-dec [data-d="'+d+'"]').setAttribute('aria-pressed','true');
+    const bien=d===caso.c;hist.n++;if(bien)hist.ok++;
+    const visita=d==='linea';if(visita&&!bien)hist.vis++;
+    let h='<span>'+(bien?'<b style="color:var(--good)">Correcto.</b> ':'<b style="color:var(--warm)">No era '+NOM[d]+': era '+NOM[caso.c]+'.</b> ')+caso.por+'</span>';
+    if(!usadas.size)h+='<span>Decidiste sin medir nada: así decide un agente sin ACS.</span>';
+    else if(bien&&t<=90)h+='<span>Lo resolviste en '+Math.floor(t/60)+':'+String(t%60).padStart(2,'0')+' de mediciones. Buen guion.</span>';
+    else if(bien)h+='<span>Acertaste, pero con '+Math.floor(t/60)+':'+String(t%60).padStart(2,'0')+' de mediciones. ¿Qué prueba podías saltarte? El guion del capítulo empieza por lo que descarta más.</span>';
+    if(visita&&!bien)h+='<span>Mandaste un técnico que no iba a arreglar nada: una visita pagada y un cliente que vuelve a llamar.</span>';
+    if(!bien&&caso.c==='linea')h+='<span>Este sí necesitaba un técnico: sin él, el cliente sigue con cortes.</span>';
+    $('#g9a-out').innerHTML=h;
+    $('#g9a-tot').innerHTML='<span class="big">Llamadas atendidas: '+hist.n+' · acertadas: '+hist.ok+' · visitas inútiles: '+hist.vis+'</span><span>Aprieta «Otra llamada» para seguir.</span>';
+  }
+  $('#g9a-her').addEventListener('click',e=>{const b=e.target.closest('button');if(b)medir(b.dataset.h);});
+  $('#g9a-dec').addEventListener('click',e=>{const b=e.target.closest('button');if(b)decidir(b.dataset.d);});
+  $('#g9a-caso').addEventListener('change',nuevo);
+  $('#g9a-otra').addEventListener('click',nuevo);
+  $('#g9a-tot').innerHTML='<span>Llamadas atendidas: 0</span>';
+  nuevo();
+})();
+</script>
+</body>
+</html>

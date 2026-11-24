@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="es">
+<head>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-KX76XF8R');</script>
+<!-- End Google Tag Manager -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Aprovisionamiento sin tocar · Gestión remota de equipos (ACS) · Gestión remota de equipos (ACS)</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Cómo un operador configura, actualiza y diagnostica a distancia los equipos que tiene en casa de sus clientes: TR-069 y TR-369 a fondo, el modelo de datos TR-181, el aprovisionamiento sin visita, los cambios masivos, el firmware, los diagnósticos, la seguridad y la escala de un ACS.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400;1,8..60,600&display=swap">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KX76XF8R"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+<div class="wrap" data-page="aprovisionamiento-sin-tocar">
+<header class="topbar"><a class="brand" href="index.html">Gestión <b>remota</b> de equipos</a><span class="eyebrow">Curso visual e interactivo · Industrias y finanzas</span><a class="al-sitio" href="https://aaramirez.github.io/">← Todos los cursos</a></header>
+<div class="layout">
+<nav class="toc" id="toc" aria-label="Ruta de aprendizaje"></nav>
+<main>
+<header class="page-head"><span class="num">CAPÍTULO 07 DE 16</span><h1>Aprovisionamiento sin tocar (zero-touch)</h1><p class="lede">El técnico conecta la fibra, enchufa el equipo y se va. Lo demás lo hacen los sistemas: el equipo encuentra a su ACS, se presenta, el ACS sabe de qué cliente es y le carga su plan. Este capítulo sigue esa primera hora, paso a paso, y muestra dónde se rompe.</p></header>
+<section><div class="prose"><p>Son las diez de la mañana en la casa 1203. El técnico de Fibra Ejemplo, el operador ficticio de este curso, terminó de tender la fibra desde la caja de la calle hasta la sala. Saca de su caja un equipo de la marca A, nuevo, en blanco: no sabe quién es el cliente, qué plan tiene ni cómo debe llamarse su Wi-Fi. El técnico escanea el código de barras de la etiqueta con su teléfono, conecta la fibra, enchufa el equipo a la corriente y espera.</p><p>Cuatro minutos después, la aplicación de su teléfono dice «Servicio listo». El Wi-Fi se llama como la clienta pidió al contratar, el teléfono fijo tiene tono y la conexión navega a 500 Mbps. El técnico no abrió ninguna pantalla de configuración.</p><p>Eso es el <b>aprovisionamiento sin tocar</b> (<i>zero-touch provisioning</i>): el equipo sale del almacén igual para todos y los sistemas le ponen, a distancia, todo lo que lo hace de un cliente. Este capítulo recorre esos cuatro minutos.</p></div><div class="analogia"><b>Imagínalo así</b><p>Piensa en un empleado nuevo que llega el primer día a una oficina grande. No trae nada configurado: ni credencial, ni escritorio, ni correo. En la recepción dice su nombre; la recepcionista lo busca en la lista de ingresos que mandó recursos humanos, confirma a qué área va y le entrega su credencial, su computadora y su clave. Si su nombre no está en la lista, no entra, por mucho que diga que lo contrataron. El equipo nuevo es el empleado, el ACS es la recepción, y la lista de ingresos es el inventario con la orden de instalación.</p></div><figure class="fig fig-flujo" id="07-diagrama-1"><div class="lienzo"><svg viewBox="0 0 910 616" style="min-width:780px" role="img" aria-label="Diagrama de secuencia del aprovisionamiento sin tocar de la casa 1203: el técnico escanea la serie, la OLT autoriza la ONT y le da la URL del ACS, el equipo manda un Inform con 0 BOOTSTRAP, el ACS consulta el inventario, escribe la plantilla del plan, RADIUS autoriza la sesión y el ACS verifica y avisa a la aplicación del técnico">
+  <defs><marker id="f71-fl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--muted)"/></marker></defs>
+  <rect x="10" y="14" width="140" height="42" rx="9" class="d-sis"/>
+  <text x="80" y="40" text-anchor="middle" class="t t-s t-b">Aplicación del técnico</text>
+  <path d="M80 56V592" class="ln ln-d" style="fill:none;stroke-width:1.2"/>
+  <rect x="160" y="14" width="140" height="42" rx="9" class="d-sis"/>
+  <text x="230" y="40" text-anchor="middle" class="t t-s t-b">Inventario</text>
+  <path d="M230 56V592" class="ln ln-d" style="fill:none;stroke-width:1.2"/>
+  <rect x="310" y="14" width="140" height="42" rx="9" class="d-oper"/>
+  <text x="380" y="40" text-anchor="middle" class="t t-s t-b">OLT</text>
+  <path d="M380 56V592" class="ln ln-d" style="fill:none;stroke-width:1.2"/>
+  <rect x="460" y="14" width="140" height="42" rx="9" class="d-casa"/>
+  <text x="530" y="40" text-anchor="middle" class="t t-s t-b">Equipo (casa 1203)</text>
+  <path d="M530 56V592" class="ln ln-d" style="fill:none;stroke-width:1.2"/>
+  <rect x="610" y="14" width="140" height="42" rx="9" class="d-oper"/>
+  <text x="680" y="40" text-anchor="middle" class="t t-s t-b">ACS</text>
+  <path d="M680 56V592" class="ln ln-d" style="fill:none;stroke-width:1.2"/>
+  <rect x="760" y="14" width="140" height="42" rx="9" class="d-oper"/>
+  <text x="830" y="40" text-anchor="middle" class="t t-s t-b">RADIUS</text>
+  <path d="M830 56V592" class="ln ln-d" style="fill:none;stroke-width:1.2"/>
+  <path d="M84 96H224" class="ln" style="fill:none;stroke-width:1.8" marker-end="url(#f71-fl)"/>
+  <text x="155" y="88" text-anchor="middle" class="t t-s" style="paint-order:stroke;stroke:var(--card);stroke-width:5px">escanea la serie → orden 1203</text>
+  <circle cx="64" cy="96" r="10" class="k-oper"/><text x="64" y="100" text-anchor="middle" class="t t-xs t-b" style="fill:var(--card)">1</text>
+  <path d="M384 144H524" class="ln s-fis" style="fill:none;stroke-width:1.8" marker-end="url(#f71-fl)"/>
+  <text x="455" y="136" text-anchor="middle" class="t t-s" style="paint-order:stroke;stroke:var(--card);stroke-width:5px">autoriza la ONT por su serie</text>
+  <circle cx="364" cy="144" r="10" class="k-oper"/><text x="364" y="148" text-anchor="middle" class="t t-xs t-b" style="fill:var(--card)">2</text>
+  <path d="M384 192H524" class="ln s-fis" style="fill:none;stroke-width:1.8" marker-end="url(#f71-fl)"/>
+  <text x="455" y="184" text-anchor="middle" class="t t-s" style="paint-order:stroke;stroke:var(--card);stroke-width:5px">IP de gestión y URL del ACS</text>
+  <circle cx="364" cy="192" r="10" class="k-oper"/><text x="364" y="196" text-anchor="middle" class="t t-xs t-b" style="fill:var(--card)">3</text>
+  <path d="M534 240H674" class="ln s-apl" style="fill:none;stroke-width:1.8" marker-end="url(#f71-fl)"/>
+  <text x="605" y="232" text-anchor="middle" class="t t-s" style="paint-order:stroke;stroke:var(--card);stroke-width:5px">Inform: 0 BOOTSTRAP, 1 BOOT</text>
+  <circle cx="514" cy="240" r="10" class="k-oper"/><text x="514" y="244" text-anchor="middle" class="t t-xs t-b" style="fill:var(--card)">4</text>
+  <path d="M676 288H236" class="ln" style="fill:none;stroke-width:1.8" marker-end="url(#f71-fl)"/>
+  <text x="455" y="280" text-anchor="middle" class="t t-s" style="paint-order:stroke;stroke:var(--card);stroke-width:5px">¿de quién es esta serie?</text>
+  <circle cx="696" cy="288" r="10" class="k-oper"/><text x="696" y="292" text-anchor="middle" class="t t-xs t-b" style="fill:var(--card)">5</text>
+  <path d="M234 336H674" class="ln" style="fill:none;stroke-width:1.8" marker-end="url(#f71-fl)"/>
+  <text x="455" y="328" text-anchor="middle" class="t t-s" style="paint-order:stroke;stroke:var(--card);stroke-width:5px">casa 1203 · «Hogar 500» · voz</text>
+  <path d="M676 384H536" class="ln s-apl" style="fill:none;stroke-width:1.8" marker-end="url(#f71-fl)"/>
+  <text x="605" y="376" text-anchor="middle" class="t t-s" style="paint-order:stroke;stroke:var(--card);stroke-width:5px">firmware OK · escribe el plan</text>
+  <circle cx="696" cy="384" r="10" class="k-oper"/><text x="696" y="388" text-anchor="middle" class="t t-xs t-b" style="fill:var(--card)">6</text>
+  <path d="M534 432H824" class="ln s-red" style="fill:none;stroke-width:1.8" marker-end="url(#f71-fl)"/>
+  <text x="680" y="424" text-anchor="middle" class="t t-s" style="paint-order:stroke;stroke:var(--card);stroke-width:5px">abre la sesión; RADIUS la autoriza</text>
+  <circle cx="514" cy="432" r="10" class="k-oper"/><text x="514" y="436" text-anchor="middle" class="t t-xs t-b" style="fill:var(--card)">7</text>
+  <path d="M676 480H536" class="ln s-apl" style="fill:none;stroke-width:1.8" marker-end="url(#f71-fl)"/>
+  <text x="605" y="472" text-anchor="middle" class="t t-s" style="paint-order:stroke;stroke:var(--card);stroke-width:5px">lee de vuelta lo escrito</text>
+  <circle cx="696" cy="480" r="10" class="k-oper"/><text x="696" y="484" text-anchor="middle" class="t t-xs t-b" style="fill:var(--card)">8</text>
+  <path d="M676 528H86" class="ln" style="fill:none;stroke-width:1.8" marker-end="url(#f71-fl)"/>
+  <text x="380" y="520" text-anchor="middle" class="t t-s" style="paint-order:stroke;stroke:var(--card);stroke-width:5px">«Servicio listo»</text>
+  <text x="455" y="610" text-anchor="middle" class="t t-s t-m">El tiempo corre hacia abajo. En la casa 1203, del paso 1 al 8 pasaron unos cuatro minutos.</text>
+</svg></div><figcaption><b>Los cuatro minutos de la casa 1203.</b> Seis carriles de izquierda a derecha: la aplicación del técnico, el inventario, la OLT, el equipo, el ACS y RADIUS. El tiempo corre hacia abajo. ① El técnico escanea la serie y el inventario la asocia a la orden de la casa 1203. ② La OLT autoriza la ONT por su serie y le arma la conexión de gestión. ③ El equipo obtiene su dirección y la URL del ACS. ④ El equipo llama con un Inform que trae <code>0 BOOTSTRAP</code> y <code>1 BOOT</code>. ⑤ El ACS pregunta al inventario de quién es esa serie y recibe el cliente y su plan. ⑥ El ACS revisa el firmware y escribe la plantilla del plan con el perfil de la marca A. ⑦ El equipo abre su sesión de Internet y RADIUS la autoriza. ⑧ El ACS lee de vuelta lo que escribió, ve la conexión arriba y avisa a la aplicación del técnico: «Servicio listo».</figcaption></figure></section>
+<section><h2>Cómo encuentra el equipo a su ACS</h2><div class="prose"><p>Un equipo en blanco no sabe nada del operador, salvo una cosa: la dirección de su ACS, la <b>URL</b> (<i>Uniform Resource Locator</i>, la dirección web) a la que debe llamar. Hay cuatro maneras de que la tenga, y un operador suele usar más de una.</p><ol class="steps"><li><span><b>Valores de fábrica.</b> El operador le pide al fabricante que grabe su URL en el firmware antes de enviar el lote. Es lo más simple y lo más rígido: si un día cambia la URL, los equipos que estén en el almacén llevan la vieja.</span></li><li><span><b>DHCP</b>, el <b>protocolo de configuración dinámica de equipos</b> (<i>Dynamic Host Configuration Protocol</i>) que le da la dirección IP al equipo cuando se conecta. TR-069 define que el equipo se presente en la opción 60 con el texto <code>dslforum.org</code> y que el servidor DHCP le responda con la URL del ACS dentro de la opción 43, la de información del fabricante. En <b>IPv6</b> (<i>Internet Protocol version 6</i>, la versión 6 del protocolo de Internet), el equivalente viaja en la opción 17 de DHCPv6.</span></li><li><span><b>OMCI</b> (<i>ONU Management and Control Interface</i>, interfaz de gestión y control de la terminal óptica), para las <b>ONT</b> (<i>Optical Network Terminal</i>, terminal de red óptica). La <b>OLT</b> (<i>Optical Line Terminal</i>, terminal de línea óptica), que ya habla con la ONT por la fibra, le entrega la URL del ACS junto con la conexión de gestión. Es el camino de TR-142 que contó el capítulo 2, y el más común en <b>FTTH</b> (<i>Fiber To The Home</i>, fibra hasta la casa).</span></li><li><span><b>A mano.</b> Un técnico entra a la página del equipo y escribe la URL. Funciona, pero deja de ser «sin tocar».</span></li></ol><p>Cuando hay varias fuentes, el equipo sigue un orden de preferencia que define cada fabricante; por eso el perfil del capítulo 6 lo anota. La URL, una vez aprendida, queda en <code>ManagementServer.URL</code>, el parámetro que el perfil marca como «no se toca».</p></div><figure class="fig fig-esquema" id="07-diagrama-2"><div class="lienzo"><svg viewBox="0 0 900 470" style="min-width:740px" role="img" aria-label="Cuatro caminos para que el equipo conozca la URL de su ACS: grabada en el firmware de fábrica, por DHCP con la opción 43 (u opción 17 en IPv6), por OMCI desde la OLT y escrita a mano por un técnico; con la URL, el equipo manda su primer Inform al ACS">
+  <defs>
+    <marker id="f72-fl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--muted)"/></marker>
+  </defs>
+
+  
+  <rect x="300" y="180" width="220" height="100" rx="12" class="d-casa" style="stroke-width:2"/>
+  <text x="410" y="210" text-anchor="middle" class="t t-b">Equipo nuevo</text>
+  <text x="410" y="236" text-anchor="middle" class="t t-s t-mono">ManagementServer.URL</text>
+  <text x="410" y="258" text-anchor="middle" class="t t-s t-m">vacía hasta que alguien se la da</text>
+
+  
+  <rect x="300" y="20" width="220" height="70" rx="9" class="c-apl"/>
+  <text x="410" y="46" text-anchor="middle" class="t t-b">Firmware de fábrica</text>
+  <text x="410" y="66" text-anchor="middle" class="t t-s">la URL viene grabada</text>
+  <text x="410" y="82" text-anchor="middle" class="t t-xs t-m">rígido: no cambia en el almacén</text>
+  <path d="M410 90V176" class="ln" style="fill:none;stroke-width:1.8" marker-end="url(#f72-fl)"/>
+
+  
+  <rect x="20" y="190" width="220" height="80" rx="9" class="c-red"/>
+  <text x="130" y="214" text-anchor="middle" class="t t-b">Servidor DHCP</text>
+  <text x="130" y="234" text-anchor="middle" class="t t-s">opción 43 con la URL</text>
+  <text x="130" y="252" text-anchor="middle" class="t t-s">(opción 17 en DHCPv6)</text>
+  <path d="M240 230H296" class="ln" style="fill:none;stroke-width:1.8" marker-end="url(#f72-fl)"/>
+  <text x="130" y="296" text-anchor="middle" class="t t-xs t-m">el equipo pide con la opción 60:</text>
+  <text x="130" y="312" text-anchor="middle" class="t t-xs t-mono">dslforum.org</text>
+
+  
+  <rect x="300" y="370" width="220" height="80" rx="9" class="c-fis"/>
+  <text x="410" y="394" text-anchor="middle" class="t t-b">OLT, por OMCI</text>
+  <text x="410" y="414" text-anchor="middle" class="t t-s">la URL junto con la conexión</text>
+  <text x="410" y="432" text-anchor="middle" class="t t-s">de gestión (TR-142)</text>
+  <path d="M410 370V284" class="ln" style="fill:none;stroke-width:1.8" marker-end="url(#f72-fl)"/>
+  <text x="420" y="330" class="t t-xs t-b t-m">EL CAMINO DE LAS ONT</text>
+
+  
+  <rect x="20" y="370" width="220" height="80" rx="9" class="caja" style="stroke-dasharray:5 4"/>
+  <text x="130" y="394" text-anchor="middle" class="t t-b t-m">Técnico, a mano</text>
+  <text x="130" y="414" text-anchor="middle" class="t t-s t-m">entra a la página del equipo</text>
+  <text x="130" y="432" text-anchor="middle" class="t t-s t-m">ya no es «sin tocar»</text>
+  <path d="M240 400H260V262H296" class="ln ln-d" style="fill:none;stroke-width:1.5" marker-end="url(#f72-fl)"/>
+
+  
+  <rect x="660" y="180" width="220" height="100" rx="12" class="d-oper" style="stroke-width:2"/>
+  <text x="770" y="214" text-anchor="middle" class="t t-b">ACS</text>
+  <text x="770" y="238" text-anchor="middle" class="t t-s">recibe el primer Inform</text>
+  <text x="770" y="258" text-anchor="middle" class="t t-s t-mono">0 BOOTSTRAP · 1 BOOT</text>
+  <path d="M520 230H656" class="ln s-apl" style="fill:none;stroke-width:2.4" marker-end="url(#f72-fl)"/>
+  <text x="588" y="220" text-anchor="middle" class="t t-s t-b">con la URL, llama</text>
+</svg></div><figcaption><b>Cuatro caminos para la misma URL.</b> En el centro, el equipo nuevo, con el parámetro <code>ManagementServer.URL</code> vacío. Llegan a él cuatro flechas: desde arriba, el firmware de fábrica con la URL grabada; desde la izquierda, el servidor DHCP con la opción 43 (y la opción 17 en IPv6); desde abajo, la OLT por OMCI, el camino de las ONT; abajo a la izquierda, un técnico que la escribe a mano, en gris y punteado porque rompe el «sin tocar». A la derecha, ya con la URL, la flecha que sale hacia el ACS: el primer Inform, con <code>0 BOOTSTRAP</code>.</figcaption></figure></section>
+<section><h2>El primer contacto: el evento <code>0 BOOTSTRAP</code></h2><div class="prose"><p>Con la URL en la mano, el equipo llama. Su primer Inform es distinto a todos los que vendrán: trae el evento <b><code>0 BOOTSTRAP</code></b> (arranque inicial). TR-069 manda enviarlo en dos casos:</p><ul><li>La <b>primera vez</b> que el equipo habla con un ACS, al salir de fábrica o después de un reinicio de fábrica.</li><li>Cada vez que <b>cambia la URL del ACS</b>. Para el ACS nuevo, ese equipo es un desconocido.</li></ul><p>Casi siempre viaja junto con <b><code>1 BOOT</code></b> (el equipo se acaba de encender), porque las dos cosas pasan en el mismo momento.</p><p><code>0 BOOTSTRAP</code> le dice al ACS: «olvida lo que sabías de mí; empiezo en blanco». Un buen ACS lo toma al pie de la letra. Si ya tenía datos guardados de ese número de serie (por ejemplo, porque el equipo estuvo en otra casa y volvió reacondicionado), los descarta y vuelve a leer el árbol desde cero. Y lo trata como la señal para arrancar el aprovisionamiento.</p><p>En GenieACS, el ACS de código abierto de las prácticas, esto se arma con un <b>preajuste</b> (<i>preset</i>) que se activa con el evento <code>0 BOOTSTRAP</code> y llama a una <b>provisión</b> (<i>provision</i>), el pequeño programa que dice qué debe tener el equipo. Los ACS comerciales tienen lo mismo con otros nombres: reglas, flujos o políticas de arranque.</p></div></section>
+<section><h2>Reconocer al equipo y saber de qué cliente es</h2><div class="prose"><p>El Inform trae el número de serie del equipo, pero el número de serie no dice nada del cliente. Para unirlos, el ACS necesita una pieza que no es suya: el <b>inventario</b>, el sistema que sabe qué equipo salió del almacén y a qué casa fue.</p><p>Hay dos formas de hacer esa unión:</p><ul><li><b>Antes de salir.</b> El almacén asigna un equipo a cada orden de instalación y el técnico se lo lleva ya asociado. Es ordenado, pero frágil: si el técnico cambia el equipo en la casa (porque el primero no encendía), la asociación queda mal.</li><li><b>En la casa.</b> El técnico escanea la serie del equipo que realmente instaló y la aplicación la asocia a la orden. Es lo que hizo el técnico de la casa 1203, y es lo que usan la mayoría de los operadores con aplicación de campo.</li></ul><p>Con la serie asociada a la orden, el ACS puede preguntar y recibir: esta serie es de la clienta de la casa 1203, plan «Hogar 500», con línea de voz, Wi-Fi llamado «Casa-1203». Si es una ONT, la OLT necesita la misma serie para autorizarla, y por eso el escaneo del técnico alimenta a los dos.</p></div></section>
+<section><h2>Cargar el plan</h2><div class="prose"><p>Con el cliente identificado, el ACS aplica la plantilla de servicio del capítulo 6, traducida por el perfil del modelo. El orden importa, y el de Fibra Ejemplo es este:</p><ol class="steps"><li><span><b>Firmware.</b> Si el equipo trae un firmware que no está aprobado, primero se actualiza con un <code>Download</code>. El equipo se reinicia y vuelve a llamar con <code>1 BOOT</code> y <code>7 TRANSFER COMPLETE</code>. Configurar antes sería trabajo perdido, porque un firmware nuevo puede cambiar el árbol.</span></li><li><span><b>Valores por defecto del operador.</b> Lo que es igual para todos: el intervalo del Inform periódico, el servidor de hora, la zona horaria, una contraseña de administrador única para ese equipo, la gestión cerrada desde Internet.</span></li><li><span><b>El plan del cliente.</b> El Wi-Fi (nombre y clave elegidos al contratar, o los de la etiqueta), la cuenta de voz, los puertos que el plan incluye.</span></li><li><span><b>Verificación.</b> El ACS vuelve a leer lo que escribió y revisa que la conexión a Internet esté arriba. Solo entonces avisa «Servicio listo».</span></li></ol><p>La velocidad no está en esa lista: como vimos en el capítulo 2, los 500 Mbps los aplican <b>RADIUS</b> (<i>Remote Authentication Dial-In User Service</i>, el servidor que autoriza la conexión del cliente) y la red. El ACS solo comprueba, al final, que la sesión se abrió.</p></div><div class="lab" id="07-lab-1"><div class="lab-title"><span class="tag">Laboratorio</span><h3>Primer contacto</h3></div><p class="hint">Conecta un equipo nuevo y mira cada paso, del <code>0 BOOTSTRAP</code> al servicio listo, con el reloj corriendo. Después apaga una pieza (el equipo no está en el inventario, la orden no tiene cliente, falta el perfil del modelo, el firmware es viejo) y mira dónde se detiene y qué ve el técnico en su aplicación.</p><style>
+[id="07-lab-1"] .l71-sw{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,210px),1fr));gap:6px}
+[id="07-lab-1"] .l71-sw label{display:flex;gap:8px;align-items:center;padding:6px 10px;border-radius:8px;background:var(--paper);font-size:.88rem;cursor:pointer}
+[id="07-lab-1"] .l71-pasos{list-style:none;margin:0;padding:0;display:grid;gap:5px}
+[id="07-lab-1"] .l71-pasos li{display:grid;grid-template-columns:3.2rem minmax(0,1fr);gap:8px;padding:6px 10px;border-radius:8px;background:var(--paper);font-size:.88rem;border-left:4px solid var(--line)}
+[id="07-lab-1"] .l71-pasos li.ok{border-left-color:var(--good)}
+[id="07-lab-1"] .l71-pasos li.alto{border-left-color:var(--c-apl);background:var(--c-apl-s)}
+[id="07-lab-1"] .l71-pasos li.aviso{border-left-color:var(--warm)}
+[id="07-lab-1"] .l71-t{font:600 .78rem var(--f-mono);color:var(--muted);padding-top:2px}
+[id="07-lab-1"] .l71-pasos code{font-size:.78rem;word-break:break-all}
+[id="07-lab-1"] .l71-tel{max-width:300px;margin:0 auto;border:2px solid var(--line);border-radius:18px;padding:12px;background:var(--card);text-align:center;display:grid;gap:4px}
+[id="07-lab-1"] .l71-tel .pant{font:700 1rem var(--f-display)}
+[id="07-lab-1"] .l71-tel.ok .pant{color:var(--good)}
+[id="07-lab-1"] .l71-tel.mal .pant{color:var(--c-apl)}
+[id="07-lab-1"] .l71-tel.esp .pant{color:var(--warm)}
+[id="07-lab-1"] .l71-tel small{color:var(--muted)}
+</style>
+<div class="l71-sw" role="group" aria-label="Piezas del aprovisionamiento">
+  <label><input type="checkbox" id="l71-inv" checked> La serie está en el inventario</label>
+  <label><input type="checkbox" id="l71-cli" checked> La orden tiene un cliente activo</label>
+  <label><input type="checkbox" id="l71-per" checked> Hay perfil para este modelo y firmware</label>
+  <label><input type="checkbox" id="l71-fw" checked> El firmware ya está aprobado</label>
+  <label><input type="checkbox" id="l71-olt" checked> La OLT autorizó la ONT</label>
+</div>
+<div class="btns"><button type="button" class="primary" id="l71-go">Conectar el equipo</button></div>
+<ol class="l71-pasos" id="l71-pasos" aria-live="polite"></ol>
+<div class="l71-tel" id="l71-tel"><small>Aplicación del técnico · casa 1203</small><span class="pant" id="l71-pant">Esperando al equipo</span><small id="l71-sub">Escanea la serie y conecta.</small></div>
+<div class="readout texto" id="l71-out" aria-live="polite"></div></div><div class="practica"><div class="practica-title"><span class="tag">En la terminal</span><h3>Mira llegar a un equipo que el ACS nunca vio</h3></div><p>Vas a usar el GenieACS y el simulador que instalaste en la práctica del capítulo 3 para ver qué hace el ACS con un equipo nuevo. Todo corre en tu computadora. Con la base de datos y los tres servicios de GenieACS corriendo (<code>genieacs-cwmp</code>, <code>genieacs-nbi</code> y <code>genieacs-ui</code>), abre otra terminal en la carpeta <code>genieacs-sim</code> (en Windows, dentro de WSL) y lanza un equipo con un número de serie distinto al del capítulo 3:</p><div class="cmds"><div class="cmd-panel" data-so="win mac linux"><div class="cmd-l"><code>./genieacs-sim -u http://127.0.0.1:7547/ --serial 7</code><button type="button" class="copiar">Copiar</button></div></div></div><ol class="steps"><li><span>En la terminal del simulador verás <code>Simulator 000007 started</code>: es un equipo que el ACS no conoce.</span></li><li><span>Abre <code>http://localhost:3000</code>, entra a <i>Devices</i> y busca el equipo <code>202BC1-BM632w-000007</code>. Fíjate en su columna de última llamada (<i>Last inform</i>).</span></li><li><span>Entra al equipo y mira su árbol: ¿cuántos parámetros conoce ya el ACS? Vuelve a mirar al cabo de un minuto.</span></li><li><span>Entra a <i>Admin</i> → <i>Presets</i>. Si al crear tu usuario aceptaste la configuración inicial, verás algunos preajustes. Mira su columna <i>Events</i> y busca si alguno se activa con <code>0 BOOTSTRAP</code>.</span></li></ol><p><b>Qué observar:</b> el ACS crea la ficha del equipo en su primera llamada, armando el nombre con OUI, clase de producto y serie, sin que nadie lo haya cargado antes. Al principio conoce apenas los parámetros del Inform; después lee el resto del árbol. El simulador se presenta con <code>2 PERIODIC</code> aun la primera vez, como viste en el capítulo 3; un equipo real diría <code>0 BOOTSTRAP</code>, y ese es el evento que activaría el preajuste de arranque. Fíjate también en lo que <b>no</b> pasa: el ACS no sabe de qué cliente es este equipo, porque tu GenieACS no tiene inventario. Al terminar, detén el simulador con Ctrl+C.</p></div></section>
+<section><h2>Qué pasa cuando algo falta</h2><div class="prose"><p>La casa 1203 salió bien al primer intento. No siempre es así, y lo que distingue a un buen aprovisionamiento es qué hace cuando una pieza falta. La regla de Fibra Ejemplo es que <b>el ACS nunca adivina</b>: si no sabe de quién es un equipo, no le pone el plan de nadie.</p><div class="tbl"><table><thead><tr><th>Lo que falta</th><th>Qué hace el ACS</th><th>Qué ve el técnico</th></tr></thead><tbody><tr><td>La serie no está en el inventario</td><td>Lo pone en <b>cuarentena</b> (<i>quarantine</i>): solo los valores por defecto, sin Wi-Fi de cliente, y una alerta al almacén</td><td>«Equipo no registrado: escanea de nuevo o llama al almacén»</td></tr><tr><td>La serie está, pero la orden no tiene cliente o el cliente está dado de baja</td><td>Lo mismo que arriba, con una alerta a ventas</td><td>«Orden incompleta»</td></tr><tr><td>No hay perfil para ese modelo o ese firmware</td><td>No escribe nada: sin perfil no sabe cómo. Alerta a ingeniería</td><td>«Modelo no homologado»</td></tr><tr><td>El firmware es viejo</td><td>Lo actualiza primero; tarda unos minutos más</td><td>«Actualizando, no desconectes»</td></tr><tr><td>La OLT no autorizó la ONT</td><td>Nada: el equipo no puede llamar</td><td>«Sin señal de gestión»</td></tr></tbody></table></div><p>La cuarentena es la pieza más importante de esta tabla. Un equipo que llama sin estar en el inventario puede ser un error de escaneo, un equipo robado o un equipo de otro operador conectado por error. En los tres casos, ponerle el plan de alguien sería peor que no ponerle nada.</p></div><div class="lab" id="07-lab-2"><div class="lab-title"><span class="tag">Laboratorio</span><h3>El orden de la instalación</h3></div><p class="hint">Cinco sistemas participan en una instalación: la orden de servicio en el <b>CRM</b> (<i>Customer Relationship Management</i>, gestión de la relación con el cliente), el inventario, la OLT, RADIUS y el ACS. Ordénalos con las flechas y pulsa «Instalar». Mira qué falla cuando una pieza llega antes que la que necesita, y cuánto se alarga la instalación.</p><style>
+[id="07-lab-2"] .l72-orden{list-style:none;margin:0;padding:0;display:grid;gap:6px;counter-reset:p}
+[id="07-lab-2"] .l72-orden li{counter-increment:p;display:grid;grid-template-columns:1.8rem minmax(0,1fr) auto;gap:8px;align-items:center;padding:6px 8px;border-radius:8px;background:var(--card);border:1px solid var(--line);border-left:5px solid var(--line)}
+[id="07-lab-2"] .l72-orden li::before{content:counter(p);font:700 .9rem var(--f-mono);color:var(--muted);text-align:center}
+[id="07-lab-2"] .l72-orden li.ok{border-left-color:var(--good)}
+[id="07-lab-2"] .l72-orden li.mal{border-left-color:var(--c-apl)}
+[id="07-lab-2"] .l72-orden b{display:block;font-size:.92rem}
+[id="07-lab-2"] .l72-orden small{color:var(--muted);font-size:.8rem}
+[id="07-lab-2"] .l72-orden .fl{display:flex;gap:4px}
+[id="07-lab-2"] .l72-orden .fl button{padding:4px 9px;min-width:34px}
+[id="07-lab-2"] .l72-res{list-style:none;margin:0;padding:0;display:grid;gap:5px}
+[id="07-lab-2"] .l72-res li{padding:6px 10px;border-radius:8px;background:var(--paper);font-size:.88rem;border-left:4px solid var(--good)}
+[id="07-lab-2"] .l72-res li.mal{border-left-color:var(--c-apl)}
+</style>
+<ol class="l72-orden" id="l72-orden" aria-label="Orden de las piezas"></ol>
+<div class="btns">
+  <button type="button" class="primary" id="l72-go">Instalar</button>
+  <button type="button" id="l72-mez">Mezclar</button>
+</div>
+<div class="readout texto" id="l72-out" aria-live="polite"></div>
+<ul class="l72-res" id="l72-res" aria-live="polite"></ul></div></section>
+<section><h2>Medir la instalación</h2><div class="prose"><p>Una instalación sin tocar que funciona a medias no ahorra visitas: las cambia de día. Por eso Fibra Ejemplo mide cada una con tres números:</p><ul><li><b>Listos al primer intento</b> (<i>first-time right</i>): el porcentaje de equipos que llegaron a «Servicio listo» sin que nadie tocara nada más. Es el número que manda.</li><li><b>Tiempo hasta el servicio listo</b>: los minutos desde el <code>0 BOOTSTRAP</code> hasta la verificación. Si crece, algo se atascó (un firmware pesado, un inventario lento).</li><li><b>Causas de falla</b>: cuántos fueron a cuarentena, cuántos sin perfil, cuántos sin autorizar en la OLT. Cada causa tiene un dueño distinto: almacén, ventas, ingeniería, red.</li></ul></div><div class="ml"><b>En la práctica</b><p>Durante un mes, el «listos al primer intento» de Fibra Ejemplo bajó de un día para otro. La causa no estaba en el ACS: el almacén había recibido un lote de equipos de la marca A con un firmware nuevo, que no tenía perfil. El ACS hizo lo correcto (no escribió nada y avisó), pero el aviso iba a un buzón que nadie leía. Desde entonces, la alerta «modelo no homologado» abre un ticket en la mesa de ayuda, y el almacén no recibe lotes con firmware sin homologar.</p></div><div class="caso"><b>Un caso real</b><p>Un operador FTTH de la región quiso acelerar sus instalaciones y le pidió a su ACS que, si un equipo llamaba sin estar en el inventario, le pusiera «el plan más común» para no hacer esperar al técnico. Funcionó durante semanas. Hasta que un equipo de reemplazo, mal escaneado, recibió ese plan en la casa de un cliente que tenía otro más caro: el cliente quedó con menos velocidad, menos servicios y una línea de voz que no era la suya. Hubo que revisar a mano todos los equipos que habían entrado por esa puerta. La lección que suelen sacar estos operadores: un equipo desconocido va a cuarentena, nunca a un plan por defecto.</p></div><div class="prose"><p>Si quieres ver la misma instalación desde el lado de la red y del negocio, el capítulo 40 de <a href="https://aaramirez.github.io/telco/40-una-instalacion-sin-tocar-nada.html" target="_blank" rel="noopener">Cómo funciona un telco</a> la cuenta de punta a punta.</p><p>La idea con la que cierra este capítulo es la que hace posible instalar miles de equipos por mes: <b>el equipo llega en blanco y el sistema le pone el plan; el técnico solo conecta.</b></p></div><div class="quiz"><h3>Pruébate</h3><details><summary>¿Cuáles son las cuatro maneras en que un equipo puede conocer la URL de su ACS?</summary><p>Grabada de fábrica en el firmware, por DHCP (opción 43, u opción 17 en DHCPv6), por OMCI desde la OLT en el caso de las ONT, y escrita a mano por un técnico.</p></details><details><summary>¿En qué dos casos manda un equipo el evento <code>0 BOOTSTRAP</code>?</summary><p>La primera vez que habla con un ACS (al salir de fábrica o después de un reinicio de fábrica) y cada vez que cambia la URL del ACS.</p></details><details><summary>¿Por qué el número de serie no alcanza para saber qué plan cargar?</summary><p>Porque la serie solo identifica al equipo. Para saber de qué cliente es, el ACS necesita que el inventario la haya asociado a una orden de instalación.</p></details><details><summary>¿Por qué se actualiza el firmware antes de cargar el plan, y no después?</summary><p>Porque un firmware nuevo puede cambiar el árbol de parámetros; lo configurado antes podría perderse o quedar en rutas que ya no existen.</p></details><details><summary>¿Qué hace un buen ACS con un equipo que llama y no está en el inventario?</summary><p>Lo pone en cuarentena: valores por defecto, ningún plan de cliente y una alerta. Nunca le pone un plan por defecto.</p></details><details><summary>¿Qué mide «listos al primer intento» y por qué es el número que manda?</summary><p>El porcentaje de equipos que llegan a «Servicio listo» sin intervención extra. Si baja, las visitas que el aprovisionamiento debía ahorrar vuelven.</p></details></div><div class="investiga"><h3>Para investigar</h3><p class="hint">Estas preguntas no se responden en el capítulo: búscalas por tu cuenta.</p><ol><li>¿Qué es la opción 60 de DHCP (<i>vendor class identifier</i>) y por qué TR-069 usa el texto «dslforum.org», si el consorcio hoy se llama Broadband Forum?<small>Pista: busca «DSL Forum Broadband Forum rename 2008».</small></li><li>¿Qué diferencia hay entre DHCPv6 con estado y sin estado, y en cuál de los dos puede viajar la URL del ACS?<small>Pista: busca «DHCPv6 stateless stateful <a href="https://www.rfc-editor.org/rfc/rfc8415" target="_blank" rel="noopener">RFC 8415</a>».</small></li><li>¿Qué es una dirección MAC y por qué la etiqueta de un equipo con Wi-Fi suele traer más de una?<small>Pista: busca «MAC address WAN LAN WLAN label router».</small></li><li>¿Qué significa el número de serie GPON de una ONT (cuatro letras y ocho caracteres hexadecimales) y quién asigna las letras?<small>Pista: busca «GPON serial number vendor ID format».</small></li><li>¿Qué es el <i>zero-touch provisioning</i> en los equipos de red de una empresa (switches y routers), y en qué se parece al de los equipos de la casa?<small>Pista: busca «ZTP zero touch provisioning switch DHCP option 67».</small></li></ol></div><div class="vids"><span>Para saber más</span><a class="vid" href="https://www.broadband-forum.org/pdfs/tr-069-1-6-1.pdf" target="_blank" rel="noopener">TR-069, la norma del protocolo, con los eventos y el descubrimiento por DHCP (Broadband Forum, inglés, PDF) <small>referencia</small></a><a class="vid" href="https://docs.genieacs.com/en/latest/provisions.html" target="_blank" rel="noopener">Provisiones en GenieACS (inglés) <small>referencia</small></a><a class="vid" href="https://aaramirez.github.io/telco/40-una-instalacion-sin-tocar-nada.html" target="_blank" rel="noopener">Una instalación sin tocar nada, capítulo 40 de Cómo funciona un telco <small>lectura</small></a><a class="vid" href="https://aaramirez.github.io/telco/28-gestionar-el-equipo-en-casa-del-cliente.html" target="_blank" rel="noopener">Gestionar el equipo en casa del cliente, capítulo 28 de Cómo funciona un telco <small>lectura</small></a></div></section>
+<label class="got"><input type="checkbox" id="got"> Lo tengo claro</label>
+<nav class="pager" id="pager" aria-label="Capítulo anterior y siguiente"></nav>
+</main>
+</div>
+<footer><span>Curso abierto de aaramirez.github.io.</span><span>Sitio publicado: <a href="https://github.com/aaramirez/gestion-remota-de-equipos" target="_blank" rel="noopener">github.com/aaramirez/gestion-remota-de-equipos</a></span></footer>
+</div>
+<script src="assets/lab.js"></script>
+<script>
+(function(){
+  const {$}=window.Lab;
+  const quieto=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let turno=0;
+  const mmss=s=>{const m=Math.floor(s/60),r=s%60;return m+':'+String(r).padStart(2,'0');};
+  function plan(){
+    const v=id=>$('#'+id).checked;
+    const P=[];let t=0;const add=(dt,c,txt)=>{t+=dt;P.push([t,c,txt]);};
+    add(0,'ok','El técnico escanea la serie <code>MRCA00012345</code>; la aplicación la asocia a la orden de la casa 1203.');
+    if(!v('l71-olt')){add(20,'alto','La OLT no tiene autorizada esa serie: la ONT ve luz, pero no recibe conexión de gestión ni la URL del ACS. El equipo no puede llamar a nadie.');
+      return {P,fin:['mal','Sin señal de gestión','Revisa la autorización en la OLT'],t,msg:'El ACS nunca se enteró: sin el paso de la OLT, el equipo no tiene camino. Es la causa de falla de la red, no del ACS.'};}
+    add(40,'ok','La OLT autoriza la ONT y, por OMCI, le da la conexión de gestión y la URL del ACS.');
+    add(15,'ok','El equipo llama: Inform con <code>0 BOOTSTRAP</code> y <code>1 BOOT</code>. El ACS crea su ficha.');
+    if(!v('l71-inv')){add(3,'alto','El ACS pregunta al inventario por la serie: no existe. Cuarentena: solo valores por defecto, sin Wi-Fi de cliente. Alerta al almacén.');
+      return {P,fin:['mal','Equipo no registrado','Escanea de nuevo o llama al almacén'],t,msg:'El ACS no adivina: un equipo desconocido no recibe el plan de nadie. Lo más probable es un error de escaneo o un equipo que no salió por el almacén.'};}
+    if(!v('l71-cli')){add(3,'alto','La serie está, pero la orden no tiene un cliente activo. Cuarentena y alerta a ventas.');
+      return {P,fin:['mal','Orden incompleta','Llama a ventas para completar la orden'],t,msg:'Sin cliente no hay plan que cargar. El equipo queda gestionado, pero vacío.'};}
+    add(3,'ok','El inventario responde: casa 1203, plan «Hogar 500», con línea de voz.');
+    if(!v('l71-per')){add(2,'alto','El equipo trae un firmware para el que no hay perfil. El ACS no escribe nada: sin perfil no sabe cómo. Alerta a ingeniería.');
+      return {P,fin:['mal','Modelo no homologado','No te vayas: llama a soporte'],t,msg:'Escribir sin perfil sería adivinar rutas. Este es el caso de un lote que llegó con un firmware nuevo sin homologar.'};}
+    if(!v('l71-fw')){
+      add(5,'aviso','El firmware no está aprobado: <code>Download</code> del firmware nuevo. La aplicación dice «Actualizando, no desconectes».');
+      add(150,'aviso','El equipo descarga, instala y se reinicia.');
+      add(20,'ok','Vuelve a llamar: Inform con <code>1 BOOT</code> y <code>7 TRANSFER COMPLETE</code>. Firmware aprobado.');
+    }else add(2,'ok','Firmware aprobado: no hace falta actualizar.');
+    add(8,'ok','Valores por defecto del operador: intervalo del Inform, hora, contraseña de administrador única, gestión cerrada desde Internet.');
+    add(10,'ok','Plantilla «Hogar 500» con el perfil de la marca A: Wi-Fi «Casa-1203» en dos bandas, cuenta de voz.');
+    add(150,'ok','El equipo abre su sesión de Internet; RADIUS la autoriza con el perfil de 500 Mbps.');
+    add(12,'ok','El ACS lee de vuelta lo que escribió y ve la conexión arriba.');
+    add(1,'ok','Aviso a la aplicación del técnico.');
+    return {P,fin:['ok','Servicio listo','Wi-Fi «Casa-1203» · voz con tono'],t,msg:v('l71-fw')?'Listo al primer intento. Nadie tocó una pantalla.':'Listo al primer intento, aunque tardó más: la actualización de firmware se lleva casi tres minutos. Por eso conviene que el almacén reciba equipos con firmware ya aprobado.'};
+  }
+  async function correr(){
+    const mio=++turno;const r=plan();const ol=$('#l71-pasos');ol.innerHTML='';
+    const tel=$('#l71-tel');tel.className='l71-tel esp';$('#l71-pant').textContent='Configurando…';$('#l71-sub').textContent='';$('#l71-out').innerHTML='';
+    for(const [t,c,txt] of r.P){
+      if(mio!==turno)return;
+      const li=document.createElement('li');li.className=c;li.innerHTML='<span class="l71-t">'+mmss(t)+'</span><span>'+txt+'</span>';ol.appendChild(li);
+      if(c==='aviso')$('#l71-pant').textContent='Actualizando, no desconectes';
+      if(!quieto)await new Promise(res=>setTimeout(res,260));
+    }
+    tel.className='l71-tel '+r.fin[0];$('#l71-pant').textContent=r.fin[1];$('#l71-sub').textContent=r.fin[2];
+    $('#l71-out').innerHTML='<span class="big">'+(r.fin[0]==='ok'?'Servicio listo en '+mmss(r.t):'Se detuvo a los '+mmss(r.t))+'</span><span>'+r.msg+'</span>';
+  }
+  $('#l71-go').addEventListener('click',correr);
+  document.querySelectorAll('[id="07-lab-1"] input').forEach(i=>i.addEventListener('change',()=>{turno++;$('#l71-pasos').innerHTML='';$('#l71-tel').className='l71-tel';$('#l71-pant').textContent='Esperando al equipo';$('#l71-sub').textContent='Pulsa «Conectar el equipo».';$('#l71-out').innerHTML='';}));
+  $('#l71-out').innerHTML='<span>Con todo encendido, pulsa «Conectar el equipo». Luego apaga una pieza y vuelve a conectar.</span>';
+})();
+</script>
+<script>
+(function(){
+  const {$}=window.Lab;
+  const PZ={
+    orden:{n:'Orden de servicio en el CRM',d:'ventas registra el cliente, la dirección y el plan'},
+    inv:{n:'Inventario',d:'asocia la serie que escaneó el técnico a la orden'},
+    olt:{n:'OLT',d:'autoriza la ONT por su serie y le da la conexión de gestión'},
+    rad:{n:'RADIUS',d:'crea la cuenta del cliente con el perfil de 500 Mbps'},
+    acs:{n:'ACS',d:'recibe el 0 BOOTSTRAP, carga el plan y verifica'}
+  };
+  // [antes, después, minutos perdidos, qué pasa si se invierte]
+  const REG=[
+    ['orden','inv',30,'El inventario no tiene a qué orden asociar la serie: el técnico la escanea y la aplicación responde «orden inexistente». Espera a que ventas la cargue.'],
+    ['orden','rad',10,'RADIUS no puede crear una cuenta para un cliente que todavía no existe.'],
+    ['inv','olt',20,'La OLT necesita la serie para autorizar la ONT; sin el escaneo, nadie se la dio. El equipo ve luz pero no tiene gestión.'],
+    ['olt','acs',15,'El ACS está listo, pero el equipo no tiene camino para llamarlo: espera hasta que la OLT lo autorice.'],
+    ['inv','acs',25,'El equipo llama antes de que el inventario sepa de quién es: el ACS lo manda a cuarentena. Hay que reintentar el aprovisionamiento a mano.'],
+    ['rad','acs',12,'El ACS carga el plan, pero al verificar ve la conexión a Internet caída: no hay cuenta en RADIUS. El técnico se va con la duda o espera.']
+  ];
+  const BIEN=['orden','inv','olt','rad','acs'];
+  let ord=['acs','olt','orden','rad','inv'];
+  function pinta(marcas){
+    $('#l72-orden').innerHTML=ord.map((k,i)=>'<li class="'+(marcas?marcas[k]:'')+'"><span><b>'+PZ[k].n+'</b><small>'+PZ[k].d+'</small></span><span class="fl"><button type="button" data-k="'+k+'" data-d="-1" aria-label="Subir '+PZ[k].n+'"'+(i===0?' disabled':'')+'>↑</button><button type="button" data-k="'+k+'" data-d="1" aria-label="Bajar '+PZ[k].n+'"'+(i===ord.length-1?' disabled':'')+'>↓</button></span></li>').join('');
+    document.querySelectorAll('#l72-orden button').forEach(b=>b.addEventListener('click',()=>{
+      const i=ord.indexOf(b.dataset.k),j=i+Number(b.dataset.d);if(j<0||j>=ord.length)return;
+      [ord[i],ord[j]]=[ord[j],ord[i]];pinta();$('#l72-res').innerHTML='';$('#l72-out').innerHTML='<span>Pulsa «Instalar» para probar este orden.</span>';
+      const f=document.querySelector('#l72-orden button[data-k="'+b.dataset.k+'"][data-d="'+b.dataset.d+'"]');if(f&&!f.disabled)f.focus();
+    }));
+  }
+  function instalar(){
+    const pos=k=>ord.indexOf(k);const fallas=REG.filter(r=>pos(r[0])>pos(r[1]));
+    const marcas={};ord.forEach(k=>marcas[k]='ok');fallas.forEach(r=>{marcas[r[1]]='mal';});
+    pinta(marcas);
+    const min=fallas.reduce((s,r)=>s+r[2],0);
+    if(!fallas.length){
+      $('#l72-out').innerHTML='<span class="big">Servicio listo en 4 minutos, al primer intento</span><span>Cada pieza llegó cuando la siguiente la necesitaba. Inventario, OLT y RADIUS pueden ir en otro orden entre sí mientras se respeten sus dependencias, pero el ACS va al final: es el que comprueba que todo lo demás funcionó.</span>';
+      $('#l72-res').innerHTML='';return;
+    }
+    $('#l72-out').innerHTML='<span class="big warn">'+fallas.length+(fallas.length===1?' pieza llegó':' piezas llegaron')+' antes de tiempo</span><span>La instalación se alarga unos '+min+' minutos y no queda lista al primer intento. Corrige el orden y vuelve a instalar.</span>';
+    $('#l72-res').innerHTML=fallas.map(r=>'<li class="mal"><b>'+PZ[r[1]].n+' antes que '+PZ[r[0]].n+':</b> '+r[3]+'</li>').join('');
+  }
+  $('#l72-go').addEventListener('click',instalar);
+  $('#l72-mez').addEventListener('click',()=>{for(let i=ord.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[ord[i],ord[j]]=[ord[j],ord[i]];}if(ord.join()===BIEN.join())ord.reverse();pinta();$('#l72-res').innerHTML='';$('#l72-out').innerHTML='<span>Pulsa «Instalar» para probar este orden.</span>';});
+  pinta();
+  $('#l72-out').innerHTML='<span>Ordena las cinco piezas con las flechas y pulsa «Instalar».</span>';
+})();
+</script>
+</body>
+</html>

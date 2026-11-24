@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="es">
+<head>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-KX76XF8R');</script>
+<!-- End Google Tag Manager -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>TR-369 (USP) · Gestión remota de equipos (ACS) · Gestión remota de equipos (ACS)</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Cómo un operador configura, actualiza y diagnostica a distancia los equipos que tiene en casa de sus clientes: TR-069 y TR-369 a fondo, el modelo de datos TR-181, el aprovisionamiento sin visita, los cambios masivos, el firmware, los diagnósticos, la seguridad y la escala de un ACS.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400;1,8..60,600&display=swap">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KX76XF8R"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+<div class="wrap" data-page="tr-369-usp">
+<header class="topbar"><a class="brand" href="index.html">Gestión <b>remota</b> de equipos</a><span class="eyebrow">Curso visual e interactivo · Industrias y finanzas</span><a class="al-sitio" href="https://aaramirez.github.io/">← Todos los cursos</a></header>
+<div class="layout">
+<nav class="toc" id="toc" aria-label="Ruta de aprendizaje"></nav>
+<main>
+<header class="page-head"><span class="num">CAPÍTULO 16 DE 16</span><h1>TR-369 (USP): la siguiente generación</h1><p class="lede">TR-069 lleva más de veinte años gestionando routers con una conversación que el equipo abre y cierra. Su sucesor deja la línea abierta, habla con mensajes livianos y admite varios dueños con permisos distintos, sobre el mismo árbol TR-181.</p></header>
+<section><div class="prose"><p>En el capítulo 3, un agente de Fibra Ejemplo cambió el nombre del Wi-Fi de un cliente y esperó veinte segundos frente a un «¿Seguro que lo cambió?». Veinte segundos no son mucho para una llamada de soporte. Pero hoy Fibra Ejemplo quiere otras cosas: una aplicación en el celular con la que el cliente vea quién está conectado a su Wi-Fi y pause la tableta de su hijo a la hora de la cena, <b>al instante</b>; un tablero que muestre la calidad del Wi-Fi de cada casa minuto a minuto; un servicio de seguridad de otra empresa que avise cuando aparece un aparato desconocido en la red. Con TR-069, cada una de esas cosas es un timbre, una sesión de varias idas y vueltas y un solo dueño que lo decide todo.</p><p>Para eso el Broadband Forum publicó en 2018 <b>TR-369</b>, cuyo nombre es <b>USP</b> (<i>User Services Platform</i>, plataforma de servicios de usuario). El capítulo 28 de <a href="https://aaramirez.github.io/telco/28-gestionar-el-equipo-en-casa-del-cliente.html" target="_blank" rel="noopener">Cómo funciona un telco</a> lo presenta en una página. Este, el último del curso, lo abre por dentro: qué cambia en la conversación, qué se mantiene y cómo se pasa de un protocolo al otro sin apagar la flota.</p></div></section>
+<section><h2>Qué le faltaba a TR-069</h2><div class="prose"><p>TR-069 se diseñó en 2004 para configurar un módem de vez en cuando. Con lo que ya sabes del curso, sus tres límites se ven solos:</p><ol class="steps"><li><span><b>Sesiones pesadas.</b> Para cambiar un solo valor hay que abrir una conexión, cifrarla, mandar el Inform, recibir la respuesta, pedir trabajo, recibir la orden, responder y cerrar (capítulo 3). Todo en XML, que pesa más que los datos que lleva.</span></li><li><span><b>El equipo que hay que despertar.</b> El ACS no puede hablarle al equipo cuando quiere: tiene que tocarle el timbre y esperar a que llame, con NAT, STUN y XMPP de por medio. Y el equipo, para avisar algo, tiene que abrir una sesión entera.</span></li><li><span><b>Un solo dueño.</b> El equipo tiene una sola dirección de ACS en <code>Device.ManagementServer.URL</code>. No hay forma de que la aplicación del cliente o un servicio de terceros le hablen directo, cada uno con lo suyo.</span></li></ol></div><div class="analogia"><b>Imagínalo así</b><p>Vuelve al vendedor del capítulo 3, el que recorría pueblos sin teléfono y llamaba él a la oficina cada mañana. Ahora tiene un celular con un chat siempre abierto. La oficina le escribe cuando quiere y él contesta en segundos; él avisa apenas cierra una venta, sin esperar a la llamada del día siguiente. Y en el chat hay más gente: su jefe, que puede pedirle cualquier cosa, un cliente grande, que puede consultarle precios pero no cambiar pedidos ajenos, y el contador, que solo ve las facturas. El vendedor es el mismo y vende los mismos productos; lo que cambió es cómo se conversa y con quién.</p></div></section>
+<section><h2>Agente y controlador</h2><div class="prose"><p>USP cambia los nombres de las dos puntas, y el cambio de nombre dice algo:</p><ul><li>El equipo de la casa, o el programa que corre dentro de él, es el <b>agente</b> (<i>agent</i>): expone su árbol de datos y obedece.</li><li>Quien lo gestiona es un <b>controlador</b> (<i>controller</i>). El ACS del operador es un controlador, pero también puede serlo la aplicación del cliente o una plataforma de terceros. Un agente puede tener <b>varios controladores a la vez</b>.</li></ul><p>Cada punta tiene un <b>identificador de extremo</b> (<i>Endpoint ID</i>), un nombre único que no depende de su dirección IP. Para un agente, lo habitual es armarlo con el fabricante y el número de serie, por ejemplo <code>os::012345-FEJ0001203</code> (<code>os</code> quiere decir «OUI y serie»). Como el nombre no cambia cuando cambia la dirección, no hace falta perseguir al equipo por la red.</p><p>Lo que viaja entre agente y controlador son <b>mensajes</b> (<i>messages</i>), y cada mensaje va dentro de un <b>registro</b> (<i>record</i>), un sobre con el remitente, el destinatario y, si hace falta, su propia capa de seguridad. Mensajes y registros no se escriben en XML sino en <b>Protocol Buffers</b> (<i>protobuf</i>), un formato binario creado por Google: en lugar de etiquetas que abren y cierran, cada dato va con un número de campo corto. Un pedido que en TR-069 ocupaba un kilobyte cabe aquí en menos de cien bytes.</p></div><figure class="fig fig-arquitectura" id="16-diagrama-1"><div class="lienzo"><svg viewBox="0 0 960 450" style="min-width:760px" role="img" aria-label="Actores de USP: el agente en el equipo de la casa se conecta a un intermediario MQTT en la red del operador; tres controladores, el ACS del operador, la aplicación del cliente y un servicio de terceros, se conectan al mismo intermediario, cada uno con su rol">
+  <defs>
+    <marker id="f16a-fl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--c-enl)"/></marker>
+    <symbol id="f16a-ont" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="10" rx="1.6"/><path d="M8 12h.01M11 12h.01M14 12h.01"/><path d="M12 18v3.5"/><circle cx="12" cy="4.5" r="1.6"/></g></symbol>
+    <symbol id="f16a-srv" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="7" rx="1.5"/><rect x="4" y="14" width="16" height="7" rx="1.5"/><path d="M8 6.5h.01M8 17.5h.01M12 6.5h5M12 17.5h5"/></g></symbol>
+    <symbol id="f16a-cel" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="6" y="2.5" width="12" height="19" rx="2.2"/><path d="M10.5 18.5h3"/></g></symbol>
+    <symbol id="f16a-esc" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M12 2.5 4 6v6c0 5 3.4 8.4 8 9.5 4.6-1.1 8-4.5 8-9.5V6z"/></g></symbol>
+  </defs>
+  <rect x="14" y="14" width="250" height="400" rx="12" class="d-casa"/>
+  <text x="26" y="36" class="t t-xs t-b k-casa">LA CASA</text>
+  <rect x="278" y="14" width="250" height="400" rx="12" class="d-oper"/>
+  <text x="290" y="36" class="t t-xs t-b k-oper">RED DEL OPERADOR</text>
+  <rect x="542" y="14" width="404" height="400" rx="12" class="d-sis"/>
+  <text x="554" y="36" class="t t-xs t-b k-sis">CONTROLADORES</text>
+
+  
+  <rect x="34" y="150" width="210" height="120" rx="10" class="caja"/>
+  <use href="#f16a-ont" x="46" y="162" width="34" height="34" class="ico"/>
+  <text x="88" y="178" class="t t-b">Equipo de la casa</text>
+  <text x="88" y="194" class="t t-s t-m">ONT con Wi-Fi</text>
+  <rect x="46" y="206" width="186" height="52" rx="8" class="c-enl"/>
+  <text x="56" y="226" class="t t-s t-b">Agente USP</text>
+  <text x="56" y="244" class="t t-xs t-mono">os::012345-FEJ0001203</text>
+  <text x="139" y="294" text-anchor="middle" class="t t-s t-m">expone su árbol TR-181</text>
+
+  
+  <rect x="308" y="150" width="190" height="120" rx="10" class="caja"/>
+  <text x="403" y="178" text-anchor="middle" class="t t-b">Intermediario MQTT</text>
+  <text x="403" y="196" text-anchor="middle" class="t t-s t-m">(broker), reparte por temas</text>
+  <text x="403" y="224" text-anchor="middle" class="t t-xs t-mono">/usp/agent/…</text>
+  <text x="403" y="242" text-anchor="middle" class="t t-xs t-mono">/usp/controller/…</text>
+
+  <line x1="244" y1="210" x2="306" y2="210" class="ln s-enl" style="stroke-width:4" marker-end="url(#f16a-fl)"/>
+  <text x="275" y="140" text-anchor="middle" class="t t-xs t-m">abierta</text>
+  <text x="275" y="152" text-anchor="middle" class="t t-xs t-m">siempre</text>
+
+  
+  <g>
+    <rect x="590" y="64" width="330" height="80" rx="10" class="c-apl"/>
+    <use href="#f16a-srv" x="602" y="76" width="34" height="34" class="ico"/>
+    <text x="646" y="90" class="t t-b">ACS del operador</text>
+    <text x="646" y="108" class="t t-s">configuración, firmware, diagnósticos</text>
+    <text x="646" y="130" class="t t-xs t-b t-mono">rol: Operador · rwxn en todo</text>
+
+    <rect x="590" y="170" width="330" height="80" rx="10" class="caja"/>
+    <use href="#f16a-cel" x="602" y="182" width="34" height="34" class="ico"/>
+    <text x="646" y="196" class="t t-b">Aplicación del cliente</text>
+    <text x="646" y="214" class="t t-s t-m">Wi-Fi, aparatos, control parental</text>
+    <text x="646" y="236" class="t t-xs t-b t-mono">rol: Cliente · rw-n en Device.WiFi.</text>
+
+    <rect x="590" y="276" width="330" height="80" rx="10" class="caja"/>
+    <use href="#f16a-esc" x="602" y="288" width="34" height="34" class="ico"/>
+    <text x="646" y="302" class="t t-b">Servicio de un socio</text>
+    <text x="646" y="320" class="t t-s t-m">avisa si aparece un aparato extraño</text>
+    <text x="646" y="342" class="t t-xs t-b t-mono">rol: Socio · r--n en Device.Hosts.</text>
+  </g>
+  <line x1="588" y1="104" x2="500" y2="180" class="ln s-enl" style="stroke-width:3" marker-end="url(#f16a-fl)"/>
+  <line x1="588" y1="210" x2="500" y2="210" class="ln s-enl" style="stroke-width:3" marker-end="url(#f16a-fl)"/>
+  <line x1="588" y1="316" x2="500" y2="240" class="ln s-enl" style="stroke-width:3" marker-end="url(#f16a-fl)"/>
+  <text x="480" y="436" text-anchor="middle" class="t t-s t-m">Verde: conexiones MQTT que quedan abiertas, cifradas con TLS. Cada flecha apunta hacia quien recibe la conexión: el intermediario.</text>
+</svg></div><figcaption><b>Los actores de USP.</b> A la izquierda, en la casa, el equipo con su agente USP y su árbol TR-181. En el centro, en la red del operador, un intermediario de mensajes (<i>broker</i> MQTT) al que todos se conectan y que reparte los mensajes por temas. A la derecha, tres controladores: el del operador, con todos los permisos; la aplicación del cliente, que maneja el Wi-Fi y el control parental; y un servicio de terceros, que solo lee qué aparatos hay. Las flechas verdes son conexiones que quedan abiertas, y todas apuntan al intermediario: cada participante abre la suya hacia él, también el equipo desde la casa, y por eso el NAT no estorba. Dentro de cada controlador, su rol y sus permisos.</figcaption></figure></section>
+<section><h2>Los transportes: por qué la conexión queda abierta</h2><div class="prose"><p>USP no viaja solo: se apoya en un <b>protocolo de transporte de mensajes</b> (<i>Message Transfer Protocol</i>, MTP), un protocolo existente que lleva los registros de un lado al otro. La norma define varios:</p><ul><li><b>MQTT</b> (<i>Message Queuing Telemetry Transport</i>, transporte de telemetría por colas de mensajes), muy usado en Internet de las cosas. Todos los participantes se conectan a un <b>intermediario</b> (<i>broker</i>), como Mosquitto, y se <b>suscriben</b> a <b>temas</b> (<i>topics</i>), direcciones con forma de ruta como <code>/usp/agent</code>. Quien quiere hablarle a alguien <b>publica</b> en su tema, y el intermediario se lo entrega.</li><li><b>WebSocket</b>, una conexión web que, una vez abierta, permite mandar mensajes en las dos direcciones. El agente se conecta directo al controlador, sin intermediario.</li><li><b>STOMP</b> (<i>Simple Text Oriented Messaging Protocol</i>, protocolo simple de mensajería orientado a texto), otro protocolo de intermediarios de mensajes, más antiguo.</li></ul><p>La norma tuvo también un transporte sobre CoAP, que luego declaró obsoleto, y tiene uno para que los programas dentro de un mismo equipo se hablen entre sí.</p><p>En los tres principales, <b>el agente abre la conexión hacia afuera y la deja abierta</b>. Es la misma salida que usaba TR-069: desde la casa hacia afuera, la puerta siempre está abierta. La diferencia es que ahora no se cierra. Para que el NAT y los cortafuegos no la olviden, cada cierto tiempo pasa por ella un mensajito de mantenimiento (<i>keep-alive</i>), por ejemplo cada sesenta segundos. Y como la conexión está abierta, el controlador puede mandar un mensaje en cualquier momento: <b>el timbre ya no hace falta.</b></p></div><figure class="fig fig-flujo" id="16-diagrama-2"><div class="lienzo"><svg viewBox="0 0 960 560" style="min-width:760px" role="img" aria-label="Flujo de USP sobre MQTT: al arrancar, el agente se conecta al intermediario con TLS y se suscribe a su tema; el controlador publica un Set en el tema del agente, el intermediario se lo entrega, el agente responde con SetResp en el tema del controlador; más tarde el agente avisa por su cuenta con un Notify">
+  <defs>
+    <marker id="f16b-fl-enl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--c-enl)"/></marker>
+    <marker id="f16b-fl-tra" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--c-tra)"/></marker>
+  </defs>
+  <g class="t" text-anchor="middle">
+    <rect x="40" y="14" width="160" height="56" rx="10" class="c-enl"/><text x="120" y="38" class="t-b">Agente</text><text x="120" y="56" class="t-s">en el equipo de la casa</text>
+    <rect x="300" y="14" width="160" height="56" rx="10" class="caja"/><text x="380" y="38" class="t-b">Intermediario MQTT</text><text x="380" y="56" class="t-s t-m">broker</text>
+    <rect x="560" y="14" width="160" height="56" rx="10" class="c-apl"/><text x="640" y="38" class="t-b">Controlador</text><text x="640" y="56" class="t-s">ACS del operador</text>
+  </g>
+  <line x1="120" y1="70" x2="120" y2="520" class="vida"/>
+  <line x1="380" y1="70" x2="380" y2="520" class="vida"/>
+  <line x1="640" y1="70" x2="640" y2="520" class="vida"/>
+
+  
+  <line x1="120" y1="108" x2="376" y2="110" class="ln s-tra" style="stroke-width:2.2" marker-end="url(#f16b-fl-tra)"/>
+  <text x="130" y="100" class="t t-s">① conexión TCP + TLS y <tspan class="t-mono">CONNECT</tspan></text>
+  <line x1="120" y1="150" x2="376" y2="152" class="ln s-tra" style="stroke-width:2.2" marker-end="url(#f16b-fl-tra)"/>
+  <text x="130" y="142" class="t t-s">② <tspan class="t-mono">SUBSCRIBE /usp/agent</tspan></text>
+  <line x1="640" y1="186" x2="384" y2="188" class="ln s-tra ln-d" style="stroke-width:2" marker-end="url(#f16b-fl-tra)"/>
+  <text x="400" y="180" class="t t-s">③ el controlador ya está conectado</text>
+  <path d="M120 206v40" class="ln s-tra" style="stroke-width:8;opacity:.25"/>
+  <text x="132" y="232" class="t t-xs t-m">la conexión queda abierta (keep-alive cada 60 s)</text>
+
+  
+  <line x1="640" y1="282" x2="384" y2="284" class="ln s-enl" style="stroke-width:2.6" marker-end="url(#f16b-fl-enl)"/>
+  <text x="400" y="274" class="t t-s">④ <tspan class="t-mono t-b">Set</tspan> SSID en <tspan class="t-mono">/usp/agent</tspan></text>
+  <line x1="380" y1="314" x2="124" y2="316" class="ln s-enl" style="stroke-width:2.6" marker-end="url(#f16b-fl-enl)"/>
+  <text x="140" y="306" class="t t-s">⑤ se lo entrega al agente</text>
+  <text x="130" y="340" class="t t-xs t-m">⑥ lo aplica</text>
+  <line x1="120" y1="362" x2="376" y2="364" class="ln s-enl" style="stroke-width:2.6" marker-end="url(#f16b-fl-enl)"/>
+  <text x="130" y="354" class="t t-s">⑦ <tspan class="t-mono t-b">SetResp</tspan> en <tspan class="t-mono">/usp/controller</tspan></text>
+  <line x1="380" y1="376" x2="636" y2="378" class="ln s-enl" style="stroke-width:2.2" marker-end="url(#f16b-fl-enl)"/>
+
+  
+  <text x="130" y="426" class="t t-xs t-m">minutos después, se conecta un aparato nuevo</text>
+  <line x1="120" y1="456" x2="376" y2="458" class="ln s-enl ln-d" style="stroke-width:2.4" marker-end="url(#f16b-fl-enl)"/>
+  <text x="130" y="448" class="t t-s">⑧ <tspan class="t-mono t-b">Notify</tspan> ObjectCreation</text>
+  <line x1="380" y1="482" x2="636" y2="484" class="ln s-enl ln-d" style="stroke-width:2.4" marker-end="url(#f16b-fl-enl)"/>
+  <text x="400" y="474" class="t t-s">⑨ llega al controlador al instante</text>
+
+  <g class="t t-xs t-b">
+    <path d="M780 92v160" class="ln s-tra" style="stroke-width:3"/><text x="792" y="150" class="k-tra">CONEXIÓN</text><text x="792" y="164" class="t-m">una sola vez,</text><text x="792" y="176" class="t-m">al arrancar</text>
+    <path d="M780 266v120" class="ln s-enl" style="stroke-width:3"/><text x="792" y="320" class="k-enl">CAMBIO</text><text x="792" y="334" class="t-m">1 ida y vuelta,</text><text x="792" y="346" class="t-m">sin timbre</text>
+    <path d="M780 436v56" class="ln s-enl" style="stroke-width:3"/><text x="792" y="460" class="k-enl">AVISO</text><text x="792" y="474" class="t-m">el agente habla</text><text x="792" y="486" class="t-m">cuando quiere</text>
+  </g>
+  <text x="480" y="546" text-anchor="middle" class="t t-s t-m">Violeta: abrir y mantener la conexión. Verde: mensajes USP en protobuf, publicados en temas de MQTT.</text>
+</svg></div><figcaption><b>Cambiar el nombre del Wi-Fi con USP sobre MQTT.</b> Tres participantes: el agente en el equipo, el intermediario MQTT y el controlador del operador; el tiempo corre hacia abajo. En la conexión (① a ③), que ocurre una sola vez al arrancar, el agente se conecta al intermediario, cifrado con TLS, y se suscribe a su tema; el controlador ya está conectado. En el cambio (④ a ⑦) el controlador publica un <code>Set</code> en el tema del agente, el intermediario se lo entrega, el agente lo aplica y publica un <code>SetResp</code> en el tema del controlador. En el aviso (⑧ y ⑨), minutos después, el agente avisa por su cuenta con un <code>Notify</code> que un parámetro vigilado cambió. A la derecha, el costo de cada fase: la conexión se paga una vez; cada cambio cuesta una ida y vuelta.</figcaption></figure></section>
+<section><h2>Los mensajes: Get, Set, Add, Delete, Operate y Notify</h2><div class="prose"><p>Las órdenes de USP se parecen a las del capítulo 4, con nombres más cortos y algunas mejoras:</p><div class="tbl"><table><thead><tr><th>USP</th><th>Qué hace</th><th>Su pariente en TR-069</th></tr></thead><tbody><tr><td><code>Get</code></td><td>Lee uno o varios parámetros, o una rama entera</td><td><code>GetParameterValues</code></td></tr><tr><td><code>Set</code></td><td>Escribe parámetros; puede aceptar algunos cambios y rechazar otros, o todo o nada</td><td><code>SetParameterValues</code></td></tr><tr><td><code>Add</code> y <code>Delete</code></td><td>Crean y borran instancias, como una red de invitados</td><td><code>AddObject</code> y <code>DeleteObject</code></td></tr><tr><td><code>Operate</code></td><td>Ejecuta un <b>comando</b> del árbol: reiniciar, descargar firmware, correr un ping</td><td><code>Reboot</code>, <code>Download</code>, diagnósticos</td></tr><tr><td><code>Notify</code></td><td>El agente avisa algo por su cuenta: un valor que cambió, un evento, un comando que terminó</td><td>El <code>Inform</code> con <code>4 VALUE CHANGE</code>, <code>7 TRANSFER COMPLETE</code> o <code>8 DIAGNOSTICS COMPLETE</code></td></tr><tr><td><code>GetSupportedDM</code> y <code>GetInstances</code></td><td>Preguntan qué parte del árbol soporta el agente y qué instancias existen</td><td><code>GetParameterNames</code></td></tr></tbody></table></div><p>Cada pedido tiene su respuesta (<code>GetResp</code>, <code>SetResp</code>…) o un mensaje de error con un código, como el <code>7006</code> de «permiso denegado» que verás en el laboratorio de permisos.</p><p>Dos novedades cambian el trabajo diario. La primera son los <b>comandos</b> y <b>eventos</b> dentro del propio árbol. Un comando es un nombre que termina en paréntesis, como <code>Device.Reboot()</code>, <code>Device.IP.Diagnostics.IPPing()</code> o <code>Device.DeviceInfo.FirmwareImage.2.Download()</code>, y se ejecuta con <code>Operate</code>; un evento termina en signo de exclamación, como <code>Device.Boot!</code>. Las pruebas del capítulo 9 y el firmware del capítulo 13 ya no son trucos de escribir parámetros y esperar un Inform: son comandos cuyo resultado llega en un <code>Notify</code>.</p><p>La segunda son las <b>rutas de búsqueda</b> (<i>search paths</i>). En TR-069, para saber el nombre de todas las redes Wi-Fi encendidas, había que leerlas todas y filtrar en el ACS. En USP se pide directamente:</p><div class="code-copia"><pre><code>Device.WiFi.SSID.[Enable==true].SSID
+Device.Hosts.Host.*.HostName
+Device.Hosts.Host.[Active==true].IPAddress</code></pre><button type="button" class="copiar copiar-todo">Copiar</button></div><p>El asterisco quiere decir «todas las instancias» y lo que va entre corchetes, «solo las que cumplan esta condición». Menos idas y vueltas, menos datos de más.</p><p>Y los avisos se piden con <b>suscripciones</b> (<i>subscriptions</i>): el controlador crea una instancia en <code>Device.LocalAgent.Subscription</code> que dice qué vigilar, como «cuando aparezca un aparato nuevo en <code>Device.Hosts.Host</code>», y el agente avisa con un <code>Notify</code> apenas pasa, sin esperar a ninguna sesión. Es lo que permite que la aplicación del cliente muestre «se conectó un dispositivo nuevo» en el momento.</p><p>Compara tú las dos conversaciones con el mismo cambio.</p></div><div class="lab" id="16-lab-1"><div class="lab-title"><span class="tag">Laboratorio</span><h3>TR-069 frente a USP</h3></div><p class="hint">Haz el mismo cambio, el nombre del Wi-Fi, con los dos protocolos. Mueve el tiempo de ida y vuelta por la red y cuántos parámetros cambias, y elige si el timbre de TR-069 entra o no. Aprieta «Hacer el cambio» y compara los mensajes de cada protocolo, sus bytes y el tiempo hasta que el cambio queda confirmado.</p><style>
+[id="16-lab-1"] svg{min-width:340px;max-width:640px;width:100%;height:auto;display:block;background:var(--card);border-radius:8px;font-family:var(--f-display)}
+[id="16-lab-1"] svg .g16a-tit{fill:var(--ink);font-size:13px;font-weight:700}
+[id="16-lab-1"] svg .g16a-tx{fill:var(--ink);font-size:12px}
+[id="16-lab-1"] svg .g16a-m{fill:var(--muted);font-size:12px}
+[id="16-lab-1"] svg .g16a-b{font:600 12px var(--f-mono);fill:var(--muted)}
+[id="16-lab-1"] svg .g16a-bar069{fill:var(--c-apl);opacity:.75}
+[id="16-lab-1"] svg .g16a-barusp{fill:var(--c-enl);opacity:.75}
+[id="16-lab-1"] svg .g16a-hs{fill:var(--c-tra);opacity:.55}
+[id="16-lab-1"] svg .g16a-oc{opacity:.15}
+[id="16-lab-1"] svg .g16a-sep{stroke:var(--line);stroke-width:1}
+</style>
+<div class="ctls">
+  <label class="ctl">Ida y vuelta por la red <output id="g16a-rv">80 ms</output><input type="range" id="g16a-r" min="20" max="400" step="10" value="80" aria-label="Tiempo de ida y vuelta entre el equipo y el servidor"></label>
+  <label class="ctl">Parámetros que cambias <output id="g16a-pv">2</output><input type="range" id="g16a-p" min="1" max="20" step="1" value="2" aria-label="Cantidad de parámetros que se cambian"></label>
+</div>
+<div class="opciones">
+  <label>El timbre de TR-069…
+    <select id="g16a-t">
+      <option value="ok">entra al primer intento</option>
+      <option value="ses">llega cuando el equipo está en otra sesión</option>
+      <option value="no">no entra (NAT): espera el Inform periódico de 1 h</option>
+    </select></label>
+</div>
+<div class="btns"><button type="button" id="g16a-ir" class="primary">Hacer el cambio</button></div>
+<div class="lab-desliza" style="overflow-x:auto"><svg id="g16a-svg" viewBox="0 0 400 400" role="img" aria-label="Mensajes de TR-069 y de USP para el mismo cambio, con sus bytes y el tiempo total"></svg></div>
+<div class="readout texto" id="g16a-out" aria-live="polite"></div>
+<p class="hint">Tamaños aproximados de mensajes típicos, con cifrado TLS en los dos casos. En USP, la conexión del agente con el intermediario se abrió al arrancar y no se cuenta aquí.</p></div></section>
+<section><h2>Varios controladores, cada uno con sus permisos</h2><div class="prose"><p>El cambio más importante de USP no es técnico sino de negocio: <b>el equipo puede tener varios dueños a la vez</b>, cada uno con lo suyo. El operador sigue siendo el que manda, pero puede darle a su propia aplicación móvil, o a un socio, un pedazo del equipo y nada más.</p><p>Los permisos viven en el propio árbol, en <code>Device.LocalAgent.ControllerTrust</code>. Cada controlador tiene un <b>rol</b> (<i>role</i>), y cada rol, una lista de <b>permisos</b> (<i>permissions</i>). Un permiso dice a qué parte del árbol se aplica (<code>Targets</code>, por ejemplo <code>Device.WiFi.</code>) y qué se puede hacer allí con cuatro letras, al estilo de los permisos de archivos: <code>r</code> leer, <code>w</code> escribir, <code>x</code> ejecutar comandos y <code>n</code> recibir avisos; un guion donde no se puede. <code>rw-n</code> quiere decir «leer, escribir y recibir avisos, pero no ejecutar».</p><p>En Fibra Ejemplo, los roles quedan así:</p><div class="tbl"><table><thead><tr><th>Controlador</th><th>Lo que puede</th><th>Lo que no</th></tr></thead><tbody><tr><td>ACS del operador</td><td>Todo el árbol</td><td>—</td></tr><tr><td>Aplicación del cliente</td><td>Leer y cambiar el Wi-Fi, ver los aparatos conectados, pausar uno, reiniciar el equipo</td><td>Tocar el firmware, la conexión a Internet o los permisos de los demás</td></tr><tr><td>Servicio de seguridad de un socio</td><td>Ver los aparatos conectados y recibir un aviso cuando aparece uno nuevo</td><td>Cambiar cualquier cosa</td></tr></tbody></table></div><p>Si la aplicación pide algo fuera de su rol, el agente lo rechaza él mismo, sin consultar al operador. La seguridad del capítulo 14 se mantiene: cada controlador se identifica con su certificado, y nadie se otorga permisos solo.</p></div><div class="lab" id="16-lab-2"><div class="lab-title"><span class="tag">Laboratorio</span><h3>Permisos por controlador</h3></div><p class="hint">Tres controladores y seis partes del árbol. Marca para cada uno qué puede leer, escribir, ejecutar o vigilar, y mira cómo se arma su cadena de cuatro letras. Después elige un controlador y una acción, aprieta «Pedir» y mira si el agente la cumple o contesta con el error 7006.</p><style>
+[id="16-lab-2"] .g16b-filas{display:grid;gap:6px}
+[id="16-lab-2"] .g16b-fila{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--paper)}
+[id="16-lab-2"] .g16b-fila code{font:500 .78rem var(--f-mono);word-break:break-all}
+[id="16-lab-2"] .g16b-fila small{display:block;color:var(--muted);font-size:.76rem}
+[id="16-lab-2"] .g16b-letras{display:flex;gap:4px}
+[id="16-lab-2"] .g16b-letras button{font-family:var(--f-mono);min-width:34px;padding:6px 0}
+[id="16-lab-2"] .g16b-cad{font:700 .9rem var(--f-mono);color:var(--accent);min-width:3.6em;text-align:right}
+[id="16-lab-2"] .g16b-fila>div:first-child{flex:1 1 220px;min-width:0}
+[id="16-lab-2"] .g16b-cad{margin-left:auto}
+</style>
+<div class="btns" role="group" aria-label="Controlador">
+  <button type="button" data-c="op" aria-pressed="true">ACS del operador</button>
+  <button type="button" data-c="app" aria-pressed="false">Aplicación del cliente</button>
+  <button type="button" data-c="soc" aria-pressed="false">Servicio de seguridad (socio)</button>
+</div>
+<p class="hint" id="g16b-rol"></p>
+<div class="g16b-filas" id="g16b-filas"></div>
+<div class="opciones">
+  <label>Acción que pide este controlador
+    <select id="g16b-acc">
+      <option value="0">Ver los aparatos conectados (Get)</option>
+      <option value="1">Cambiar la clave del Wi-Fi (Set)</option>
+      <option value="2">Pausar la tableta del hijo (Set)</option>
+      <option value="3">Reiniciar el equipo (Operate)</option>
+      <option value="4">Instalar un firmware (Operate)</option>
+      <option value="5">Avisar si aparece un aparato nuevo (suscripción)</option>
+      <option value="6">Darse más permisos (Set en ControllerTrust)</option>
+    </select></label>
+</div>
+<div class="btns"><button type="button" id="g16b-pedir" class="primary">Pedir</button><button type="button" id="g16b-reset">Volver a los roles de Fibra Ejemplo</button></div>
+<div class="readout texto" id="g16b-out" aria-live="polite"></div></div><div class="ml"><b>En la práctica</b><p>Para el negocio, los varios controladores abren productos que con TR-069 eran difíciles: el Wi-Fi que el cliente maneja desde su celular, el control parental, servicios de seguridad o de hogar inteligente de terceros sobre el mismo equipo. También abren preguntas nuevas, que conviene responder antes de firmar con un socio: qué parte del árbol ve, qué datos de la casa recibe y cómo se le corta el acceso si el contrato termina. La respuesta técnica es un rol; la respuesta de negocio, un contrato que diga lo mismo.</p></div></section>
+<section><h2>El mismo árbol TR-181</h2><div class="prose"><p>La buena noticia para quien recorrió todo el curso: <b>lo aprendido sigue sirviendo.</b> USP usa el mismo modelo de datos TR-181 de la parte 3. <code>Device.WiFi.SSID.1.SSID</code> se llama igual, los perfiles por marca del capítulo 6 siguen siendo necesarios, y las extensiones del fabricante (<code>X_…</code>) siguen existiendo.</p><p>Lo que cambia es poco y está a la vista:</p><ul><li><b>Aparecen objetos nuevos</b> para el propio protocolo, sobre todo <code>Device.LocalAgent</code>, con los controladores, los transportes, las suscripciones y los permisos. Ocupan el lugar que en TR-069 tenía <code>Device.ManagementServer</code>.</li><li><b>Los comandos y eventos</b> pasan a ser parte del árbol, como viste arriba.</li><li><b>El árbol <code>InternetGatewayDevice</code> de TR-098 no existe en USP.</b> Los equipos que todavía lo usan, como el lote antiguo de la marca C de Fibra Ejemplo, tienen que pasar primero a <code>Device</code> con un firmware nuevo, o quedarse en TR-069 hasta que se reemplacen.</li></ul></div></section>
+<section><h2>Convivir y migrar</h2><div class="prose"><p>Hay cientos de millones de equipos con TR-069 en el mundo, y ningún operador los va a cambiar de un día para otro. Por años, los dos protocolos conviven, y la migración se hace por etapas:</p></div><figure class="fig fig-esquema" id="16-diagrama-3"><div class="lienzo"><svg viewBox="0 0 960 420" style="min-width:760px" role="img" aria-label="Migración a USP en cuatro etapas: hoy toda la flota habla TR-069; en el piloto llegan equipos con los dos protocolos; en la convivencia USP se usa para las funciones nuevas; después USP es la regla y los equipos viejos se retiran">
+  <defs><marker id="f16c-fl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--muted)"/></marker></defs>
+  <rect x="20" y="14" width="200" height="366" rx="12" class="caja"/>
+  <text x="34" y="38" class="t t-xs t-b t-m">1 · HOY</text>
+  <text x="34" y="58" class="t t-b">Solo TR-069</text>
+  <rect x="80" y="80.0" width="80" height="180.0" class="c-apl"/>
+  <text x="120" y="174.0" text-anchor="middle" class="t t-s t-b">100 %</text>
+  <text x="34" y="290" class="t t-s">Toda la flota con el ACS</text>
+  <text x="34" y="306" class="t t-s">de siempre</text>
+  <line x1="34" y1="330" x2="206" y2="330" class="ln ln-d" style="stroke-width:.8"/>
+  <text x="34" y="352" class="t t-s t-m">Para pasar: comprar equipos</text>
+  <text x="34" y="368" class="t t-s t-m">con TR-069 y USP</text>
+  <line x1="224" y1="170" x2="250" y2="170" class="ln" style="stroke-width:2" marker-end="url(#f16c-fl)"/>
+  <rect x="256" y="14" width="200" height="366" rx="12" class="caja"/>
+  <text x="270" y="38" class="t t-xs t-b t-m">2 · PILOTO</text>
+  <text x="270" y="58" class="t t-b">Llegan equipos con los dos</text>
+  <rect x="316" y="80.0" width="80" height="153.0" class="c-apl"/>
+  <text x="356" y="160.5" text-anchor="middle" class="t t-s t-b">85 %</text>
+  <rect x="316" y="233.0" width="80" height="27.0" class="c-tra"/>
+  <text x="356" y="250.5" text-anchor="middle" class="t t-s t-b">15 %</text>
+  <text x="270" y="290" class="t t-s">Los nuevos, por TR-069;</text>
+  <text x="270" y="306" class="t t-s">USP en un lote piloto</text>
+  <line x1="270" y1="330" x2="442" y2="330" class="ln ln-d" style="stroke-width:.8"/>
+  <text x="270" y="352" class="t t-s t-m">Para pasar: controlador que</text>
+  <text x="270" y="368" class="t t-s t-m">hable los dos protocolos</text>
+  <line x1="460" y1="170" x2="486" y2="170" class="ln" style="stroke-width:2" marker-end="url(#f16c-fl)"/>
+  <rect x="492" y="14" width="200" height="366" rx="12" class="caja"/>
+  <text x="506" y="38" class="t t-xs t-b t-m">3 · CONVIVENCIA</text>
+  <text x="506" y="58" class="t t-b">USP para lo nuevo</text>
+  <rect x="552" y="80.0" width="80" height="81.0" class="c-apl"/>
+  <text x="592" y="124.5" text-anchor="middle" class="t t-s t-b">45 %</text>
+  <rect x="552" y="161.0" width="80" height="99.0" class="c-tra"/>
+  <text x="592" y="214.5" text-anchor="middle" class="t t-s t-b">55 %</text>
+  <text x="506" y="290" class="t t-s">Aplicación y avisos por USP;</text>
+  <text x="506" y="306" class="t t-s">lo de siempre, por TR-069</text>
+  <line x1="506" y1="330" x2="678" y2="330" class="ln ln-d" style="stroke-width:.8"/>
+  <text x="506" y="352" class="t t-s t-m">Para pasar: un dueño claro</text>
+  <text x="506" y="368" class="t t-s t-m">de cada parámetro</text>
+  <line x1="696" y1="170" x2="722" y2="170" class="ln" style="stroke-width:2" marker-end="url(#f16c-fl)"/>
+  <rect x="728" y="14" width="200" height="366" rx="12" class="caja"/>
+  <text x="742" y="38" class="t t-xs t-b t-m">4 · DESPUÉS</text>
+  <text x="742" y="58" class="t t-b">USP como regla</text>
+  <rect x="788" y="80.0" width="80" height="18.0" class="c-apl"/>
+  <text x="876" y="93.0" class="t t-s t-b">10 %</text>
+  <rect x="788" y="98.0" width="80" height="162.0" class="c-enl"/>
+  <text x="828" y="183.0" text-anchor="middle" class="t t-s t-b">90 %</text>
+  <text x="742" y="290" class="t t-s">Los equipos viejos se retiran</text>
+  <text x="742" y="306" class="t t-s">al ritmo de su vida útil</text>
+  <line x1="742" y1="330" x2="914" y2="330" class="ln ln-d" style="stroke-width:.8"/>
+  <text x="742" y="352" class="t t-s t-m">Sin fecha de corte:</text>
+  <text x="742" y="368" class="t t-s t-m">avanza función por función</text>
+  <g class="t t-s"><rect x="250" y="392" width="12" height="12" class="c-apl"/><text x="268" y="403">solo TR-069</text><rect x="370" y="392" width="12" height="12" class="c-tra"/><text x="388" y="403">TR-069 y USP en el mismo equipo</text><rect x="600" y="392" width="12" height="12" class="c-enl"/><text x="618" y="403">USP como protocolo principal</text></g>
+</svg></div><figcaption><b>La migración de Fibra Ejemplo a USP, en cuatro etapas.</b> De izquierda a derecha. En la primera, toda la flota habla TR-069 con el ACS. En la segunda, los equipos nuevos llegan con los dos protocolos, y el ACS, que ya habla los dos, los gestiona por TR-069 mientras se prueba USP con un lote piloto. En la tercera, los equipos con los dos protocolos pasan a USP para las funciones nuevas (la aplicación del cliente, los avisos en tiempo real) y siguen usando TR-069 para lo de siempre. En la cuarta, los equipos solo TR-069 que quedan son los más viejos y se van retirando al ritmo de su vida útil. Debajo de cada etapa, qué porcentaje de la flota habla cada protocolo y qué hace falta para pasar a la siguiente.</figcaption></figure><div class="prose"><p>Lo que Fibra Ejemplo decide en cada etapa:</p><ul><li><b>Un controlador que hable los dos.</b> Muchas plataformas, comerciales y abiertas, gestionan TR-069 y USP desde una misma pantalla, con la misma ficha de equipo. Así, para el agente de atención, el protocolo es invisible.</li><li><b>Equipos con los dos protocolos.</b> En la compra, el pliego del capítulo 6 ya no dice «TR-069 con TR-181», sino «TR-069 y USP, con TR-181».</li><li><b>Cómo encuentra el agente a su controlador.</b> Como en la instalación sin tocar del capítulo 7: de fábrica, por DHCP o, en un equipo que ya habla TR-069, porque el ACS le escribe por TR-069 los datos de su controlador USP en <code>Device.LocalAgent</code>. El ACS viejo presenta al nuevo.</li><li><b>Un dueño de cada cosa.</b> Si un equipo habla los dos protocolos, hay que decidir quién manda en qué, para que el ACS y el controlador USP no se pisen escribiendo el mismo parámetro.</li><li><b>El intermediario de mensajes es una pieza más.</b> Mantener cien mil conexiones abiertas cuesta memoria, y el peor día del capítulo 15 tiene su versión USP: cuando vuelve la luz, cien mil agentes se reconectan al intermediario a la vez. Las mismas defensas sirven: reintentos crecientes al azar y capacidad para el pico.</li></ul></div><div class="caso"><b>Un caso real</b><p>Un operador FTTH de la región empezó su paso a USP por donde más valor veía: la aplicación del cliente. Compró sus equipos nuevos con los dos protocolos, dejó el ACS de siempre a cargo de la configuración y del firmware, y usó USP solo para la aplicación, con un rol que permitía manejar el Wi-Fi y pausar aparatos. Las llamadas por «cambiar la clave del Wi-Fi» bajaron porque los clientes lo hacían solos, al instante. Dos años después, con la mayoría de la flota renovada, empezó a mover también los diagnósticos a USP. La lección: la migración no necesita una fecha de corte; avanza función por función, empezando por la que el cliente nota.</p></div><div class="prose"><p>Antes de cerrar, haz correr un agente USP de verdad.</p></div><div class="practica"><div class="practica-title"><span class="tag">En la terminal</span><h3>Un agente USP, un intermediario MQTT y un controlador de prueba en tu computadora</h3></div><p>Vas a correr <b>OB-USP-Agent</b>, el agente USP de código abierto que publica el Broadband Forum, conectado a un intermediario <b>Mosquitto</b>, y le vas a pedir un valor con un controlador de prueba de unas cuarenta líneas escrito en <b>Python</b>. Todo corre en tu computadora, dentro de <b>Docker</b>. En Windows, usa WSL con Ubuntu, como en el capítulo 3. La construcción del agente tarda entre cinco y quince minutos la primera vez.</p><div class="cmds"><div class="cmd-panel" data-so="win mac linux"><div class="cmd-l"><code>mkdir usp-lab</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>cd usp-lab</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>docker network create usp</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>docker run -d --name broker --network usp -p 1883:1883 eclipse-mosquitto:2 mosquitto -c /mosquitto-no-auth.conf</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>curl -sO https://raw.githubusercontent.com/BroadbandForum/obuspa/master/Dockerfile</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>docker build -t obuspa:local .</code><button type="button" class="copiar">Copiar</button></div></div></div><ol class="steps"><li><span>Con esos comandos creas la carpeta, una red para los contenedores, el intermediario Mosquitto y la imagen del agente.</span></li><li><span>En la carpeta <code>usp-lab</code>, crea un archivo <code>agente.txt</code> (por ejemplo con <code>nano agente.txt</code>) con esta configuración de fábrica. Dice cómo se llama el agente, a qué intermediario se conecta y quién es su controlador:</span></li></ol><div class="code-copia"><pre><code>Device.LocalAgent.EndpointID "os::012345-FEJ0001203"
+Device.LocalAgent.MTP.1.Alias "cpe-1"
+Device.LocalAgent.MTP.1.Enable true
+Device.LocalAgent.MTP.1.Protocol "MQTT"
+Device.LocalAgent.MTP.1.MQTT.ResponseTopicConfigured "/usp/agent"
+Device.LocalAgent.MTP.1.MQTT.Reference "Device.MQTT.Client.1"
+Device.MQTT.Client.1.Alias "cpe-1"
+Device.MQTT.Client.1.Enable true
+Device.MQTT.Client.1.BrokerAddress "broker"
+Device.MQTT.Client.1.BrokerPort "1883"
+Device.MQTT.Client.1.ProtocolVersion "5.0"
+Device.MQTT.Client.1.TransportProtocol "TCP/IP"
+Device.MQTT.Client.1.KeepAliveTime "60"
+Device.MQTT.Client.1.Username ""
+Device.MQTT.Client.1.Password ""
+Device.MQTT.Client.1.ClientID ""
+Device.LocalAgent.Controller.1.Alias "cpe-1"
+Device.LocalAgent.Controller.1.Enable true
+Device.LocalAgent.Controller.1.EndpointID "self::usp-controller"
+Device.LocalAgent.Controller.1.AssignedRole "Device.LocalAgent.ControllerTrust.Role.1"
+Device.LocalAgent.Controller.1.MTP.1.Alias "cpe-1"
+Device.LocalAgent.Controller.1.MTP.1.Enable true
+Device.LocalAgent.Controller.1.MTP.1.Protocol "MQTT"
+Device.LocalAgent.Controller.1.MTP.1.MQTT.Reference "Device.MQTT.Client.1"
+Device.LocalAgent.Controller.1.MTP.1.MQTT.Topic "/usp/controller"
+Internal.Reboot.Cause "LocalFactoryReset"</code></pre><button type="button" class="copiar copiar-todo">Copiar</button></div><ol class="steps" start="3" style="counter-reset:st 2"><li><span>Crea en la misma carpeta el controlador de prueba, <code>controlador.py</code>. Arma a mano un registro USP con un <code>Get</code>, lo publica en el tema del agente y muestra los textos de la respuesta:</span></li></ol><div class="code-copia"><pre><code>import re, sys, time
+import paho.mqtt.client as mqtt
+from paho.mqtt.packettypes import PacketTypes
+from paho.mqtt.properties import Properties
+
+AGENTE = "os::012345-FEJ0001203"
+CONTROLADOR = "self::usp-controller"
+RUTA = sys.argv[1] if len(sys.argv) &gt; 1 else "Device.DeviceInfo."
+
+def varint(v):
+    b = b""
+    while v &gt; 127:
+        b += bytes([v &amp; 127 | 128]); v &gt;&gt;= 7
+    return b + bytes([v])
+
+def campo(n, d):  # un campo de protobuf con largo: texto o mensaje
+    d = d.encode() if isinstance(d, str) else d
+    return varint(n &lt;&lt; 3 | 2) + varint(len(d)) + d
+
+encabezado = campo(1, "get-1") + b"\x10\x01"           # msg_id y tipo GET
+cuerpo = campo(1, campo(1, campo(1, RUTA)))            # request &gt; get &gt; param_paths
+msg = campo(1, encabezado) + campo(2, cuerpo)
+record = campo(1, "1.3") + campo(2, AGENTE) + campo(3, CONTROLADOR) + campo(7, campo(2, msg))
+
+def al_recibir(cliente, datos, m):
+    print(f"Respuesta del agente: {len(m.payload)} bytes. Textos que trae:")
+    for t in re.findall(rb"[ -~]{3,}", m.payload):
+        print("   ", t.decode())
+
+c = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, protocol=mqtt.MQTTv5)
+c.on_message = al_recibir
+c.connect("localhost", 1883)
+c.subscribe("/usp/controller")
+c.loop_start()
+time.sleep(1)
+p = Properties(PacketTypes.PUBLISH)
+p.ResponseTopic = "/usp/controller"
+c.publish("/usp/agent", record, properties=p)
+print(f"Get enviado al agente: {len(record)} bytes, pidiendo {RUTA}")
+time.sleep(5)
+c.loop_stop()</code></pre><button type="button" class="copiar copiar-todo">Copiar</button></div><ol class="steps" start="4" style="counter-reset:st 3"><li><span>Arranca el agente y deja su registro a la vista en una terminal. En otra, prepara Python con la biblioteca de MQTT y corre el controlador dos veces, la segunda con otra rama del árbol (en Ubuntu, si falta, instala antes <code>python3-venv</code> con <code>sudo apt install python3-venv</code>):</span></li></ol><div class="cmds"><div class="cmd-panel" data-so="win mac linux"><div class="cmd-l"><code>docker run -d --name agente --network usp -v "$PWD":/usr/local/etc obuspa:local -p -v4 -r /usr/local/etc/agente.txt -f /tmp/usp.db</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>docker logs -f agente</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>python3 -m venv venv</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>venv/bin/pip install paho-mqtt</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>venv/bin/python controlador.py</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>venv/bin/python controlador.py Device.LocalAgent.MTP.</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>docker logs broker</code><button type="button" class="copiar">Copiar</button></div></div></div><ol class="steps" start="5" style="counter-reset:st 4"><li><span>Al terminar, borra todo con <code>docker rm -f agente broker</code> y <code>docker network rm usp</code>.</span></li></ol><p><b>Qué observar:</b> el <code>Get</code> que manda el controlador ocupa menos de cien bytes, sin XML: las rutas y los nombres se leen, pero el resto son números de campo. En el registro del agente (la opción <code>-p</code> lo muestra decodificado) verás llegar el <code>Get</code> y salir el <code>GetResp</code>, con los parámetros de <code>Device.DeviceInfo.</code> y sus valores. En el registro de Mosquitto verás que el agente se conectó una sola vez, al arrancar, y <b>no se desconectó</b>: cada corrida del controlador entra, pregunta y sale, mientras la conexión del agente sigue abierta y lista. Esa es la diferencia con TR-069: no hubo timbre, ni Inform, ni sesión que abrir. El agente de ejemplo trae un árbol pequeño, sin Wi-Fi ni hosts, porque está pensado para que cada fabricante le agregue el suyo. Si el agente no responde, revisa en su registro que <code>EndpointID</code> y los temas coincidan con los del controlador.</p></div></section>
+<section><h2>El cierre del curso</h2><div class="prose"><p>Fibra Ejemplo recorrió en dieciséis capítulos el camino completo de la gestión remota. Entendió el mapa y quién configura qué; escuchó la conversación entre sus equipos y el ACS; ordenó el árbol de datos de tres marcas; instaló sin tocar, atendió llamadas con diagnósticos y cuidó el Wi-Fi; cambió cien mil equipos y su firmware sin romper ninguno; y aprendió a proteger el ACS, a dimensionarlo para el peor día y a prepararse para USP. La regla del capítulo 1 sigue en pie y ahora tiene herramientas detrás: todo lo que se puede resolver por la red se resuelve por la red; la visita queda para lo físico.</p><p>Para seguir, el curso de <a href="https://aaramirez.github.io/redes-de-computadoras/temario.html" target="_blank" rel="noopener">Redes de computadoras</a> profundiza en los protocolos que sostienen todo esto, y <a href="https://aaramirez.github.io/telco/" target="_blank" rel="noopener">Cómo funciona un telco</a> muestra el resto del operador alrededor del ACS.</p><p>La idea con la que termina el capítulo, y el curso: <b>USP mantiene el modelo de datos y cambia la conversación: conexión abierta, mensajes livianos y varios dueños con permisos.</b></p></div><div class="quiz"><h3>Pruébate</h3><details><summary>¿Qué tres límites de TR-069 resuelve USP?</summary><p>Las sesiones pesadas en XML con muchas idas y vueltas, la necesidad de despertar al equipo con un timbre para hablarle, y que el equipo tiene un solo dueño (una sola dirección de ACS).</p></details><details><summary>¿Por qué con USP sobre MQTT ya no hace falta el Connection Request?</summary><p>Porque el agente abre una conexión hacia el intermediario y la deja abierta, con mensajes de mantenimiento; el controlador puede publicar un mensaje en el tema del agente en cualquier momento y le llega por esa conexión.</p></details><details><summary>¿Qué diferencia hay entre un comando y un evento en el árbol de USP? Da un ejemplo de cada uno.</summary><p>Un comando es algo que el controlador manda ejecutar con <code>Operate</code>, y su nombre termina en paréntesis, como <code>Device.Reboot()</code>; un evento es algo que el agente avisa con <code>Notify</code>, y su nombre termina en signo de exclamación, como <code>Device.Boot!</code>.</p></details><details><summary>¿Qué quiere decir el permiso <code>r--n</code> sobre <code>Device.Hosts.</code>?</summary><p>Que ese controlador puede leer la lista de aparatos conectados y recibir avisos cuando cambia, pero no escribir ni ejecutar comandos en esa parte del árbol.</p></details><details><summary>¿Qué parte de lo aprendido sobre TR-181 sigue sirviendo con USP y qué cambia?</summary><p>Sirve todo el árbol <code>Device</code> y sus nombres, los perfiles por marca y las extensiones del fabricante. Cambia que aparece <code>Device.LocalAgent</code> para el propio protocolo, que comandos y eventos son parte del árbol, y que el árbol antiguo <code>InternetGatewayDevice</code> no existe en USP.</p></details><details><summary>¿Cómo puede un equipo que ya habla TR-069 enterarse de su controlador USP?</summary><p>El ACS le escribe por TR-069 los datos del controlador y del transporte en <code>Device.LocalAgent</code>, porque los dos protocolos comparten el árbol; también puede venir de fábrica o por DHCP.</p></details></div><div class="investiga"><h3>Para investigar</h3><p class="hint">Estas preguntas no se responden en el capítulo: búscalas por tu cuenta.</p><ol><li>¿Cómo funcionan los niveles de calidad de servicio (QoS 0, 1 y 2) de MQTT y cuál conviene para mensajes de gestión?<small>Pista: busca «MQTT QoS levels».</small></li><li>¿Qué es la seguridad de punta a punta de USP (<i>session context</i>) y por qué puede hacer falta aunque la conexión con el intermediario ya vaya cifrada con TLS?<small>Pista: busca «USP end-to-end message exchange session context».</small></li><li>¿Qué es prplMesh o RDK-B, y qué papel juegan los programas de código abierto en los equipos de la casa que hablan USP?<small>Pista: busca «prpl Foundation prplOS USP».</small></li><li>¿Qué es un esquema <code>.proto</code> y cómo sigue funcionando un programa viejo cuando la norma agrega campos nuevos a un mensaje?<small>Pista: busca «protobuf backward compatibility field numbers».</small></li><li>¿Qué es Matter y en qué se parece y en qué no a USP como forma de gestionar aparatos de la casa?<small>Pista: busca «Matter smart home standard CSA».</small></li></ol></div><div class="vids"><span>Para saber más</span><a class="vid" href="https://usp.technology/specification/index.htm" target="_blank" rel="noopener">Especificación de TR-369, User Services Platform (Broadband Forum, inglés) <small>norma</small></a><a class="vid" href="https://github.com/BroadbandForum/obuspa" target="_blank" rel="noopener">OB-USP-Agent, el agente USP de código abierto del Broadband Forum (inglés) <small>herramienta</small></a><a class="vid" href="https://usp-data-models.broadband-forum.org/tr-181-2-17-0-usp.html" target="_blank" rel="noopener">Modelo de datos TR-181 para USP, con Device.LocalAgent (Broadband Forum, inglés) <small>referencia</small></a><a class="vid" href="https://mqtt.org/" target="_blank" rel="noopener">MQTT: el protocolo y sus implementaciones (inglés) <small>lectura</small></a><a class="vid" href="https://aaramirez.github.io/telco/28-gestionar-el-equipo-en-casa-del-cliente.html" target="_blank" rel="noopener">Gestionar el equipo en casa del cliente, capítulo 28 de Cómo funciona un telco <small>lectura</small></a></div></section>
+<label class="got"><input type="checkbox" id="got"> Lo tengo claro</label>
+<nav class="pager" id="pager" aria-label="Capítulo anterior y siguiente"></nav>
+</main>
+</div>
+<footer><span>Curso abierto de aaramirez.github.io.</span><span>Sitio publicado: <a href="https://github.com/aaramirez/gestion-remota-de-equipos" target="_blank" rel="noopener">github.com/aaramirez/gestion-remota-de-equipos</a></span></footer>
+</div>
+<script src="assets/lab.js"></script>
+<script>
+(function(){
+  const {$}=window.Lab;
+  const f=(x,d)=>x.toLocaleString('es',{maximumFractionDigits:d||0});
+  const dur=ms=>ms<1000?f(ms)+' ms':ms<90000?f(ms/1000,1)+' s':f(ms/60000)+' min';
+  let vis=99, anim=null;
+  function datos(){
+    const R=+$('#g16a-r').value, P=+$('#g16a-p').value, T=$('#g16a-t').value;
+    $('#g16a-rv').textContent=R+' ms';$('#g16a-pv').textContent=P;
+    const a=[];
+    if(T!=='no')a.push({n:'Timbre: GET «llámame» y respuesta',b:300,rt:1});
+    a.push({n:'Conexión TCP y saludo TLS',b:4500,rt:3,hs:true});
+    a.push({n:'POST Inform · '+(T==='no'?'2 PERIODIC':'6 CONNECTION REQUEST'),b:1900,rt:0});
+    a.push({n:'200 InformResponse',b:450,rt:1});
+    a.push({n:'POST vacío',b:250,rt:0});
+    a.push({n:'200 SetParameterValues ('+P+' parám.)',b:700+180*P,rt:1});
+    a.push({n:'POST SetParameterValuesResp.',b:480,rt:0});
+    a.push({n:'204 vacío y cierre',b:120,rt:1});
+    const u=[{n:'Set en /usp/agent ('+P+' parám.)',b:110+55*P,rt:0},{n:'SetResp en /usp/controller',b:90+45*P,rt:1}];
+    const espera=T==='no'?1800000:T==='ses'?15000:0;
+    const t069=a.reduce((s,m)=>s+m.rt,0)*R+350+espera, tusp=R+10+120;
+    return {a,u,R,P,T,espera,t069,tusp,b069:a.reduce((s,m)=>s+m.b,0),busp:u.reduce((s,m)=>s+m.b,0)};
+  }
+  function dibujar(d){
+    const BMAX=Math.max(...d.a.map(m=>m.b));
+    const fila=(m,y,cls,oc)=>'<g class="'+oc+'"><rect x="10" y="'+y+'" width="'+Math.max(3,m.b/BMAX*90)+'" height="14" rx="3" class="'+cls+'"/><text x="108" y="'+(y+11)+'" class="g16a-tx">'+m.n+'</text><text x="392" y="'+(y+11)+'" text-anchor="end" class="g16a-b">'+f(m.b)+' B</text></g>';
+    let h='<text x="10" y="18" class="g16a-tit">TR-069 (CWMP)</text><text x="392" y="18" text-anchor="end" class="g16a-m">'+d.a.length+' pasos · '+f(d.b069)+' bytes</text>';
+    let y=30;
+    d.a.forEach((m,i)=>{h+=fila(m,y,m.hs?'g16a-hs':'g16a-bar069',i>=vis?'g16a-oc':'');y+=22;});
+    y+=10;h+='<line x1="10" y1="'+y+'" x2="392" y2="'+y+'" class="g16a-sep"/>';y+=22;
+    h+='<text x="10" y="'+y+'" class="g16a-tit">USP sobre MQTT</text><text x="392" y="'+y+'" text-anchor="end" class="g16a-m">'+d.u.length+' mensajes · '+f(d.busp)+' bytes</text>';y+=12;
+    d.u.forEach((m,i)=>{h+=fila(m,y,'g16a-barusp',i>=vis?'g16a-oc':'');y+=22;});
+    h+='<text x="10" y="'+(y+8)+'" class="g16a-m">La conexión ya estaba abierta: sin timbre, sin Inform, sin cierre.</text>';y+=34;
+    const tmax=Math.max(d.t069,d.tusp), sc=v=>Math.max(3,Math.log10(1+v)/Math.log10(1+tmax)*230);
+    h+='<text x="10" y="'+y+'" class="g16a-m">Tiempo hasta confirmar (escala logarítmica)</text>';y+=8;
+    h+='<text x="10" y="'+(y+11)+'" class="g16a-tx">TR-069</text><rect x="60" y="'+y+'" width="'+sc(d.t069)+'" height="14" rx="3" class="g16a-bar069"/><text x="'+(66+sc(d.t069))+'" y="'+(y+11)+'" class="g16a-b">'+dur(d.t069)+'</text>';y+=20;
+    h+='<text x="10" y="'+(y+11)+'" class="g16a-tx">USP</text><rect x="60" y="'+y+'" width="'+sc(d.tusp)+'" height="14" rx="3" class="g16a-barusp"/><text x="'+(66+sc(d.tusp))+'" y="'+(y+11)+'" class="g16a-b">'+dur(d.tusp)+'</text>';y+=24;
+    const svg=$('#g16a-svg');svg.setAttribute('viewBox','0 0 400 '+y);svg.innerHTML=h;
+  }
+  function informe(d){
+    $('#g16a-out').innerHTML='<span class="big">USP: '+dur(d.tusp)+' y '+f(d.busp)+' bytes. TR-069: '+dur(d.t069)+' y '+f(d.b069)+' bytes ('+f(d.b069/d.busp)+' veces más).</span>'+
+      '<span>TR-069 necesita unas '+d.a.reduce((s,m)=>s+m.rt,0)+' idas y vueltas por la red; USP, una. Cuanto más lejos está el equipo, más pesa esa diferencia.</span>'+
+      (d.T==='no'?'<span class="warn">Sin timbre, el cambio de TR-069 espera en promedio media hora, hasta la próxima llamada de rutina. USP no tiene ese problema: la conexión ya está abierta.</span>':d.T==='ses'?'<span class="warn">El equipo estaba en otra sesión: primero la termina y recién después atiende el timbre, como en el capítulo 3.</span>':'')+
+      (d.P>=10?'<span>Con muchos parámetros, el XML de TR-069 crece unos 180 bytes por cada uno; protobuf, unos 55.</span>':'');
+  }
+  function todo(){const d=datos();vis=99;dibujar(d);informe(d);}
+  ['#g16a-r','#g16a-p'].forEach(s=>$(s).addEventListener('input',todo));
+  $('#g16a-t').addEventListener('change',todo);
+  $('#g16a-ir').addEventListener('click',()=>{
+    const d=datos();
+    if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches){todo();return;}
+    if(anim)clearInterval(anim);
+    vis=0;dibujar(d);$('#g16a-out').innerHTML='<span>Mensajes en camino…</span>';
+    anim=setInterval(()=>{vis++;dibujar(d);if(vis>=d.a.length){clearInterval(anim);informe(d);}},350);
+  });
+  todo();
+})();
+</script>
+<script>
+(function(){
+  const {$}=window.Lab;
+  const T=[
+    {p:'Device.WiFi.',d:'redes, claves y canales'},
+    {p:'Device.Hosts.',d:'aparatos conectados'},
+    {p:'Device.X_EJEMPLO_ControlParental.',d:'extensión del fabricante'},
+    {p:'Device.Reboot()',d:'comando de reinicio'},
+    {p:'Device.DeviceInfo.FirmwareImage.',d:'imágenes de firmware'},
+    {p:'Device.LocalAgent.',d:'controladores y permisos'}
+  ];
+  const ROLES={op:['rwxn','rwxn','rwxn','rwxn','rwxn','rwxn'],app:['rw-n','r--n','rw-n','--x-','----','----'],soc:['----','r--n','----','----','----','----']};
+  const NOM={op:'el ACS del operador',app:'la aplicación del cliente',soc:'el servicio de seguridad del socio'};
+  const DES={op:'Rol «Operador»: todo el árbol.',app:'Rol «Cliente»: su Wi-Fi, sus aparatos, el control parental y reiniciar.',soc:'Rol «Socio de seguridad»: solo mira los aparatos y recibe avisos.'};
+  const ACC=[
+    {t:1,l:'r',m:'Get Device.Hosts.Host.',ok:'GetResp con 9 aparatos: celulares, un televisor, una tableta, una consola…'},
+    {t:0,l:'w',m:'Set Device.WiFi.AccessPoint.1.Security.KeyPassphrase',ok:'SetResp: clave cambiada. Los aparatos tendrán que volver a conectarse.'},
+    {t:2,l:'w',m:'Set Device.X_EJEMPLO_ControlParental.Regla.3.Enable = true',ok:'SetResp: la tableta queda sin Internet hasta las 21:00.'},
+    {t:3,l:'x',m:'Operate Device.Reboot()',ok:'OperateResp: el equipo se reinicia; vuelve en un par de minutos y avisa con Device.Boot!.'},
+    {t:4,l:'x',m:'Operate Device.DeviceInfo.FirmwareImage.2.Download()',ok:'OperateResp: descarga en curso; el resultado llegará en un Notify OperationComplete.'},
+    {t:1,l:'n',m:'Add Device.LocalAgent.Subscription. (ObjectCreation en Device.Hosts.Host.)',ok:'AddResp: suscripción creada. Cuando se conecte un aparato nuevo, llegará un Notify al instante.'},
+    {t:5,l:'w',m:'Set Device.LocalAgent.ControllerTrust.Role.2.Permission.1.Param = "rwxn"',ok:'SetResp: permisos cambiados.'}
+  ];
+  let est=JSON.parse(JSON.stringify(ROLES)), c='op';
+  function filas(){
+    $('#g16b-rol').textContent=DES[c]+' Toca las letras para cambiarlo.';
+    $('#g16b-filas').innerHTML=T.map((t,i)=>{
+      const s=est[c][i];
+      const b=['r','w','x','n'].map((L,k)=>'<button type="button" data-i="'+i+'" data-k="'+k+'" aria-pressed="'+(s[k]!=='-')+'" aria-label="'+({r:'leer',w:'escribir',x:'ejecutar',n:'recibir avisos'})[L]+' en '+t.p+'">'+L+'</button>').join('');
+      return '<div class="g16b-fila"><div><code>'+t.p+'</code><small>'+t.d+'</small></div><div class="g16b-letras">'+b+'</div><div class="g16b-cad" id="g16b-cad-'+i+'">'+s+'</div></div>';
+    }).join('');
+    document.querySelectorAll('[id="16-lab-2"] .g16b-letras button').forEach(bt=>bt.addEventListener('click',()=>{
+      const i=+bt.dataset.i,k=+bt.dataset.k,L='rwxn'[k];
+      const s=est[c][i].split('');s[k]=s[k]==='-'?L:'-';est[c][i]=s.join('');
+      bt.setAttribute('aria-pressed',s[k]!=='-');$('#g16b-cad-'+i).textContent=est[c][i];aviso();
+    }));
+    aviso();
+  }
+  function aviso(){
+    const peligro=Object.keys(est).filter(k=>k!=='op'&&est[k][5][1]==='w');
+    $('#g16b-out').innerHTML='<span>Cadenas del rol, en el orden de la lista: '+T.map((t,i)=>'<code>'+est[c][i]+'</code>').join(' · ')+'</span>'+
+      (peligro.length?'<span class="warn">Cuidado: '+peligro.map(k=>NOM[k]).join(' y ')+' puede escribir en Device.LocalAgent. Con eso un controlador puede darse a sí mismo todos los permisos: ese permiso es solo del operador.</span>':'');
+  }
+  function pedir(){
+    const a=ACC[+$('#g16b-acc').value], s=est[c][a.t], k='rwxn'.indexOf(a.l), ok=s[k]!=='-';
+    $('#g16b-out').innerHTML='<span>'+NOM[c].replace(/^./,x=>x.toUpperCase())+' manda: <code>'+a.m+'</code></span>'+
+      (ok?'<span class="ok">✓ El agente lo cumple.</span><span>'+a.ok+'</span>'+(a.t===5&&c!=='op'?'<span class="warn">El controlador acaba de cambiar los permisos. Por eso Device.LocalAgent queda solo para el operador.</span>':'')
+        :'<span class="warn">✗ Error 7006 (Permission Denied).</span><span>El rol de '+NOM[c]+' tiene <code>'+s+'</code> en <code>'+T[a.t].p+'</code>: le falta la «'+a.l+'» ('+({r:'leer',w:'escribir',x:'ejecutar',n:'recibir avisos'})[a.l]+'). El agente lo rechaza solo, sin consultar a nadie.</span>');
+  }
+  document.querySelectorAll('[id="16-lab-2"] [data-c]').forEach(bt=>bt.addEventListener('click',()=>{
+    c=bt.dataset.c;document.querySelectorAll('[id="16-lab-2"] [data-c]').forEach(x=>x.setAttribute('aria-pressed',x===bt));filas();
+  }));
+  $('#g16b-pedir').addEventListener('click',pedir);
+  $('#g16b-reset').addEventListener('click',()=>{est=JSON.parse(JSON.stringify(ROLES));filas();});
+  filas();
+})();
+</script>
+</body>
+</html>

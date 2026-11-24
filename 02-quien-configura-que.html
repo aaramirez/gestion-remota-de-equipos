@@ -1,0 +1,559 @@
+<!doctype html>
+<html lang="es">
+<head>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-KX76XF8R');</script>
+<!-- End Google Tag Manager -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Quién configura qué · Gestión remota de equipos (ACS) · Gestión remota de equipos (ACS)</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Cómo un operador configura, actualiza y diagnostica a distancia los equipos que tiene en casa de sus clientes: TR-069 y TR-369 a fondo, el modelo de datos TR-181, el aprovisionamiento sin visita, los cambios masivos, el firmware, los diagnósticos, la seguridad y la escala de un ACS.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400;1,8..60,600&display=swap">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KX76XF8R"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+<div class="wrap" data-page="quien-configura-que">
+<header class="topbar"><a class="brand" href="index.html">Gestión <b>remota</b> de equipos</a><span class="eyebrow">Curso visual e interactivo · Industrias y finanzas</span><a class="al-sitio" href="https://aaramirez.github.io/">← Todos los cursos</a></header>
+<div class="layout">
+<nav class="toc" id="toc" aria-label="Ruta de aprendizaje"></nav>
+<main>
+<header class="page-head"><span class="num">CAPÍTULO 02 DE 16</span><h1>El ACS entre los demás sistemas: quién configura qué</h1><p class="lede">La OLT, el ACS, el RADIUS, el NMS y los sistemas del negocio se reparten el trabajo sobre el mismo cliente. Este capítulo dibuja ese reparto para que cada pregunta vaya al sistema que tiene la respuesta.</p></header>
+<section><div class="prose"><p>Un lunes por la mañana, en Fibra Ejemplo, el operador ficticio que recorre este curso, llegan tres pedidos a la mesa de soporte. Ventas quiere saber por qué un cliente que pagó ayer sigue sin Internet. Atención pregunta por qué el ACS no muestra la potencia de la fibra de una casa. Y finanzas quiere la lista de equipos que siguen en casas de clientes dados de baja.</p><p>Los tres pedidos terminan en el ACS, y ninguno es del ACS. El primero es de RADIUS, el sistema que autoriza la conexión. El segundo es de la OLT, que es la que ve la luz de la fibra. El tercero es del inventario. El ACS puede ayudar en los tres, pero no es el <b>dueño del dato</b> (<i>data owner</i>), el sistema que lo crea, lo mantiene y responde por él.</p><p>En el capítulo 1 vimos qué hace el ACS. En este vemos lo que <b>no</b> hace: dónde termina su trabajo, dónde empieza el de los demás y por qué caminos se pasan los datos. Con ese mapa, cada pregunta va al lugar correcto la primera vez.</p></div><div class="analogia"><b>Imagínalo así</b><p>Piensa en un edificio de apartamentos. La empresa de agua llega hasta el medidor y la llave de paso: decide si entra agua al apartamento y cuánta. La administración del edificio lleva la lista de quién está al día con el condominio y le da o le quita la tarjeta del portón. Y el plomero de confianza, que tiene copia de la llave, entra al apartamento a cambiar la ducha o arreglar el calentador. Los tres trabajan para el mismo inquilino, pero si el portón no abre, llamar al plomero no sirve de nada.</p></div><div class="prose"><p>En la gestión de una red de fibra, la empresa de agua es la <b>OLT</b>, la administración es <b>RADIUS</b> y el plomero con la llave es el <b>ACS</b>. El resto del capítulo pone nombre a cada uno.</p></div></section>
+<section><h2>Los dos caminos al equipo de la casa</h2><div class="prose"><p>El equipo que Fibra Ejemplo deja en casi todas las casas es una sola caja con dos personalidades. Por un lado es una <b>ONT</b> (<i>Optical Network Terminal</i>, terminal de red óptica): la parte que recibe la luz de la fibra y la convierte en datos. Por otro lado es un <b>router</b> (enrutador) con Wi-Fi: la parte que reparte la conexión entre los dispositivos de la casa. Cada personalidad tiene su propio jefe y su propio camino de órdenes.</p><p><b>El camino de la fibra: OMCI desde la OLT.</b> La <b>OLT</b> (<i>Optical Line Terminal</i>, terminal de línea óptica) es el equipo de la central que atiende a todas las ONT de una zona. Le habla a cada ONT por <b>OMCI</b> (<i>ONU Management and Control Interface</i>, interfaz de gestión y control de la ONU), un canal reservado dentro de la propia fibra que define la norma G.988 de la <b>UIT</b> (Unión Internacional de Telecomunicaciones). OMCI no usa direcciones IP: existe desde el instante en que la ONT se enciende y la OLT la reconoce, aunque nada más funcione todavía.</p><p><b>El camino de la red: TR-069 desde el ACS.</b> El <b>ACS</b> (<i>Auto Configuration Server</i>, servidor de autoconfiguración) le habla a la parte de router por <b>TR-069</b>, la norma del <b>Broadband Forum</b> cuyo nombre oficial es <b>CWMP</b> (<i>CPE WAN Management Protocol</i>, protocolo de gestión del equipo del cliente desde la red del operador). TR-069 viaja sobre <b>IP</b> (<i>Internet Protocol</i>, protocolo de Internet), como cualquier página web, así que solo funciona cuando el equipo ya tiene una conexión de red armada.</p><p>Los dos caminos no compiten: se encadenan. Una norma del Broadband Forum, la <b>TR-142</b>, describe cómo: primero la OLT, por OMCI, le arma a la ONT una conexión de gestión y le dice la dirección del ACS; después la ONT llama al ACS por su cuenta. El capítulo 28 de <a href="https://aaramirez.github.io/telco/28-gestionar-el-equipo-en-casa-del-cliente.html" target="_blank" rel="noopener">Cómo funciona un telco</a> cuenta ese arranque paso a paso; el capítulo 7 de este curso lo usa para instalar equipos sin visita.</p></div><figure class="fig fig-arquitectura" id="02-diagrama-1"><div class="lienzo"><svg viewBox="0 0 920 440" style="min-width:740px" role="img" aria-label="Tres caminos hasta la misma casa: la OLT configura la parte óptica de la ONT por OMCI dentro de la fibra; el ACS configura la parte de router y Wi-Fi por TR-069 sobre una red de gestión; el BNG abre la sesión del cliente después de preguntarle a RADIUS. El gestor de OLT manda a la OLT, el inventario alimenta al ACS y facturación alimenta a RADIUS">
+  <defs>
+    <marker id="g21-fl-apl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--c-apl)"/></marker>
+    <marker id="g21-fl-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--c-red)"/></marker>
+    <marker id="g21-fl-fis" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--c-fis)"/></marker>
+    <marker id="g21-fl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--muted)"/></marker>
+    <symbol id="g21-ont" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="10" rx="1.6"/><path d="M8 12h.01M11 12h.01M14 12h.01"/><path d="M12 18v3.5"/><circle cx="12" cy="4.5" r="1.6"/></g></symbol>
+    <symbol id="g21-router" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="13" width="18" height="7" rx="1.6"/><path d="M7 13 5.5 6M17 13l1.5-7"/><path d="M7 16.5h.01M10 16.5h.01"/><path d="M9.5 6.5a3.5 3.5 0 0 1 5 0M8 4.6a6 6 0 0 1 8 0"/></g></symbol>
+    <symbol id="g21-olt" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="1.6"/><path d="M3 9h18M3 15h18"/><path d="M6 6h.01M9 6h.01M6 12h.01M9 12h.01M6 18h.01M9 18h.01"/><path d="M14 6h4M14 12h4M14 18h4"/></g></symbol>
+    <symbol id="g21-srv" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="7" rx="1.5"/><rect x="4" y="14" width="16" height="7" rx="1.5"/><path d="M8 6.5h.01M8 17.5h.01M12 6.5h5M12 17.5h5"/></g></symbol>
+    <symbol id="g21-mon" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M8 20h8M12 16v4"/><path d="M6 12l3-3 3 2 4-4"/></g></symbol>
+    <symbol id="g21-core" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M8 12h8M12 8v8M14.5 9.5 16 8M9.5 14.5 8 16"/></g></symbol>
+  </defs>
+
+  
+  <rect x="10" y="10" width="220" height="380" rx="12" class="d-casa"/>
+  <rect x="240" y="10" width="420" height="380" rx="12" class="d-oper"/>
+  <rect x="670" y="10" width="240" height="380" rx="12" class="d-sis"/>
+  <text x="120" y="34" text-anchor="middle" class="t t-xs t-b k-casa">CASA DEL CLIENTE</text>
+  <text x="450" y="34" text-anchor="middle" class="t t-xs t-b k-oper">RED DEL OPERADOR</text>
+  <text x="790" y="34" text-anchor="middle" class="t t-xs t-b k-sis">SISTEMAS DEL NEGOCIO</text>
+
+  
+  <rect x="26" y="56" width="188" height="310" rx="12" class="caja"/>
+  <text x="120" y="76" text-anchor="middle" class="t t-xs t-b t-m">UNA SOLA CAJA</text>
+  <rect x="40" y="88" width="160" height="96" rx="10" class="c-fis"/>
+  <use href="#g21-ont" x="50" y="98" width="32" height="32" class="ico"/>
+  <text x="90" y="112" class="t t-b">Parte óptica</text>
+  <text x="90" y="128" class="t t-s">la ONT</text>
+  <text x="52" y="152" class="t t-s">recibe la luz,</text>
+  <text x="52" y="168" class="t t-s">la vuelve datos</text>
+  <rect x="40" y="200" width="160" height="150" rx="10" class="c-apl"/>
+  <use href="#g21-router" x="50" y="210" width="32" height="32" class="ico"/>
+  <text x="90" y="224" class="t t-b">Router</text>
+  <text x="90" y="240" class="t t-s">y Wi-Fi</text>
+  <text x="52" y="266" class="t t-s">Wi-Fi, voz,</text>
+  <text x="52" y="282" class="t t-s">conexión,</text>
+  <text x="52" y="298" class="t t-s">firmware,</text>
+  <text x="52" y="314" class="t t-s">diagnósticos</text>
+
+  
+  <rect x="320" y="100" width="140" height="56" rx="10" class="caja"/>
+  <use href="#g21-olt" x="330" y="112" width="32" height="32" class="ico"/>
+  <text x="370" y="125" class="t t-b">OLT</text><text x="370" y="142" class="t t-s t-m">en la central</text>
+
+  <rect x="495" y="100" width="150" height="56" rx="10" class="caja"/>
+  <use href="#g21-mon" x="505" y="112" width="32" height="32" class="ico"/>
+  <text x="545" y="125" class="t t-b">Gestor</text><text x="545" y="142" class="t t-s t-m">de OLT</text>
+
+  <rect x="320" y="226" width="140" height="56" rx="10" class="c-apl"/>
+  <use href="#g21-srv" x="330" y="238" width="32" height="32" class="ico"/>
+  <text x="370" y="251" class="t t-b">ACS</text><text x="370" y="268" class="t t-s">configura</text>
+
+  <rect x="320" y="320" width="140" height="56" rx="10" class="caja"/>
+  <use href="#g21-core" x="330" y="332" width="32" height="32" class="ico"/>
+  <text x="370" y="345" class="t t-b">BNG</text><text x="370" y="362" class="t t-s t-m">abre la sesión</text>
+
+  <rect x="495" y="320" width="150" height="56" rx="10" class="c-red"/>
+  <use href="#g21-srv" x="505" y="332" width="32" height="32" class="ico"/>
+  <text x="545" y="345" class="t t-b">RADIUS</text><text x="545" y="362" class="t t-s">autoriza</text>
+
+  
+  <line x1="200" y1="128" x2="318" y2="128" class="ln s-fis" style="stroke-width:3"/>
+  <text x="246" y="120" class="t t-s t-b k-fis">OMCI</text>
+  <text x="246" y="146" class="t t-xs k-fis">EN LA</text><text x="246" y="158" class="t t-xs k-fis">FIBRA</text>
+  <line x1="495" y1="128" x2="462" y2="128" class="ln" style="stroke-width:1.6" marker-end="url(#g21-fl)"/>
+
+  
+  <path d="M390 226V158" class="ln ln-d" style="stroke-width:1.6" marker-end="url(#g21-fl)"/>
+  <text x="398" y="186" class="t t-xs t-m">DIRECCIÓN DEL ACS</text>
+  <text x="398" y="200" class="t t-xs t-m">VÍA OMCI (TR-142)</text>
+
+  
+  <line x1="320" y1="256" x2="202" y2="256" class="ln s-apl" style="stroke-width:2.4" marker-start="url(#g21-fl-apl)" marker-end="url(#g21-fl-apl)"/>
+  <text x="246" y="248" class="t t-s t-b k-apl">TR-069</text>
+  <text x="246" y="274" class="t t-xs k-apl">GESTIÓN</text>
+
+  
+  <line x1="320" y1="340" x2="202" y2="334" class="ln s-red" style="stroke-width:2.4" marker-start="url(#g21-fl-red)"/>
+  <text x="246" y="324" class="t t-s t-b k-red">sesión</text>
+  <line x1="462" y1="348" x2="493" y2="348" class="ln s-red" style="stroke-width:2" marker-start="url(#g21-fl-red)" marker-end="url(#g21-fl-red)"/>
+
+  
+  <rect x="690" y="100" width="200" height="56" rx="10" class="caja"/>
+  <text x="704" y="124" class="t t-b">CRM y órdenes</text><text x="704" y="142" class="t t-s t-m">serie, plan, puerto</text>
+  <rect x="690" y="226" width="200" height="56" rx="10" class="caja"/>
+  <text x="704" y="250" class="t t-b">Inventario</text><text x="704" y="268" class="t t-s t-m">qué serie está en qué casa</text>
+  <rect x="690" y="320" width="200" height="56" rx="10" class="caja"/>
+  <text x="704" y="344" class="t t-b">Facturación</text><text x="704" y="362" class="t t-s t-m">quién está al día</text>
+
+  <line x1="690" y1="128" x2="647" y2="128" class="ln" style="stroke-width:1.6" marker-end="url(#g21-fl)"/>
+  <line x1="690" y1="254" x2="462" y2="254" class="ln" style="stroke-width:1.6" marker-end="url(#g21-fl)"/>
+  <text x="578" y="246" text-anchor="middle" class="t t-xs t-m">API</text>
+  <line x1="690" y1="348" x2="647" y2="348" class="ln" style="stroke-width:1.6" marker-end="url(#g21-fl)"/>
+
+  
+  <g class="t t-s">
+    <line x1="30" y1="420" x2="58" y2="420" class="ln s-fis" style="stroke-width:3"/><text x="64" y="424">fibra con OMCI</text>
+    <line x1="190" y1="420" x2="218" y2="420" class="ln s-apl" style="stroke-width:2.4"/><text x="224" y="424">TR-069</text>
+    <line x1="300" y1="420" x2="328" y2="420" class="ln s-red" style="stroke-width:2.4"/><text x="334" y="424">sesión y RADIUS</text>
+    <line x1="470" y1="420" x2="498" y2="420" class="ln" style="stroke-width:1.6"/><text x="504" y="424">órdenes y APIs</text>
+    <text x="690" y="424" class="t-m">lo óptico · lo de router · lo comercial</text>
+  </g>
+</svg></div><figcaption><b>Tres caminos hasta la misma casa.</b> Tres franjas: la casa del cliente a la izquierda, la red del operador en el medio y los sistemas del negocio a la derecha. El equipo de la casa está partido en dos: su parte óptica (ONT) y su parte de router y Wi-Fi. La línea naranja gruesa es la fibra, y por dentro de ella viaja OMCI, de la OLT a la parte óptica. La línea rosada es TR-069, del ACS a la parte de router, por una red de gestión separada. La línea azul es la sesión del cliente, que el BNG abre después de preguntarle a RADIUS. La flecha punteada marca el enlace entre los dos primeros caminos: por OMCI, la ONT recibe la dirección del ACS.</figcaption></figure><div class="prose"><p>Hay un tercer camino que no configura el equipo pero decide si el cliente navega: la <b>sesión</b> (<i>session</i>), la conexión abierta del cliente hacia Internet. La sesión la abre el <b>BNG</b> (<i>Broadband Network Gateway</i>, puerta de enlace de banda ancha), el router del operador que recibe a todos los clientes de una región, y antes de abrirla le pregunta a <b>RADIUS</b> (<i>Remote Authentication Dial-In User Service</i>, servicio de autenticación remota de usuarios) si ese cliente existe, si está al día y qué velocidad le corresponde. Ni el BNG ni RADIUS le cambian un solo parámetro al equipo de la casa.</p></div></section>
+<section><h2>Qué configura cada uno</h2><div class="prose"><p>La regla general es fácil de recordar: <b>lo óptico es de la OLT; lo que se parece a un router, del ACS; lo comercial, de RADIUS</b>. Bajada a tareas concretas, queda así:</p><div class="tbl"><table><thead><tr><th>Tema</th><th>OLT por OMCI</th><th>ACS por TR-069</th><th>RADIUS y BNG</th></tr></thead><tbody><tr><td>Dejar entrar a la ONT a la fibra</td><td>Autoriza su <b>número de serie</b> (<i>serial number</i>) en un puerto PON</td><td>—</td><td>—</td></tr><tr><td>Turnos y canales dentro de la fibra</td><td>Crea sus contenedores de subida (<b>T-CONT</b>, <i>Transmission Container</i>) y sus puertos lógicos (<b>GEM</b>, <i>GPON Encapsulation Method</i>)</td><td>—</td><td>—</td></tr><tr><td>Separar servicios</td><td>Asigna la <b>VLAN</b> (<i>Virtual LAN</i>, red local virtual) de Internet, de voz y de gestión</td><td>Usa esas VLAN en la configuración del router</td><td>—</td></tr><tr><td>Luz y alarmas de la fibra</td><td>Lee la <b>potencia óptica</b> (<i>optical power</i>) y las alarmas</td><td>A veces la muestra, copiada del equipo</td><td>—</td></tr><tr><td>Conexión a Internet</td><td>—</td><td>Carga el usuario <b>PPPoE</b> (<i>Point-to-Point Protocol over Ethernet</i>) o el modo de conexión</td><td>Valida el usuario, da la IP y aplica la velocidad del plan</td></tr><tr><td>Wi-Fi</td><td>—</td><td>Nombre (<b>SSID</b>, <i>Service Set Identifier</i>), clave, canal, banda, red de invitados</td><td>—</td></tr><tr><td>Voz</td><td>—</td><td>Cuenta <b>SIP</b> (<i>Session Initiation Protocol</i>, protocolo de inicio de sesión) y códecs</td><td>—</td></tr><tr><td>Software del equipo</td><td>A veces actualiza el de la parte óptica</td><td>Actualiza el <b>firmware</b>, el software interno del equipo</td><td>—</td></tr><tr><td>Diagnósticos</td><td>Estado de la ONT y de su enlace óptico</td><td>Ping, prueba de velocidad, equipos conectados</td><td>Si la sesión está abierta y desde cuándo</td></tr><tr><td>Corte por falta de pago</td><td>—</td><td>—</td><td>Suspende la sesión o la manda a un portal de aviso</td></tr></tbody></table></div><p>Las zonas grises existen, y conviene conocerlas para no sorprenderse. Algunos fabricantes permiten configurar el Wi-Fi por OMCI, cuando la ONT es «tonta» y el router es otra caja. Algunos operadores cargan el usuario de Internet desde la OLT. Y casi todos los ACS muestran la potencia óptica, porque el equipo la expone en su árbol de parámetros. Pero mostrar un dato no es ser su dueño: si el ACS y la OLT no coinciden en la potencia de una ONT, manda la OLT, que la mide de su lado.</p></div><div class="ml"><b>En la práctica</b><p>Cuando dos sistemas pueden configurar lo mismo, el operador tiene que elegir <b>uno</b> y escribirlo. Si la OLT y el ACS escriben los dos la VLAN de voz, el día que alguien la cambie en uno solo el equipo quedará con la del que habló último, y nadie sabrá por qué la voz funciona a ratos. La regla de un solo dueño por dato vale más que cualquier función extra.</p></div><div class="prose"><p>Ahora ponte a prueba. Las doce tareas de este laboratorio son las que llegan a cualquier mesa de soporte de un operador FTTH.</p></div><div class="lab" id="02-lab-1"><div class="lab-title"><span class="tag">Laboratorio</span><h3>¿Quién lo hace?</h3></div><p class="hint">Elige una tarea (tócala o arrástrala) y suéltala en el sistema que le toca. Cada respuesta trae su porqué. Al terminar, mira cuántas tareas eran del ACS y cuántas parecían suyas pero no lo eran.</p><style>
+[id="02-lab-1"] .g2a-tareas{display:flex;flex-wrap:wrap;gap:6px;min-height:44px;padding:8px;border:1px dashed var(--line);border-radius:10px;background:var(--paper)}
+[id="02-lab-1"] .g2a-chip{font:600 .82rem var(--f-display);text-align:left;padding:7px 10px;border-radius:8px;background:var(--card);border:1px solid var(--line);cursor:grab;max-width:100%;white-space:normal}
+[id="02-lab-1"] .g2a-chip[aria-pressed="true"]{background:var(--accent);color:var(--card);border-color:var(--accent)}
+[id="02-lab-1"] .g2a-chip.bien{border-color:var(--good);background:var(--good-soft);color:var(--ink);cursor:default}
+[id="02-lab-1"] .g2a-chip.mal{border-color:var(--warm);background:var(--warm-soft);color:var(--ink);cursor:default}
+[id="02-lab-1"] .g2a-chip.mal::after{content:" ✗";color:var(--warm)}
+[id="02-lab-1"] .g2a-chip.bien::after{content:" ✓";color:var(--good)}
+[id="02-lab-1"] .g2a-sist{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,180px),1fr));gap:8px}
+[id="02-lab-1"] .g2a-caja{display:grid;align-content:start;gap:6px;min-height:110px;padding:10px;border-radius:10px;border:2px solid var(--line);background:var(--card);cursor:pointer;text-align:left;font:inherit;color:var(--ink)}
+[id="02-lab-1"] .g2a-caja:hover,[id="02-lab-1"] .g2a-caja.sobre{border-color:var(--accent)}
+[id="02-lab-1"] .g2a-caja b{font:700 .95rem var(--f-display)}
+[id="02-lab-1"] .g2a-caja small{color:var(--muted);font-size:.78rem}
+[id="02-lab-1"] .g2a-caja .g2a-chip{cursor:default;font-size:.76rem;padding:4px 7px}
+[id="02-lab-1"] .g2a-caja[data-s="olt"]{border-top:6px solid var(--c-fis)}
+[id="02-lab-1"] .g2a-caja[data-s="acs"]{border-top:6px solid var(--c-apl)}
+[id="02-lab-1"] .g2a-caja[data-s="radius"]{border-top:6px solid var(--c-red)}
+[id="02-lab-1"] .g2a-caja[data-s="nms"]{border-top:6px solid var(--c-tra)}
+[id="02-lab-1"] .g2a-caja[data-s="neg"]{border-top:6px solid var(--d-sis)}
+[id="02-lab-1"] .g2a-barra{display:flex;height:14px;border-radius:7px;overflow:hidden;background:var(--paper)}
+[id="02-lab-1"] .g2a-barra i{display:block;height:100%}
+</style>
+<p class="hint">Toca una tarea y luego el sistema que la hace (o arrástrala, si usas mouse). Quedan <b id="g2a-quedan">12</b>.</p>
+<div class="g2a-tareas" id="g2a-tareas" aria-label="Tareas por repartir"></div>
+<div class="g2a-sist" id="g2a-sist">
+  <div class="g2a-caja" role="button" tabindex="0" data-s="olt"><b>OLT y su gestor</b><small>lo óptico, por OMCI</small></div>
+  <div class="g2a-caja" role="button" tabindex="0" data-s="acs"><b>ACS</b><small>el equipo como router, por TR-069</small></div>
+  <div class="g2a-caja" role="button" tabindex="0" data-s="radius"><b>RADIUS y BNG</b><small>la sesión y lo comercial</small></div>
+  <div class="g2a-caja" role="button" tabindex="0" data-s="nms"><b>NMS</b><small>la salud de la red</small></div>
+  <div class="g2a-caja" role="button" tabindex="0" data-s="neg"><b>CRM, inventario y facturación</b><small>el negocio</small></div>
+</div>
+<div class="readout texto" id="g2a-out" aria-live="polite"><span>Elige la primera tarea.</span></div>
+<div class="g2a-barra" id="g2a-barra" aria-hidden="true"></div>
+<div class="legend" id="g2a-leyenda"></div>
+<div class="btns"><button type="button" id="g2a-reset">Empezar de nuevo</button></div></div></section>
+<section><h2>RADIUS autoriza la conexión; el ACS configura el equipo</h2><div class="prose"><p>El ejemplo que más confusiones causa es el <b>corte y la reconexión por falta de pago</b>. La intuición dice que el ACS, que puede cambiarlo todo en el equipo, es el que debería «apagar» el Internet del cliente. No es así, y las razones enseñan mucho sobre el reparto.</p><p>La decisión de cortar nace en el sistema de <b>facturación</b> (<i>billing</i>): la factura venció y no se pagó. Facturación avisa a RADIUS, directamente o a través de un sistema intermedio, y RADIUS cambia el estado del cliente. Desde ese momento pueden pasar dos cosas, según el diseño del operador:</p><ol class="steps"><li><span><b>Corte duro.</b> RADIUS le pide al BNG que cierre la sesión con un mensaje <b>Disconnect-Request</b>, y cuando el equipo intenta reconectarse le contesta <b>Access-Reject</b> (acceso rechazado).</span></li><li><span><b>Corte suave.</b> RADIUS le manda al BNG un <b>CoA</b> (<i>Change of Authorization</i>, cambio de autorización) para que la sesión siga abierta pero con un perfil restringido: el cliente solo puede llegar a un <b>portal cautivo</b> (<i>captive portal</i>), una página que le avisa de la deuda y le dice cómo pagar.</span></li></ol><p>Los dos mensajes, Disconnect-Request y CoA, están en la norma <b><a href="https://www.rfc-editor.org/rfc/rfc5176" target="_blank" rel="noopener">RFC 5176</a></b> (<i>Request for Comments</i>, la serie de documentos donde se publican las normas de Internet). En los dos casos, el equipo de la casa no se entera de nada especial: su configuración queda intacta.</p></div><figure class="fig fig-flujo" id="02-diagrama-2"><div class="lienzo"><svg viewBox="0 0 1000 560" style="min-width:780px" role="img" aria-label="Flujo de corte y reconexión por falta de pago: facturación avisa la deuda a RADIUS, RADIUS manda un cambio de autorización al BNG, el equipo queda limitado al portal de pago; al pagar, facturación avisa a RADIUS, RADIUS manda otro cambio al BNG, el BNG confirma y el equipo vuelve a navegar. El ACS no recibe ni envía ningún mensaje">
+  <defs>
+    <marker id="g22-fl-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--c-red)"/></marker>
+    <marker id="g22-fl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--muted)"/></marker>
+    <symbol id="g22-fac" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6M9 16h3"/></g></symbol>
+    <symbol id="g22-srv" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="7" rx="1.5"/><rect x="4" y="14" width="16" height="7" rx="1.5"/><path d="M8 6.5h.01M8 17.5h.01M12 6.5h5M12 17.5h5"/></g></symbol>
+    <symbol id="g22-core" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M8 12h8M12 8v8M14.5 9.5 16 8M9.5 14.5 8 16"/></g></symbol>
+    <symbol id="g22-ont" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="10" rx="1.6"/><path d="M8 12h.01M11 12h.01M14 12h.01"/><path d="M12 18v3.5"/><circle cx="12" cy="4.5" r="1.6"/></g></symbol>
+  </defs>
+
+  
+  <rect x="20" y="14" width="140" height="56" rx="10" class="d-sis"/><use href="#g22-fac" x="30" y="26" width="30" height="30" class="ico"/><text x="66" y="38" class="t t-b">Facturación</text><text x="66" y="56" class="t t-s t-m">la deuda</text>
+  <rect x="190" y="14" width="140" height="56" rx="10" class="c-red"/><use href="#g22-srv" x="200" y="26" width="30" height="30" class="ico"/><text x="236" y="38" class="t t-b">RADIUS</text><text x="236" y="56" class="t t-s">autoriza</text>
+  <rect x="360" y="14" width="140" height="56" rx="10" class="caja"/><use href="#g22-core" x="370" y="26" width="30" height="30" class="ico"/><text x="406" y="38" class="t t-b">BNG</text><text x="406" y="56" class="t t-s t-m">la sesión</text>
+  <rect x="530" y="14" width="140" height="56" rx="10" class="caja"/><use href="#g22-ont" x="540" y="26" width="30" height="30" class="ico"/><text x="576" y="38" class="t t-b">Equipo</text><text x="576" y="56" class="t t-s t-m">casa 1203</text>
+  <g class="apagado">
+    <rect x="700" y="14" width="140" height="56" rx="10" class="c-apl"/><use href="#g22-srv" x="710" y="26" width="30" height="30" class="ico"/><text x="746" y="38" class="t t-b">ACS</text><text x="746" y="56" class="t t-s">no participa</text>
+    <line x1="770" y1="70" x2="770" y2="520" class="vida"/>
+  </g>
+  <line x1="90" y1="70" x2="90" y2="520" class="vida"/>
+  <line x1="260" y1="70" x2="260" y2="520" class="vida"/>
+  <line x1="430" y1="70" x2="430" y2="520" class="vida"/>
+  <line x1="600" y1="70" x2="600" y2="520" class="vida"/>
+
+  
+  <line x1="90" y1="112" x2="258" y2="116" class="ln" style="stroke-width:2" marker-end="url(#g22-fl)"/>
+  <text x="98" y="104" class="t t-s">① factura vencida: suspender</text>
+  <line x1="260" y1="160" x2="428" y2="164" class="ln s-red" style="stroke-width:2.4" marker-end="url(#g22-fl-red)"/>
+  <text x="268" y="152" class="t t-s">② <tspan class="t-mono t-b">CoA-Request</tspan></text>
+  <text x="268" y="182" class="t t-s t-m">perfil: solo portal</text>
+  <line x1="600" y1="214" x2="432" y2="218" class="ln s-red" style="stroke-width:2" marker-end="url(#g22-fl-red)"/>
+  <text x="444" y="206" class="t t-s">③ pide una página web</text>
+  <line x1="430" y1="258" x2="598" y2="262" class="ln s-red" style="stroke-width:2" marker-end="url(#g22-fl-red)"/>
+  <text x="440" y="250" class="t t-s">④ redirige al portal</text>
+  <text x="440" y="280" class="t t-s t-m">«tienes un saldo pendiente»</text>
+
+  
+  <line x1="90" y1="330" x2="258" y2="334" class="ln" style="stroke-width:2" marker-end="url(#g22-fl)"/>
+  <text x="98" y="322" class="t t-s">⑤ pago recibido</text>
+  <line x1="260" y1="378" x2="428" y2="382" class="ln s-red" style="stroke-width:2.4" marker-end="url(#g22-fl-red)"/>
+  <text x="268" y="370" class="t t-s">⑥ <tspan class="t-mono t-b">CoA-Request</tspan></text>
+  <text x="268" y="400" class="t t-s t-m">perfil: plan 200 Mbps</text>
+  <line x1="430" y1="426" x2="262" y2="430" class="ln s-red" style="stroke-width:2" marker-end="url(#g22-fl-red)"/>
+  <text x="280" y="420" class="t t-s">⑦ <tspan class="t-mono">CoA-ACK</tspan></text>
+  <line x1="600" y1="474" x2="432" y2="478" class="ln s-red" style="stroke-width:2" marker-start="url(#g22-fl-red)" marker-end="url(#g22-fl-red)"/>
+  <text x="444" y="466" class="t t-s">⑧ navega normal</text>
+
+  
+  <rect x="690" y="250" width="160" height="70" rx="8" class="caja"/>
+  <text x="770" y="274" text-anchor="middle" class="t t-s t-b">Sin mensajes</text>
+  <text x="770" y="292" text-anchor="middle" class="t t-s t-m">el Wi-Fi, la voz y</text>
+  <text x="770" y="308" text-anchor="middle" class="t t-s t-m">la conexión no cambian</text>
+
+  
+  <g class="t t-xs t-b">
+    <path d="M890 96v190" class="ln s-red" style="stroke-width:3"/><text x="900" y="184" class="k-red">CORTE</text><text x="900" y="198" class="t-m">segundos</text>
+    <path d="M890 314v176" class="ln s-red" style="stroke-width:3"/><text x="900" y="396" class="k-red">RECONEXIÓN</text><text x="900" y="410" class="t-m">segundos</text>
+  </g>
+  <text x="14" y="300" class="t t-xs t-m" transform="rotate(-90 14 300)">EL TIEMPO CORRE HACIA ABAJO ↓</text>
+  <text x="430" y="548" text-anchor="middle" class="t t-s t-m">Con corte duro, ② sería un Disconnect-Request y el BNG cerraría la sesión en lugar de limitarla.</text>
+</svg></div><figcaption><b>Corte y reconexión: el ACS mira desde afuera.</b> Cinco participantes: facturación, RADIUS, el BNG, el equipo de la casa y, apagado a la derecha, el ACS; el tiempo corre hacia abajo. En el corte (① a ④), facturación marca la deuda, RADIUS le pide al BNG que cambie la sesión y el equipo queda limitado al portal de pago. En la reconexión (⑤ a ⑧), el pago llega, RADIUS manda otro cambio y la navegación vuelve en segundos. Las flechas azules son mensajes de RADIUS; las grises, avisos entre sistemas. Ninguna flecha llega al ACS ni sale de él: la configuración del equipo nunca se tocó.</figcaption></figure><div class="prose"><p>¿Por qué se diseña así? Por cuatro razones:</p><ul><li><b>Funciona aunque el equipo no colabore.</b> Si el corte dependiera de una orden del ACS, bastaría con desconectar el cable de gestión o volver el equipo a valores de fábrica para saltárselo. En el BNG, el cliente no tiene nada que tocar.</li><li><b>Es inmediato.</b> El BNG aplica un CoA en segundos. Una orden del ACS tiene que esperar a que el equipo llame, como veremos en el capítulo 3.</li><li><b>La reconexión es instantánea.</b> Como el equipo conserva su Wi-Fi, su voz y su conexión, al pagar no hay nada que reconfigurar: RADIUS levanta la restricción y listo.</li><li><b>Vale para cualquier equipo.</b> Si el cliente usa un router propio detrás de la ONT, o si el equipo es de una marca que el ACS todavía no gestiona bien, el corte sigue funcionando.</li></ul><p>El ACS solo aparece en un caso: cuando el operador quiere mostrar el aviso <b>dentro de la casa</b>, por ejemplo cambiando una página del equipo o encendiendo una luz. Es un complemento del corte, nunca el corte. El capítulo 8 lo cuenta con el resto del ciclo de vida del equipo.</p></div></section>
+<section><h2>ACS, gestor de OLT y NMS: tres herramientas distintas</h2><div class="prose"><p>En el mercado se venden plataformas que traen «todo en uno», y por eso es fácil confundir tres herramientas que hacen trabajos distintos:</p><ul><li><b>El gestor de OLT</b> (<i>OLT manager</i>) administra las OLT y, a través de ellas, la parte óptica de cada ONT: autoriza equipos nuevos, asigna perfiles y VLAN, muestra la potencia de la fibra y las caídas. Ejemplos del mercado: SmartOLT y los sistemas de cada fabricante de OLT.</li><li><b>El ACS</b> administra la parte de router de cada equipo de la casa, uno por uno o por miles. Ejemplos del mercado: GenieACS, de <b>código abierto</b> (<i>open source</i>), y varias plataformas comerciales.</li><li><b>El NMS</b> (<i>Network Management System</i>, sistema de gestión de red) vigila la salud de la red entera: OLT, enlaces, routers del core, servidores. Pregunta por <b>SNMP</b> (<i>Simple Network Management Protocol</i>, protocolo simple de gestión de red), recibe registros, guarda históricos y alarma. Ejemplos del mercado: Zabbix, LibreNMS o PRTG, con tableros en Grafana.</li></ul></div><figure class="fig fig-comparacion" id="02-diagrama-3"><div class="lienzo"><svg viewBox="0 0 900 440" style="min-width:740px" role="img" aria-label="Comparación entre el ACS, el gestor de OLT y el NMS: la pregunta que contesta cada uno, qué mira, con qué protocolo habla, su unidad de trabajo, quién lo usa y qué pasa si se cae">
+  
+  <rect x="190" y="14" width="226" height="50" rx="10" class="c-apl"/>
+  <text x="303" y="38" text-anchor="middle" class="t t-b">ACS</text><text x="303" y="55" text-anchor="middle" class="t t-s">el equipo de la casa</text>
+  <rect x="426" y="14" width="226" height="50" rx="10" class="c-fis"/>
+  <text x="539" y="38" text-anchor="middle" class="t t-b">Gestor de OLT</text><text x="539" y="55" text-anchor="middle" class="t t-s">la fibra y sus ONT</text>
+  <rect x="662" y="14" width="226" height="50" rx="10" class="c-tra"/>
+  <text x="775" y="38" text-anchor="middle" class="t t-b">NMS</text><text x="775" y="55" text-anchor="middle" class="t t-s">la salud de la red</text>
+
+  
+  <g class="t t-xs t-b t-m">
+    <text x="14" y="98">PREGUNTA</text>
+    <text x="14" y="158">QUÉ MIRA</text>
+    <text x="14" y="214">PROTOCOLO</text>
+    <text x="14" y="266">UNIDAD</text>
+    <text x="14" y="318">QUIÉN LA USA</text>
+    <text x="14" y="378">SI SE CAE</text>
+  </g>
+  <g class="ln" style="stroke-width:1">
+    <line x1="14" y1="122" x2="888" y2="122"/>
+    <line x1="14" y1="182" x2="888" y2="182"/>
+    <line x1="14" y1="234" x2="888" y2="234"/>
+    <line x1="14" y1="286" x2="888" y2="286"/>
+    <line x1="14" y1="342" x2="888" y2="342"/>
+  </g>
+
+  <g class="t t-s">
+    <text x="200" y="92">«¿Cómo está el equipo de</text><text x="200" y="108">esta casa y qué le cambio?»</text>
+    <text x="436" y="92">«¿Le llega luz a esta ONT</text><text x="436" y="108">y está autorizada?»</text>
+    <text x="672" y="92">«¿Qué parte de la red</text><text x="672" y="108">está fallando ahora?»</text>
+
+    <text x="200" y="150">Wi-Fi, conexión, voz,</text><text x="200" y="166">firmware, diagnósticos</text>
+    <text x="436" y="150">Potencia óptica, alarmas,</text><text x="436" y="166">perfiles y VLAN</text>
+    <text x="672" y="150">OLT, enlaces, routers,</text><text x="672" y="166">servidores, tráfico</text>
+
+    <text x="200" y="214" class="t-mono">TR-069 o USP</text>
+    <text x="436" y="214" class="t-mono">OMCI vía la OLT</text>
+    <text x="672" y="214" class="t-mono">SNMP, registros, API</text>
+
+    <text x="200" y="266" class="t-b k-apl">una casa (o miles)</text>
+    <text x="436" y="266" class="t-b k-fis">un puerto de fibra</text>
+    <text x="672" y="266" class="t-b k-tra">la red entera</text>
+
+    <text x="200" y="310">Atención, soporte,</text><text x="200" y="326">ingeniería</text>
+    <text x="436" y="310">Soporte, campo,</text><text x="436" y="326">el NOC</text>
+    <text x="672" y="310">El NOC, ingeniería</text><text x="672" y="326">de red</text>
+
+    <text x="200" y="372">Los clientes navegan;</text><text x="200" y="388">no se pueden hacer cambios</text>
+    <text x="436" y="372">Los clientes navegan;</text><text x="436" y="388">no se instalan ONT nuevas</text>
+    <text x="672" y="372">La red funciona, pero nadie</text><text x="672" y="388">se entera de las fallas</text>
+  </g>
+  <text x="450" y="428" text-anchor="middle" class="t t-s t-m">Ejemplos del mercado: GenieACS y plataformas comerciales · SmartOLT y los sistemas de cada fabricante · Zabbix, LibreNMS, PRTG</text>
+</svg></div><figcaption><b>Tres herramientas, tres preguntas.</b> Una columna por herramienta y una fila por rasgo. Arriba, la pregunta que cada una contesta mejor; luego, qué mira, con qué protocolo habla, de qué tamaño es su unidad de trabajo (una casa, una OLT con sus ONT, la red entera), quién la usa más y qué pasa si se cae. La última fila es la más útil para no confundirlas: si el ACS se cae, los clientes siguen navegando; si se cae el NMS, la red sigue funcionando pero nadie se entera de las fallas.</figcaption></figure><div class="prose"><p>Las tres se tocan en los bordes. El gestor de OLT también alarma; el NMS puede leer la potencia de una ONT por SNMP; el ACS puede mostrar alarmas del equipo. Lo que las separa es la <b>unidad de trabajo</b>: el ACS piensa en casas, el gestor de OLT en puertos de fibra y el NMS en la red. El capítulo 29 de <a href="https://aaramirez.github.io/telco/29-las-plataformas-de-gestion-en-la-practica.html" target="_blank" rel="noopener">Cómo funciona un telco</a> las recorre con más detalle como herramientas de trabajo.</p></div><div class="caso"><b>Un caso real</b><p>En un operador FTTH de la región, el ACS y el gestor de OLT llegaron en años distintos y de proveedores distintos. Durante un tiempo, soporte miraba la potencia óptica en el ACS, que la copiaba del equipo cada hora, y el NOC la miraba en el gestor de OLT, que la medía en el momento. Cuando un barrio tuvo un problema de fibra, las dos pantallas decían cosas distintas y se perdió una mañana discutiendo cuál tenía razón. La solución no fue técnica sino de reglas: la potencia óptica es de la OLT, el ACS la muestra con su hora de lectura y un enlace al gestor de OLT, y nadie decide una visita con el dato copiado.</p></div></section>
+<section><h2>Dónde se conecta el ACS con el negocio</h2><div class="prose"><p>Un ACS que solo usan los ingenieros es un ACS a medias. Su valor aparece cuando se conecta con los <b>sistemas del negocio</b>, los que usan ventas, atención y finanzas. Cada uno es dueño de un tipo de dato distinto:</p><div class="tbl"><table><thead><tr><th>Sistema</th><th>Es dueño de</th><th>Le da al ACS</th><th>Recibe del ACS</th></tr></thead><tbody><tr><td><b>CRM</b> (<i>Customer Relationship Management</i>, gestión de la relación con el cliente)</td><td>El cliente, su plan y sus contactos</td><td>Qué plan tiene y qué servicios (voz, Wi-Fi extendido)</td><td>Estado del equipo para la ficha del cliente</td></tr><tr><td><b>Facturación</b></td><td>Lo que se cobra y lo que se debe</td><td>Nada directo: su camino es RADIUS</td><td>Nada directo</td></tr><tr><td><b>Inventario</b> de equipos</td><td>Cada equipo: serie, MAC, modelo, dónde está</td><td>Qué serie está en qué casa</td><td>Equipos que llaman pero no figuran, firmware de cada uno</td></tr><tr><td><b>Mesa de ayuda</b> (<i>help desk</i>)</td><td>Los tickets de reclamos</td><td>El número de cliente del ticket</td><td>Diagnóstico al abrir el ticket</td></tr><tr><td><b>El propio ACS</b></td><td>La configuración de cada equipo y su historial</td><td>—</td><td>—</td></tr></tbody></table></div><p>¿Cómo se hablan? Por una <b>API</b> (<i>Application Programming Interface</i>, interfaz de programación de aplicaciones): un conjunto de direcciones web a las que un programa le pide datos o tareas a otro, sin pantallas de por medio. A la API que un ACS ofrece hacia los sistemas del negocio se le dice <b>API hacia el norte</b> (<i>northbound API</i>), porque en los dibujos de arquitectura el negocio va arriba y los equipos, abajo. Por esa API, el CRM puede preguntar «¿cómo está el equipo del cliente 1203?» y la mesa de ayuda puede pedir «corre un ping desde ese equipo». El capítulo 15 la mira por dentro.</p><p>La regla para integrar bien es la misma de la sección anterior: <b>cada dato se escribe en su dueño y se lee desde los demás</b>. Si atención cambia la clave del Wi-Fi, lo hace a través del ACS, aunque el botón esté en la pantalla del CRM. Si el cliente se muda, el cambio de dirección se hace en el CRM, y el inventario y el ACS se enteran de él, no al revés.</p></div><div class="practica"><div class="practica-title"><span class="tag">En el navegador</span><h3>Lee la API de un ACS de código abierto</h3></div><p>GenieACS publica la referencia de su API hacia el norte. Vas a leerla como lo haría quien integra el CRM o la mesa de ayuda. Solo se lee: no hace falta instalar nada.</p><ol class="steps"><li><span>Abre la <a href="https://docs.genieacs.com/en/latest/api-reference.html" target="_blank" rel="noopener">referencia de la API de GenieACS</a> (en inglés; el traductor del navegador ayuda).</span></li><li><span>Busca el pedido que <b>busca equipos</b> (<code>GET /devices/?query=…</code>) y mira el ejemplo que encuentra un equipo por su dirección MAC.</span></li><li><span>Busca el pedido que <b>encola tareas</b> (<code>POST /devices/&lt;device_id&gt;/tasks</code>) y el ejemplo que cambia el nombre y la clave del Wi-Fi.</span></li><li><span>Fíjate en la opción <code>connection_request</code> de ese pedido y en las dos respuestas posibles: <code>200</code> y <code>202</code>.</span></li></ol><p><b>Qué observar:</b> el identificador de cada equipo junta tres datos que el propio equipo informa (fabricante, clase de producto y número de serie), y por eso el inventario y el ACS pueden reconocerse sin que nadie copie números a mano. La diferencia entre <code>200</code> («hecho») y <code>202</code> («quedó en cola para la próxima llamada del equipo») es la misma idea del capítulo 3: el ACS no siempre puede hablarle al equipo en el momento.</p></div></section>
+<section><h2>El viaje de un dato</h2><div class="prose"><p>Para cerrar, sigamos un dato concreto desde que nace en el equipo hasta que lo lee alguien que no sabe nada de TR-069: el número de dispositivos conectados al Wi-Fi de una casa.</p><ol class="steps"><li><span><b>En el equipo.</b> El router lleva la cuenta de los dispositivos que tiene conectados. En el árbol de datos que estudiaremos en la parte 3, ese número vive en un parámetro con nombre fijo: <code>Device.Hosts.HostNumberOfEntries</code>.</span></li><li><span><b>Del equipo al ACS.</b> El dato viaja dentro de una sesión TR-069: el equipo lo informa en su llamada periódica o el ACS lo lee a pedido con la orden <code>GetParameterValues</code>, que veremos en el capítulo 4.</span></li><li><span><b>En el ACS.</b> El ACS lo guarda en su base de datos junto con la hora en que lo leyó. Ese «cuándo» es tan importante como el número: un dato de hace seis horas no sirve para atender una llamada de ahora.</span></li><li><span><b>Del ACS al CRM o a la mesa de ayuda.</b> El CRM lo pide por la API hacia el norte cuando el agente abre la ficha del cliente.</span></li><li><span><b>En la pantalla.</b> El agente no ve <code>HostNumberOfEntries = 14</code>: ve «14 dispositivos conectados» con un semáforo, y al lado un botón «actualizar ahora» que dispara una lectura nueva.</span></li></ol></div><figure class="fig fig-flujo" id="02-diagrama-4"><div class="lienzo"><svg viewBox="0 0 1000 490" style="min-width:780px" role="img" aria-label="El viaje de un dato: el equipo informa al ACS el número de dispositivos conectados dentro de una sesión TR-069; el ACS lo guarda con su hora; el agente abre la ficha del cliente; el CRM le pregunta al ACS por su API y recibe el dato en JSON; el CRM lo muestra como una frase con semáforo">
+  <defs>
+    <marker id="g24-fl-apl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--c-apl)"/></marker>
+    <marker id="g24-fl-sis" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--d-sis)"/></marker>
+    <marker id="g24-fl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" style="fill:var(--muted)"/></marker>
+    <symbol id="g24-ont" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="10" rx="1.6"/><path d="M8 12h.01M11 12h.01M14 12h.01"/><path d="M12 18v3.5"/><circle cx="12" cy="4.5" r="1.6"/></g></symbol>
+    <symbol id="g24-srv" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="7" rx="1.5"/><rect x="4" y="14" width="16" height="7" rx="1.5"/><path d="M8 6.5h.01M8 17.5h.01M12 6.5h5M12 17.5h5"/></g></symbol>
+    <symbol id="g24-db" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5.5" rx="7" ry="2.5"/><path d="M5 5.5v13c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5v-13"/><path d="M5 12c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5"/></g></symbol>
+    <symbol id="g24-mon" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M8 20h8M12 16v4"/><path d="M6 12l3-3 3 2 4-4"/></g></symbol>
+    <symbol id="g24-persona" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></g></symbol>
+  </defs>
+
+  <rect x="20" y="14" width="140" height="56" rx="10" class="caja"/><use href="#g24-ont" x="30" y="26" width="30" height="30" class="ico"/><text x="66" y="38" class="t t-b">Equipo</text><text x="66" y="56" class="t t-s t-m">casa 1203</text>
+  <rect x="190" y="14" width="140" height="56" rx="10" class="c-apl"/><use href="#g24-srv" x="200" y="26" width="30" height="30" class="ico"/><text x="236" y="38" class="t t-b">ACS</text><text x="236" y="56" class="t t-s">acs.ejemplo.com</text>
+  <rect x="360" y="14" width="140" height="56" rx="10" class="c-apl"/><use href="#g24-db" x="370" y="26" width="30" height="30" class="ico"/><text x="406" y="38" class="t t-b">Base</text><text x="406" y="56" class="t t-s">del ACS</text>
+  <rect x="530" y="14" width="140" height="56" rx="10" class="d-sis"/><use href="#g24-mon" x="540" y="26" width="30" height="30" class="ico"/><text x="576" y="38" class="t t-b">CRM</text><text x="576" y="56" class="t t-s t-m">ficha</text>
+  <rect x="700" y="14" width="140" height="56" rx="10" class="caja"/><use href="#g24-persona" x="710" y="26" width="30" height="30" class="ico"/><text x="746" y="38" class="t t-b">Agente</text><text x="746" y="56" class="t t-s t-m">de atención</text>
+  <line x1="90" y1="70" x2="90" y2="450" class="vida"/>
+  <line x1="260" y1="70" x2="260" y2="450" class="vida"/>
+  <line x1="430" y1="70" x2="430" y2="450" class="vida"/>
+  <line x1="600" y1="70" x2="600" y2="450" class="vida"/>
+  <line x1="770" y1="70" x2="770" y2="450" class="vida"/>
+
+  
+  <line x1="90" y1="114" x2="258" y2="118" class="ln s-apl" style="stroke-width:2.4" marker-end="url(#g24-fl-apl)"/>
+  <text x="98" y="106" class="t t-s">① sesión <tspan class="t-mono t-b">TR-069</tspan></text>
+  <text x="98" y="136" class="t t-xs t-mono t-m">HostNumberOfEntries = 14</text>
+  <line x1="260" y1="166" x2="428" y2="170" class="ln s-apl" style="stroke-width:2" marker-end="url(#g24-fl-apl)"/>
+  <text x="268" y="158" class="t t-s">② guarda: 14 · leído 09:12</text>
+
+  
+  <line x1="770" y1="226" x2="602" y2="230" class="ln" style="stroke-width:2" marker-end="url(#g24-fl)"/>
+  <text x="612" y="218" class="t t-s">③ abre la ficha del 1203</text>
+  <line x1="600" y1="276" x2="262" y2="282" class="ln s-sis" style="stroke-width:2;stroke:var(--d-sis)" marker-end="url(#g24-fl-sis)"/>
+  <text x="300" y="268" class="t t-s">④ API: <tspan class="t-mono">GET /devices/…</tspan></text>
+  <line x1="260" y1="326" x2="598" y2="332" class="ln" style="stroke-width:2;stroke:var(--d-sis)" marker-end="url(#g24-fl-sis)"/>
+  <text x="270" y="318" class="t t-s">⑤ JSON con el dato y su hora</text>
+  <text x="270" y="348" class="t t-xs t-mono t-m">{"hosts": 14, "leido": "09:12"}</text>
+
+  
+  <line x1="600" y1="392" x2="768" y2="396" class="ln" style="stroke-width:2" marker-end="url(#g24-fl)"/>
+  <text x="608" y="384" class="t t-s">⑥ «14 dispositivos conectados»</text>
+  <circle cx="616" cy="412" r="6" style="fill:var(--good)"/><text x="628" y="416" class="t t-s t-m">semáforo en verde</text>
+
+  <g class="t t-xs t-b">
+    <path d="M880 96v84" class="ln s-apl" style="stroke-width:3"/><text x="890" y="128" class="k-apl">RECOLECCIÓN</text><text x="890" y="142" class="t-m">de segundos</text><text x="890" y="156" class="t-m">a horas</text>
+    <path d="M880 204v156" class="ln" style="stroke-width:3;stroke:var(--d-sis)"/><text x="890" y="278" class="k-sis">CONSULTA</text><text x="890" y="292" class="t-m">milisegundos</text>
+    <path d="M880 374v50" class="ln" style="stroke-width:3"/><text x="890" y="398" class="t-m">TRADUCCIÓN</text>
+  </g>
+  <text x="14" y="270" class="t t-xs t-m" transform="rotate(-90 14 270)">EL TIEMPO CORRE HACIA ABAJO ↓</text>
+  <text x="440" y="478" text-anchor="middle" class="t t-s t-m">La consulta es rápida; lo que decide si el dato sirve es cuándo llamó el equipo por última vez.</text>
+</svg></div><figcaption><b>El viaje de un dato, del equipo a la pantalla.</b> Cinco participantes: el equipo de la casa, el ACS, su base de datos, el CRM y el agente; el tiempo corre hacia abajo. En la fase de recolección (① y ②) el dato sube del equipo al ACS dentro de una sesión TR-069 y se guarda con su hora. En la de consulta (③ a ⑤) el agente abre la ficha, el CRM le pregunta al ACS por su API y recibe el dato en JSON. En la de traducción (⑥) el CRM convierte el nombre técnico en una frase y un semáforo. A la derecha, cuánto tarda cada fase: la recolección depende de cuándo llamó el equipo; la consulta, de milisegundos.</figcaption></figure><div class="prose"><p>En ese viaje el dato cruza tres idiomas: TR-069 entre el equipo y el ACS, una API web con mensajes en <b>JSON</b> (<i>JavaScript Object Notation</i>, notación de objetos de JavaScript) entre el ACS y el CRM, y el lenguaje del cliente en la pantalla. Cada traducción es un lugar donde el dato puede perderse, envejecer o malinterpretarse, y cada sistema del camino responde solo por su tramo.</p><p>Explora el mapa completo. Aquí están todos los sistemas del capítulo y los datos que se pasan.</p></div><div class="lab" id="02-lab-2"><div class="lab-title"><span class="tag">Laboratorio</span><h3>Mapa del ecosistema</h3></div><p class="hint">En el modo «Por sistema», toca un sistema y mira qué datos le pasa a cada vecino y por qué camino. En el modo «Sigue un dato», elige un dato (la potencia de la fibra, el estado de pago, los equipos conectados…) y mira su recorrido paso a paso, con el dueño marcado.</p><style>
+[id="02-lab-2"] .g2b-wrap{overflow-x:auto;border-radius:8px}
+[id="02-lab-2"] svg{width:100%;min-width:520px;height:auto;display:block;background:var(--card);border-radius:8px;font-family:var(--f-display)}
+[id="02-lab-2"] .g2b-n rect{fill:var(--paper);stroke:var(--line);stroke-width:1.5}
+[id="02-lab-2"] .g2b-n{cursor:pointer}
+[id="02-lab-2"] .g2b-n text{fill:var(--ink);font-size:14px;font-weight:700;pointer-events:none}
+[id="02-lab-2"] .g2b-n:focus{outline:none}
+[id="02-lab-2"] .g2b-n:focus rect,[id="02-lab-2"] .g2b-n.sel rect{stroke:var(--accent);stroke-width:3}
+[id="02-lab-2"] .g2b-n.vec rect{stroke:var(--accent);stroke-dasharray:4 3}
+[id="02-lab-2"] .g2b-n.duenio rect{fill:var(--accent-soft);stroke:var(--accent);stroke-width:3}
+[id="02-lab-2"] .g2b-n.t-sis rect{stroke:var(--d-sis)}
+[id="02-lab-2"] .g2b-n.t-op rect{stroke:var(--d-oper)}
+[id="02-lab-2"] .g2b-n.t-casa rect{stroke:var(--d-casa)}
+[id="02-lab-2"] .g2b-e{stroke:var(--line);stroke-width:2;fill:none}
+[id="02-lab-2"] .g2b-e.on{stroke:var(--accent);stroke-width:4}
+[id="02-lab-2"] .g2b-e.fis.on{stroke:var(--c-fis)}
+[id="02-lab-2"] .g2b-e.apl.on{stroke:var(--c-apl)}
+[id="02-lab-2"] .g2b-e.red.on{stroke:var(--c-red)}
+[id="02-lab-2"] .g2b-num circle{fill:var(--ink)}
+[id="02-lab-2"] .g2b-num text{fill:var(--card);font:700 12px var(--f-mono)}
+[id="02-lab-2"] .g2b-franja{font-size:11px;letter-spacing:.06em;font-weight:700;paint-order:stroke;stroke:var(--card);stroke-width:5px}
+[id="02-lab-2"] .g2b-pkt{fill:var(--accent)}
+[id="02-lab-2"] .g2b-lista{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+[id="02-lab-2"] .g2b-lista li{padding:6px 10px;border-radius:8px;background:var(--paper);font-size:.9rem;border-left:4px solid var(--line)}
+[id="02-lab-2"] .g2b-lista li.act{border-left-color:var(--accent);background:var(--accent-soft)}
+[id="02-lab-2"] .g2b-lista code{font-size:.8rem}
+</style>
+<div class="btns" role="group" aria-label="Modo">
+  <button type="button" id="g2b-m1" aria-pressed="true">Por sistema</button>
+  <button type="button" id="g2b-m2" aria-pressed="false">Sigue un dato</button>
+</div>
+<div class="opciones" id="g2b-datos" hidden>
+  <label>Dato
+    <select id="g2b-dato">
+      <option value="pot">La potencia de la fibra de una ONT</option>
+      <option value="pago">El estado de pago del cliente</option>
+      <option value="hosts">Los equipos conectados al Wi-Fi</option>
+      <option value="plan">El plan contratado (500 Mbps)</option>
+      <option value="serie">El número de serie del equipo instalado</option>
+      <option value="falla">Una OLT que pierde su enlace</option>
+    </select></label>
+</div>
+<div class="g2b-wrap"><svg id="g2b-svg" viewBox="0 0 640 440" role="img" aria-label="Mapa de los sistemas del operador y los caminos entre ellos"></svg></div>
+<div class="btns" id="g2b-btns" hidden><button type="button" id="g2b-play" class="primary">Reproducir el viaje</button></div>
+<div class="readout texto" id="g2b-out" aria-live="polite"></div>
+<ol class="g2b-lista" id="g2b-lista" aria-live="polite"></ol></div><div class="prose"><p>Con este mapa, los tres pedidos del lunes en Fibra Ejemplo tienen respuesta. El cliente que pagó y no navega es un asunto de RADIUS: hay que ver si el pago llegó y si se mandó el cambio al BNG. La potencia de la fibra se mira en el gestor de OLT. Y los equipos en casas de clientes dados de baja salen del inventario, cruzado con la última llamada de cada equipo al ACS. El ACS ayuda en los tres, pero cada respuesta tiene un dueño.</p><p>La idea con la que sigue el curso es esa: <b>cada sistema tiene un dueño claro del dato; el ACS es el dueño de la configuración del equipo de la casa.</b></p></div><div class="quiz"><h3>Pruébate</h3><details><summary>¿Qué configura la OLT por OMCI y qué configura el ACS por TR-069 en una misma ONT con Wi-Fi?</summary><p>La OLT, la parte óptica: la autorización del número de serie, los contenedores y puertos dentro de la fibra, las VLAN y la lectura de la potencia y las alarmas. El ACS, la parte de router: el Wi-Fi, el usuario de conexión, la voz, el firmware y los diagnósticos.</p></details><details><summary>¿Por qué OMCI funciona aunque el equipo no tenga todavía una dirección IP?</summary><p>Porque viaja por un canal reservado dentro de la propia fibra, entre la OLT y la ONT, y no usa IP. TR-069, en cambio, necesita una conexión IP armada.</p></details><details><summary>¿Por qué el corte por falta de pago no lo hace el ACS?</summary><p>Porque el BNG y RADIUS lo aplican en segundos, sin depender de que el equipo llame ni colabore, el cliente no puede saltárselo reiniciando el equipo, funciona con cualquier router y la reconexión es instantánea porque la configuración del equipo nunca se tocó.</p></details><details><summary>El ACS dice que a una ONT le llega −22 dBm y el gestor de OLT dice −28 dBm. ¿Cuál vale para decidir una visita?</summary><p>El del gestor de OLT, que es el dueño del dato óptico y lo mide en el momento. El del ACS es una copia que el equipo informó en su última llamada.</p></details><details><summary>¿Qué distingue al ACS, al gestor de OLT y al NMS, si los tres muestran alarmas?</summary><p>Su unidad de trabajo: el ACS piensa en el equipo de cada casa, el gestor de OLT en las OLT y sus puertos de fibra, y el NMS en la salud de la red entera.</p></details><details><summary>¿Qué es la API hacia el norte de un ACS y quién la usa?</summary><p>Es la interfaz por la que los sistemas del negocio (CRM, mesa de ayuda, inventario, NMS) le piden datos o tareas al ACS sin usar su pantalla.</p></details></div><div class="investiga"><h3>Para investigar</h3><p class="hint">Estas preguntas no se responden en el capítulo: búscalas por tu cuenta.</p><ol><li>¿Qué son un T-CONT y un puerto GEM, y por qué la OLT tiene que crearlos antes de que pase tráfico?<small>Pista: busca «GPON T-CONT GEM port DBA».</small></li><li>¿Qué diferencia hay entre una sesión PPPoE y una IPoE con DHCP, y cuál usan más los operadores de fibra hoy?<small>Pista: busca «PPPoE vs IPoE BNG».</small></li><li>¿Qué es un dBm y por qué la potencia de la fibra se escribe con números negativos?<small>Pista: busca «dBm potencia óptica escala logarítmica».</small></li><li>¿Qué es un orquestador de servicios y en qué se diferencia de una simple integración punto a punto entre dos sistemas?<small>Pista: busca «service orchestration OSS BSS».</small></li><li>¿Por qué existen dos protocolos de autorización parecidos, RADIUS y Diameter, y en qué redes se usa cada uno?</li></ol></div><div class="vids"><span>Para saber más</span><a class="vid" href="https://aaramirez.github.io/telco/28-gestionar-el-equipo-en-casa-del-cliente.html" target="_blank" rel="noopener">Gestionar el equipo en casa del cliente, capítulo 28 de Cómo funciona un telco <small>lectura</small></a><a class="vid" href="https://aaramirez.github.io/telco/29-las-plataformas-de-gestion-en-la-practica.html" target="_blank" rel="noopener">Las plataformas de gestión en la práctica, capítulo 29 de Cómo funciona un telco <small>lectura</small></a><a class="vid" href="https://www.rfc-editor.org/rfc/rfc5176" target="_blank" rel="noopener">RFC 5176: Dynamic Authorization Extensions to RADIUS (inglés) <small>norma</small></a><a class="vid" href="https://docs.genieacs.com/en/latest/api-reference.html" target="_blank" rel="noopener">Referencia de la API de GenieACS (inglés) <small>referencia</small></a></div></section>
+<label class="got"><input type="checkbox" id="got"> Lo tengo claro</label>
+<nav class="pager" id="pager" aria-label="Capítulo anterior y siguiente"></nav>
+</main>
+</div>
+<footer><span>Curso abierto de aaramirez.github.io.</span><span>Sitio publicado: <a href="https://github.com/aaramirez/gestion-remota-de-equipos" target="_blank" rel="noopener">github.com/aaramirez/gestion-remota-de-equipos</a></span></footer>
+</div>
+<script src="assets/lab.js"></script>
+<script>
+(function(){
+  const {$}=window.Lab;
+  const NOM={olt:'la OLT',acs:'el ACS',radius:'RADIUS y el BNG',nms:'el NMS',neg:'los sistemas del negocio'};
+  const COL={olt:'var(--c-fis)',acs:'var(--c-apl)',radius:'var(--c-red)',nms:'var(--c-tra)',neg:'var(--d-sis)'};
+  const T=[
+    {t:'Cambiar la VLAN del servicio de Internet de una ONT',s:'olt',p:'Las VLAN dentro de la fibra las arma la OLT por OMCI. El ACS usa esa VLAN en el router, pero no la crea.'},
+    {t:'Cambiar el nombre (SSID) del Wi-Fi',s:'acs',p:'El Wi-Fi es la parte de router del equipo: es del ACS, por TR-069. Solo en ONT sin router se hace por OMCI.'},
+    {t:'Cortar el servicio por falta de pago',s:'radius',p:'Facturación avisa y RADIUS le manda al BNG un CoA o un Disconnect-Request. El equipo no se toca, y por eso la reconexión es instantánea.'},
+    {t:'Actualizar el firmware del router de la casa',s:'acs',p:'El ACS manda la orden Download con la dirección del archivo (capítulos 4 y 13). Algunas OLT actualizan por OMCI el software de la parte óptica, pero el router lo actualiza el ACS.'},
+    {t:'Autorizar una ONT nueva por su número de serie',s:'olt',p:'Sin autorización de la OLT, la ONT no puede usar la fibra y nunca llegará a llamar al ACS.'},
+    {t:'Ver cuánta luz le llega a la ONT',s:'olt',p:'La potencia óptica es de la OLT, que la mide en el momento. El ACS puede mostrar una copia, pero ante una diferencia manda la OLT.'},
+    {t:'Aplicar la velocidad del plan nuevo (de 200 a 500 Mbps)',s:'radius',p:'La velocidad la aplica el BNG con el perfil que le da RADIUS. El ACS puede ajustar algo del equipo, pero el límite del plan está en la red.'},
+    {t:'Hacer un ping desde el equipo de la casa',s:'acs',p:'Los diagnósticos desde el equipo los pide el ACS: escribe la prueba en el árbol del equipo y lee el resultado (capítulo 11).'},
+    {t:'Alarmar cuando una OLT pierde su enlace hacia el core',s:'nms',p:'Es la salud de la red, no de una casa: el NMS vigila OLT, enlaces y routers por SNMP y avisa al NOC.'},
+    {t:'Registrar que el cliente pidió un cambio de plan',s:'neg',p:'La venta y el plan contratado son del CRM. Desde ahí la orden llega a RADIUS y, si hace falta, al ACS.'},
+    {t:'Saber en qué casa está el equipo de serie ZXA0012',s:'neg',p:'El inventario es el dueño de dónde está cada equipo. El ACS sabe qué serie lo llamó, pero no a qué casa pertenece.'},
+    {t:'Cargar la cuenta SIP de la línea de voz',s:'acs',p:'La línea de voz vive en el equipo como router: el ACS escribe la cuenta SIP y sus parámetros.'}
+  ];
+  let estado, elegido=null;
+  function iniciar(){
+    estado=T.map((x,i)=>({...x,i,puesto:null}));
+    const orden=estado.slice().sort(()=>Math.random()-.5);
+    elegido=null;
+    $('#g2a-tareas').innerHTML=orden.map(x=>'<button type="button" class="g2a-chip" draggable="true" aria-pressed="false" data-i="'+x.i+'">'+x.t+'</button>').join('');
+    document.querySelectorAll('#g2a-sist .g2a-caja').forEach(c=>{c.querySelectorAll('.g2a-chip').forEach(n=>n.remove());});
+    $('#g2a-out').innerHTML='<span>Elige la primera tarea.</span>';
+    resumen();
+  }
+  function elegir(i){
+    elegido=i;
+    document.querySelectorAll('#g2a-tareas .g2a-chip').forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.i===i)));
+    $('#g2a-out').innerHTML='<span>Elegiste: <b>'+T[i].t+'</b>. Ahora toca el sistema que la hace.</span>';
+  }
+  function soltar(i,s){
+    const x=estado[i]; if(x.puesto)return;
+    x.puesto=s;
+    const chip=document.querySelector('#g2a-tareas .g2a-chip[data-i="'+i+'"]');
+    const ok=s===x.s;
+    chip.className='g2a-chip '+(ok?'bien':'mal');chip.removeAttribute('draggable');chip.removeAttribute('aria-pressed');chip.disabled=true;
+    document.querySelector('#g2a-sist .g2a-caja[data-s="'+s+'"]').appendChild(chip);
+    elegido=null;
+    $('#g2a-out').innerHTML=(ok?'<span class="ok">Correcto: lo hace '+NOM[x.s]+'.</span>':'<span class="warn">No: lo hace '+NOM[x.s]+', no '+NOM[s]+'.</span>')+'<span>'+x.p+'</span>';
+    resumen();
+  }
+  function resumen(){
+    const quedan=estado.filter(x=>!x.puesto).length;
+    $('#g2a-quedan').textContent=quedan;
+    const cuenta={};estado.forEach(x=>cuenta[x.s]=(cuenta[x.s]||0)+1);
+    $('#g2a-barra').innerHTML=Object.keys(NOM).map(k=>'<i style="width:'+(cuenta[k]||0)/T.length*100+'%;background:'+COL[k]+'"></i>').join('');
+    $('#g2a-leyenda').innerHTML=Object.keys(NOM).map(k=>'<span><i style="background:'+COL[k]+'"></i>'+NOM[k]+': '+(cuenta[k]||0)+'</span>').join('');
+    if(!quedan){
+      const bien=estado.filter(x=>x.puesto===x.s).length;
+      const acsFalso=estado.filter(x=>x.puesto==='acs'&&x.s!=='acs').length;
+      $('#g2a-out').innerHTML+='<span class="big">'+bien+' de 12 bien ubicadas.</span><span>Solo 4 de las 12 tareas eran del ACS. '+(acsFalso?'Le diste al ACS '+acsFalso+' que no eran suyas: es el error más común, porque el ACS «puede verlo todo» en el equipo. ':'')+'Ver un dato no es ser su dueño.</span>';
+    }
+  }
+  $('#g2a-tareas').addEventListener('click',ev=>{const b=ev.target.closest('.g2a-chip');if(b&&!b.disabled)elegir(+b.dataset.i);});
+  $('#g2a-tareas').addEventListener('dragstart',ev=>{const b=ev.target.closest('.g2a-chip');if(b){ev.dataTransfer.setData('text/plain',b.dataset.i);elegir(+b.dataset.i);}});
+  document.querySelectorAll('#g2a-sist .g2a-caja').forEach(c=>{
+    c.addEventListener('click',()=>{if(elegido===null){$('#g2a-out').innerHTML='<span>Primero elige una tarea de la lista de arriba.</span>';return;}soltar(elegido,c.dataset.s);});
+    c.addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();c.click();}});
+    c.addEventListener('dragover',ev=>{ev.preventDefault();c.classList.add('sobre');});
+    c.addEventListener('dragleave',()=>c.classList.remove('sobre'));
+    c.addEventListener('drop',ev=>{ev.preventDefault();c.classList.remove('sobre');const i=ev.dataTransfer.getData('text/plain');if(i!=='')soltar(+i,c.dataset.s);});
+  });
+  $('#g2a-reset').addEventListener('click',iniciar);
+  iniciar();
+})();
+</script>
+<script>
+(function(){
+  const {$}=window.Lab;
+  const quieto=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const NS='http://www.w3.org/2000/svg';
+  const N={
+    fac:{x:90,y:62,n:'Facturación',t:'sis'},crm:{x:240,y:62,n:'CRM',t:'sis'},inv:{x:390,y:62,n:'Inventario',t:'sis'},mesa:{x:545,y:62,n:'Mesa de ayuda',t:'sis'},
+    rad:{x:90,y:182,n:'RADIUS',t:'op'},acs:{x:240,y:182,n:'ACS',t:'op'},golt:{x:390,y:182,n:'Gestor de OLT',t:'op'},nms:{x:545,y:182,n:'NMS',t:'op'},
+    bng:{x:90,y:292,n:'BNG',t:'op'},olt:{x:390,y:292,n:'OLT',t:'op'},
+    eq:{x:240,y:400,n:'Equipo (casa)',t:'casa'}
+  };
+  // aristas: [a,b,camino,clase, flujos a→b, flujos b→a]
+  const E=[
+    ['fac','rad','API o base compartida','', 'estado de pago: suspender o reactivar',''],
+    ['crm','rad','API','', 'usuario y perfil del plan contratado',''],
+    ['crm','acs','API hacia el norte','', 'plan y servicios del cliente (voz, Wi-Fi extendido)','estado del equipo y su última llamada, para la ficha'],
+    ['crm','golt','API','', 'orden de instalación: serie de la ONT, puerto y perfil','estado de la ONT y potencia para la ficha'],
+    ['inv','acs','API','', 'qué serie está en qué casa','equipos que llaman sin figurar en el inventario y el firmware de cada uno'],
+    ['mesa','acs','API hacia el norte','', 'pedido de diagnóstico al abrir un ticket','resultado del diagnóstico'],
+    ['mesa','nms','API','', '','ticket automático cuando falla algo de la red'],
+    ['rad','bng','protocolo RADIUS','red', 'Access-Accept con la IP y la velocidad; CoA para cambiarla','Access-Request: «¿quién es este cliente?»'],
+    ['golt','olt','NETCONF, CLI o SNMP','', 'autorizar la ONT, perfiles y VLAN','potencia óptica y alarmas (LOS, dying gasp)'],
+    ['nms','olt','SNMP y registros','', '','tráfico, estado de puertos y alarmas de la OLT'],
+    ['nms','bng','SNMP','', '','sesiones activas y tráfico'],
+    ['bng','eq','sesión PPPoE o IPoE','red', 'dirección IP y navegación (o solo el portal de pago)','pedido para abrir la sesión'],
+    ['olt','eq','OMCI dentro de la fibra','fis', 'contenedores, VLAN y la dirección del ACS','potencia recibida y alarmas del equipo'],
+    ['acs','eq','TR-069 sobre IP','apl', 'órdenes: leer, escribir, descargar, reiniciar','Inform: quién soy, qué pasó y mis datos']
+  ];
+  const DATOS={
+    pot:{d:'olt',txt:'La ONT mide la luz que recibe y la OLT mide la que le llega de vuelta. El dueño es la OLT.',p:[['eq','olt','La ONT informa por OMCI la potencia que recibe; la OLT mide su propio lado.'],['olt','golt','El gestor de OLT lee los valores y guarda el histórico.'],['golt','crm','La ficha del cliente muestra la potencia con su hora y un semáforo.']]},
+    pago:{d:'fac',txt:'Lo crea facturación; RADIUS y el BNG lo aplican. El ACS no aparece.',p:[['fac','rad','Facturación marca la deuda (o el pago) y avisa a RADIUS.'],['rad','bng','RADIUS manda un CoA al BNG: perfil restringido o perfil del plan.'],['bng','eq','El equipo navega normal o solo llega al portal de pago. Su configuración no cambió.']]},
+    hosts:{d:'acs',txt:'Nace en el equipo y su dueño en el operador es el ACS, que lo guarda con su hora de lectura.',p:[['eq','acs','El equipo informa Device.Hosts.HostNumberOfEntries en una sesión TR-069.'],['acs','crm','El CRM lo pide por la API hacia el norte al abrir la ficha.'],['acs','mesa','Si se abre un ticket, la mesa de ayuda lo recibe con el diagnóstico.']]},
+    plan:{d:'crm',txt:'El plan lo vende ventas y vive en el CRM; cada sistema aplica su parte.',p:[['crm','rad','El CRM le pasa a RADIUS el perfil de 500 Mbps.'],['rad','bng','RADIUS manda un CoA y el BNG aplica la velocidad nueva.'],['crm','acs','Si el plan trae algo en el equipo (por ejemplo una red de invitados), el CRM se lo pide al ACS.']]},
+    serie:{d:'inv',txt:'El inventario sabe qué serie se instaló en qué casa; los demás lo usan para reconocer al equipo.',p:[['inv','acs','El inventario le dice al ACS de qué cliente es esa serie.'],['crm','golt','La orden de instalación lleva la serie al gestor de OLT.'],['golt','olt','La OLT autoriza esa serie en su puerto de fibra.'],['eq','acs','El equipo llama con su serie en el Inform y el ACS lo asocia al cliente.']]},
+    falla:{d:'nms',txt:'Una falla de la red es del NMS: no es de ninguna casa en particular.',p:[['olt','nms','La OLT deja de responder o avisa la caída de su enlace.'],['nms','mesa','El NMS abre un ticket con la zona afectada.'],['mesa','acs','Atención ve en el ACS que cientos de equipos de esa zona dejaron de llamar: confirma que no es una casa sino la red.']]}
+  };
+  const svg=$('#g2b-svg');
+  const el=(t,a,p)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);(p||svg).appendChild(e);return e;};
+  const lineas={};
+  E.forEach((e,k)=>{const a=N[e[0]],b=N[e[1]];lineas[k]=el('line',{x1:a.x,y1:a.y,x2:b.x,y2:b.y,class:'g2b-e '+e[3]});});
+  // franjas
+  [['SISTEMAS DEL NEGOCIO',24,'k-sis','var(--d-sis)'],['GESTIÓN Y RED DEL OPERADOR',144,'','var(--d-oper)'],['CASA',372,'','var(--d-casa)']].forEach(([t,y,_,c])=>{const x=el('text',{x:10,y:y,class:'g2b-franja'});x.textContent=t;x.style.fill=c;});
+  const capaNum=el('g',{});
+  const nodos={};
+  for(const id in N){const n=N[id];const g=el('g',{class:'g2b-n t-'+n.t,tabindex:'0',role:'button','aria-label':n.n,'data-id':id});
+    el('rect',{x:n.x-64,y:n.y-21,width:128,height:42,rx:9},g);const t=el('text',{x:n.x,y:n.y+5,'text-anchor':'middle'},g);t.textContent=n.n;nodos[id]=g;}
+  const pkt=el('circle',{r:7,class:'g2b-pkt',opacity:0});
+  let modo=1,turno=0;
+  function limpiar(){Object.values(lineas).forEach(l=>l.classList.remove('on'));Object.values(nodos).forEach(g=>g.classList.remove('sel','vec','duenio'));capaNum.innerHTML='';pkt.setAttribute('opacity',0);}
+  function sistema(id){
+    limpiar();nodos[id].classList.add('sel');
+    const filas=[];let vec=0;
+    E.forEach((e,k)=>{
+      if(e[0]!==id&&e[1]!==id)return;
+      const otro=e[0]===id?e[1]:e[0];lineas[k].classList.add('on');nodos[otro].classList.add('vec');vec++;
+      const sale=e[0]===id?e[4]:e[5],entra=e[0]===id?e[5]:e[4];
+      if(sale)filas.push('<li><b>→ '+N[otro].n+'</b>: '+sale+' <code>('+e[2]+')</code></li>');
+      if(entra)filas.push('<li><b>← '+N[otro].n+'</b>: '+entra+' <code>('+e[2]+')</code></li>');
+    });
+    $('#g2b-out').innerHTML='<span class="big">'+N[id].n+'</span><span>Habla directamente con '+vec+' sistemas. → lo que entrega; ← lo que recibe.</span>';
+    $('#g2b-lista').innerHTML=filas.join('');
+  }
+  function arista(a,b){return E.findIndex(e=>(e[0]===a&&e[1]===b)||(e[0]===b&&e[1]===a));}
+  function dato(){
+    turno++;limpiar();const D=DATOS[$('#g2b-dato').value];
+    nodos[D.d].classList.add('duenio');
+    D.p.forEach(([a,b],i)=>{const k=arista(a,b);lineas[k].classList.add('on');
+      const A=N[a],B=N[b];const g=el('g',{class:'g2b-num'},capaNum);el('circle',{cx:(A.x+B.x)/2,cy:(A.y+B.y)/2,r:10},g);const t=el('text',{x:(A.x+B.x)/2,y:(A.y+B.y)/2+4,'text-anchor':'middle'},g);t.textContent=i+1;});
+    svg.appendChild(capaNum);svg.appendChild(pkt);
+    $('#g2b-out').innerHTML='<span>Dueño del dato: <b>'+N[D.d].n+'</b> (el recuadro relleno).</span><span>'+D.txt+'</span>';
+    $('#g2b-lista').innerHTML=D.p.map(([a,b,t])=>'<li><b>'+N[a].n+' → '+N[b].n+'</b>: '+t+' <code>('+E[arista(a,b)][2]+')</code></li>').join('');
+  }
+  async function reproducir(){
+    const mio=++turno;const D=DATOS[$('#g2b-dato').value];const items=[...document.querySelectorAll('#g2b-lista li')];
+    for(let i=0;i<D.p.length;i++){
+      if(mio!==turno)return;
+      items.forEach((li,j)=>li.classList.toggle('act',j===i));
+      const A=N[D.p[i][0]],B=N[D.p[i][1]];pkt.setAttribute('opacity',1);
+      await new Promise(res=>{const ini=performance.now(),dur=quieto?0:1100;(function paso(t){if(mio!==turno)return res();const k=dur?Math.min(1,(t-ini)/dur):1;pkt.setAttribute('cx',A.x+(B.x-A.x)*k);pkt.setAttribute('cy',A.y+(B.y-A.y)*k);if(k<1)requestAnimationFrame(paso);else setTimeout(res,quieto?0:350);})(performance.now());});
+    }
+    pkt.setAttribute('opacity',0);
+  }
+  function setModo(m){
+    modo=m;turno++;$('#g2b-m1').setAttribute('aria-pressed',String(m===1));$('#g2b-m2').setAttribute('aria-pressed',String(m===2));
+    $('#g2b-datos').hidden=m!==2;$('#g2b-btns').hidden=m!==2;
+    if(m===2)dato();else{limpiar();$('#g2b-out').innerHTML='<span>Toca un sistema del mapa.</span>';$('#g2b-lista').innerHTML='';sistema('acs');}
+  }
+  for(const id in nodos){const g=nodos[id];
+    g.addEventListener('click',()=>{if(modo!==1)setModo(1);sistema(id);});
+    g.addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();g.dispatchEvent(new Event('click'));}});}
+  $('#g2b-m1').addEventListener('click',()=>setModo(1));
+  $('#g2b-m2').addEventListener('click',()=>setModo(2));
+  $('#g2b-dato').addEventListener('change',dato);
+  $('#g2b-play').addEventListener('click',()=>{dato();reproducir();});
+  setModo(1);
+})();
+</script>
+</body>
+</html>
