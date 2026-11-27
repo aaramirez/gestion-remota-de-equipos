@@ -154,7 +154,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </g>
   <text x="14" y="330" class="t t-xs t-m" transform="rotate(-90 14 330)">EL TIEMPO CORRE HACIA ABAJO ↓</text>
   <text x="470" y="588" text-anchor="middle" class="t t-s t-m">Todo el recorrido, de ① a ⑩, cabe en menos de un minuto.</text>
-</svg></div><figcaption><b>Cambiar la clave del Wi-Fi sin visita.</b> Cuatro participantes: la clienta, el agente de atención con su pantalla, el ACS y el equipo de la casa; el tiempo corre hacia abajo. En la fase de consulta (② y ③) el agente busca el equipo y ve su ficha. En la de orden (④ a ⑧) el ACS despierta al equipo con un <i>Connection Request</i>, el equipo llama y se presenta con un <i>Inform</i>, recibe la orden <code>SetParameterValues</code> con la clave nueva y confirma con estado 0, que quiere decir «aplicado». En la de aviso (⑨ y ⑩) la confirmación vuelve hasta la clienta. Las flechas rosadas son mensajes entre sistemas; las grises, la conversación telefónica. Todo cabe en menos de un minuto. En la sesión real hay un par de mensajes más entre ⑥ y ⑦, que el capítulo 3 muestra uno por uno.</figcaption></figure><div class="prose"><p>Pruébalo tú: en este laboratorio eres el agente, y el equipo de la casa responde, o no, según el escenario.</p></div><div class="lab" id="01-lab-3"><div class="lab-title"><span class="tag">Laboratorio</span><h3>Consola del agente: el equipo de la casa 1203</h3></div><p class="hint">Elige un escenario y aprieta una acción. Mira viajar los mensajes entre tu pantalla, el ACS y el equipo, y lee qué respondió. Prueba después con «Fibra cortada» o «Equipo desenchufado»: ¿qué ve el ACS cuando el equipo no llama?</p><style>
+</svg></div><figcaption><b>Cambiar la clave del Wi-Fi sin visita.</b> Cuatro participantes: la clienta, el agente de atención con su pantalla, el ACS y el equipo de la casa; el tiempo corre hacia abajo. En la fase de consulta (② y ③) el agente busca el equipo y ve su ficha. En la de orden (④ a ⑧) el ACS despierta al equipo con un <i>Connection Request</i>, el equipo llama y se presenta con un <i>Inform</i>, recibe la orden <code>SetParameterValues</code> con la clave nueva y confirma con estado 0, que quiere decir «aplicado». En la de aviso (⑨ y ⑩) la confirmación vuelve hasta la clienta. Las flechas rosadas son mensajes entre sistemas; las grises, la conversación telefónica. Todo cabe en menos de un minuto. En la sesión real hay un par de mensajes más entre ⑥ y ⑦, que el capítulo 3 muestra uno por uno.</figcaption></figure><div class="prose"><p>Pruébalo tú: en este laboratorio eres el agente, y el equipo de la casa responde, o no, según el escenario.</p></div><div class="lab" id="01-lab-3"><div class="lab-title"><span class="tag">Laboratorio</span><h3>Consola del agente: el equipo de la casa 1203</h3></div><p class="hint">Elige un escenario y aprieta una acción. Mira viajar los mensajes entre tu pantalla, el ACS y el equipo, y lee qué respondió. Con «Anterior» y «Siguiente» recorres el mismo flujo mensaje por mensaje, hacia adelante y hacia atrás; marca «Paso a paso» para que una acción empiece detenida en el primer paso. Prueba después con «Fibra cortada» o «Equipo desenchufado»: ¿qué ve el ACS cuando el equipo no llama?</p><style>
 [id="01-lab-3"] .g1c-ficha{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,170px),1fr));gap:6px 14px;border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:var(--paper)}
 [id="01-lab-3"] .g1c-ficha div{display:grid;gap:1px;min-width:0}
 [id="01-lab-3"] .g1c-ficha span{font:600 .7rem var(--f-display);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
@@ -177,6 +177,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 [id="01-lab-3"] .g1c-log li i{font-style:normal;color:var(--muted)}
 [id="01-lab-3"] .g1c-log li.err{background:var(--warm-soft)}
 [id="01-lab-3"] .g1c-log li.ok{background:var(--good-soft)}
+[id="01-lab-3"] .g1c-pasos{align-items:center;margin-top:8px}
+[id="01-lab-3"] .g1c-modo{display:flex;gap:6px;align-items:center;font:600 .88rem var(--f-display);margin-right:6px;cursor:pointer}
+[id="01-lab-3"] .g1c-n{font:600 .85rem var(--f-mono);color:var(--muted);min-width:7.5em;text-align:center}
 </style>
 <div class="opciones">
   <label>Escenario de la casa 1203
@@ -196,6 +199,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <button type="button" data-a="reboot">Reiniciar</button>
   <button type="button" data-a="firm">Actualizar firmware</button>
   <button type="button" data-a="ping">Prueba de ping</button>
+</div>
+<div class="btns g1c-pasos" id="g1c-pasos">
+  <label class="g1c-modo"><input type="checkbox" id="g1c-modo"> Paso a paso</label>
+  <button type="button" id="g1c-ant">← Anterior</button>
+  <span class="g1c-n" id="g1c-n" aria-live="polite">Elige una acción</span>
+  <button type="button" class="primary" id="g1c-sig">Siguiente →</button>
+  <button type="button" id="g1c-ini">Empezar de nuevo</button>
 </div>
 <svg viewBox="0 0 360 140" role="img" aria-label="Los mensajes viajan entre la pantalla del agente, el ACS y el equipo de la casa">
   <line x1="106" y1="72" x2="130" y2="72" class="via"/>
@@ -525,35 +535,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     fibra:{llama:false,ult:'hace 2 días',fw:'5.2 (vigente)',fwOk:true,canal:'6',canalOk:true,disp:'—',ssid:'Casa-1203',olt:'LOS: no le llega luz',nota:'La OLT marca pérdida de señal (LOS) desde hace dos días.'},
     luz:{llama:false,ult:'hace 40 min',fw:'5.2 (vigente)',fwOk:true,canal:'6',canalOk:true,disp:'—',ssid:'Casa-1203',olt:'último aviso de energía (dying gasp)',nota:'Antes de callar, la ONT avisó a la OLT que se quedaba sin energía.'}
   };
-  let s, t=0, corriendo=false, turno=0;
-  const espera=ms=>new Promise(r=>setTimeout(r,quieto?0:ms));
-  function ficha(){
-    const f=[['Cliente','1203 · plan 500 Mbps'],['Equipo','ONT con Wi-Fi · marca A'],['Firmware',s.fw,s.fwOk?'':'mal'],
-      ['Última llamada al ACS',s.ult,s.llama?'bien':'mal'],['Wi-Fi',s.ssid],['Canal',s.canal,s.canalOk?'':'mal'],['Dispositivos conectados',String(s.disp)]];
-    if(s.olt)f.push(['La OLT dice',s.olt,'mal']);
-    $('#g1c-ficha').innerHTML=f.map(([k,v,c])=>'<div><span>'+k+'</span><b class="'+(c||'')+'">'+v+'</b></div>').join('');
-    $('#g1c-eqbox').setAttribute('class','nodo'+(s.llama?'':' caido'));
-  }
-  function log(txt,cls){const li=document.createElement('li');if(cls)li.className=cls;li.innerHTML='<i>'+t.toFixed(1).replace('.',',')+' s</i><span>'+txt+'</span>';const ol=$('#g1c-log');ol.appendChild(li);ol.scrollTop=ol.scrollHeight;}
-  function reloj(){$('#g1c-reloj').textContent='tiempo simulado: '+(t<120?t.toFixed(1).replace('.',',')+' s':(t/60).toFixed(1).replace('.',',')+' min');}
-  function viaje(de,a,txt,seg,opt){
-    opt=opt||{};const mio=turno;
-    return new Promise(res=>{
-      const p=$('#g1c-pkt');p.setAttribute('class','pkt'+(opt.cr?' cr':''));
-      $('#g1c-lbl').textContent=X[a]<X[de]?'← '+txt:txt+' →';
-      const x0=X[de],x1=opt.falla?(X[a]-66):X[a],dur=quieto?0:900,ini=performance.now();
-      p.setAttribute('opacity','1');
-      // setTimeout y no requestAnimationFrame: así la animación termina aunque la pestaña quede en segundo plano
-      function paso(){
-        if(mio!==turno)return res(false);
-        const k=dur?Math.min(1,(performance.now()-ini)/dur):1;
-        p.setAttribute('cx',x0+(x1-x0)*k);
-        if(k<1)setTimeout(paso,25);
-        else{p.setAttribute('opacity',opt.falla?'.25':'0');t+=seg;reloj();res(true);}
-      }
-      paso();
-    });
-  }
   const RPC={
     leer:{rpc:'GetParameterValues',resp:'GetParameterValuesResponse',fin:()=>'Leíste el estado: firmware '+s.fw+', canal '+s.canal+', '+s.disp+' dispositivos.'},
     clave:{rpc:'SetParameterValues · KeyPassphrase',resp:'estado 0: aplicado',fin:()=>'Clave cambiada. Los dispositivos de la casa tendrán que conectarse con la clave nueva.'},
@@ -562,60 +543,137 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     firm:{rpc:'Download · firmware 5.2',resp:'DownloadResponse',descarga:true,fx:()=>{s.fw='5.2 (vigente)';s.fwOk=true;},fin:()=>'Firmware actualizado a 5.2. El equipo avisó con 7 TRANSFER COMPLETE. Se acabaron los reinicios.'},
     ping:{rpc:'diagnóstico de ping',resp:'resultado: 0 % de pérdida, 9 ms',fin:()=>'El equipo llega sin problemas a Internet: si el cliente nota lentitud, hay que mirar su Wi-Fi.'}
   };
-  async function accion(a){
-    if(corriendo)return;corriendo=true;const mio=++turno;
-    $('#g1c-log').innerHTML='';t=0;reloj();$('#g1c-x').setAttribute('opacity','0');$('#g1c-out').innerHTML='<span>En curso…</span>';
-    document.querySelectorAll('#g1c-acc button').forEach(b=>b.disabled=true);
-    const r=RPC[a];
-    const ok=async(...q)=>{const v=await viaje(...q);if(mio!==turno)throw 0;return v;};
-    try{
-      log('Pides «'+r.rpc+'» al ACS');
-      await ok('ag','acs','orden pendiente',0.3);
-      log('El ACS toca el timbre del equipo (Connection Request)');
-      if(!s.llama){
-        await ok('acs','eq','Connection Request',1.5,{cr:true,falla:true});
-        $('#g1c-x').setAttribute('opacity','1');
-        for(let k=0;k<3;k++){await espera(350);t+=10;reloj();log('… sin respuesta ('+(k+1)+'.º intento)','err');}
-        await ok('acs','ag','el equipo no responde',0.3);
-        log('El ACS avisa: el equipo no llama desde '+s.ult.replace('hace ',''),'err');
-        $('#g1c-out').innerHTML='<span class="warn">El ACS no puede hacer nada: solo habla con equipos que lo llaman.</span><span>'+s.nota+'</span><span>'+
-          (s.olt.startsWith('LOS')?'Veredicto: <b>visita</b>. El problema es la fibra, y ninguna orden la arregla.':'Veredicto: <b>llamar al cliente</b>. Lo más probable es que se haya ido la luz o que desenchufaran el equipo.')+'</span>';
-        return;
-      }
-      await ok('acs','eq','Connection Request',0.4,{cr:true});
-      await ok('eq','acs','Inform · 6 CONNECTION REQUEST',0.6);
-      log('El equipo llama y se presenta con un Inform');
-      await ok('acs','eq',r.rpc,0.4);
-      log('El ACS manda la orden: '+r.rpc);
-      if(r.descarga){
-        await ok('eq','acs','DownloadResponse',0.3);log('El equipo acepta y empieza a descargar el archivo');
-        await espera(500);t+=90;reloj();log('Descarga e instalación (unos 90 s)');
-        await espera(400);t+=60;reloj();log('El equipo se reinicia con el firmware nuevo (unos 60 s)');
-        await ok('eq','acs','Inform · 1 BOOT, 7 TRANSFER COMPLETE',0.6);log('Vuelve a llamar: «terminé la descarga»','ok');
-      }else if(r.reinicio){
-        await ok('eq','acs','RebootResponse',0.3);log('El equipo confirma y se reinicia');
-        await espera(500);t+=60;reloj();log('Reinicio (unos 60 s): por un minuto la casa no tiene Internet');
-        await ok('eq','acs','Inform · 1 BOOT',0.6);log('Vuelve a llamar con el evento 1 BOOT','ok');
-      }else{
-        await ok('eq','acs',r.resp,a==='ping'?3:0.4);log('El equipo responde: '+r.resp,'ok');
-      }
-      if(r.fx)r.fx();
-      await ok('acs','ag','resultado',0.3);
-      ficha();
-      $('#g1c-out').innerHTML='<span class="ok">'+r.fin()+'</span><span>Tiempo total: '+(t<120?t.toFixed(1).replace('.',',')+' segundos':(t/60).toFixed(1).replace('.',',')+' minutos')+'. Una visita habría tardado días.</span>';
-    }catch(e){}
-    finally{if(mio===turno){corriendo=false;document.querySelectorAll('#g1c-acc button').forEach(b=>b.disabled=false);}}
+
+  // Estado: s es el equipo; base, la copia de cuando empezó la acción (para volver atrás).
+  let s, base, a=null, P=[], k=0, turno=0, anim=null;
+  const espera=ms=>new Promise(r=>setTimeout(r,quieto?0:ms));
+  const seg=t=>t<120?t.toFixed(1).replace('.',',')+' s':(t/60).toFixed(1).replace('.',',')+' min';
+
+  // El flujo de una acción como lista de pasos. Cada paso: un mensaje que viaja (v) o una espera (ms),
+  // el tiempo simulado que suma (dt), lo que se anota antes y después, y si marca la X roja.
+  function pasos(a){
+    const r=RPC[a], L=[];
+    const v=(de,ha,txt,dt,o)=>Object.assign({v:{de,a:ha,txt,cr:!!(o&&o.cr),falla:!!(o&&o.falla)},dt,antes:[],despues:[]},o&&o.extra);
+    L.push(Object.assign(v('ag','acs','orden pendiente',0.3),{antes:[['Pides «'+r.rpc+'» al ACS']]}));
+    if(!s.llama){
+      L.push(Object.assign(v('acs','eq','Connection Request',1.5,{cr:true,falla:true}),{antes:[['El ACS toca el timbre del equipo (Connection Request)']],equis:true}));
+      for(let i=1;i<=3;i++)L.push({ms:350,dt:10,antes:[],despues:[['… sin respuesta ('+i+'.º intento)','err']]});
+      L.push(Object.assign(v('acs','ag','el equipo no responde',0.3),{despues:[['El ACS avisa: el equipo no llama desde '+s.ult.replace('hace ',''),'err']],fin:'caido'}));
+      return L;
+    }
+    L.push(Object.assign(v('acs','eq','Connection Request',0.4,{cr:true}),{antes:[['El ACS toca el timbre del equipo (Connection Request)']]}));
+    L.push(Object.assign(v('eq','acs','Inform · 6 CONNECTION REQUEST',0.6),{despues:[['El equipo llama y se presenta con un Inform']]}));
+    L.push(Object.assign(v('acs','eq',r.rpc,0.4),{despues:[['El ACS manda la orden: '+r.rpc]]}));
+    if(r.descarga){
+      L.push(Object.assign(v('eq','acs','DownloadResponse',0.3),{despues:[['El equipo acepta y empieza a descargar el archivo']]}));
+      L.push({ms:500,dt:90,antes:[],despues:[['Descarga e instalación (unos 90 s)']]});
+      L.push({ms:400,dt:60,antes:[],despues:[['El equipo se reinicia con el firmware nuevo (unos 60 s)']]});
+      L.push(Object.assign(v('eq','acs','Inform · 1 BOOT, 7 TRANSFER COMPLETE',0.6),{despues:[['Vuelve a llamar: «terminé la descarga»','ok']]}));
+    }else if(r.reinicio){
+      L.push(Object.assign(v('eq','acs','RebootResponse',0.3),{despues:[['El equipo confirma y se reinicia']]}));
+      L.push({ms:500,dt:60,antes:[],despues:[['Reinicio (unos 60 s): por un minuto la casa no tiene Internet']]});
+      L.push(Object.assign(v('eq','acs','Inform · 1 BOOT',0.6),{despues:[['Vuelve a llamar con el evento 1 BOOT','ok']]}));
+    }else{
+      L.push(Object.assign(v('eq','acs',r.resp,a==='ping'?3:0.4),{despues:[['El equipo responde: '+r.resp,'ok']]}));
+    }
+    L.push(Object.assign(v('acs','ag','resultado',0.3),{fin:'ok'}));
+    return L;
+  }
+
+  function ficha(){
+    const f=[['Cliente','1203 · plan 500 Mbps'],['Equipo','ONT con Wi-Fi · marca A'],['Firmware',s.fw,s.fwOk?'':'mal'],
+      ['Última llamada al ACS',s.ult,s.llama?'bien':'mal'],['Wi-Fi',s.ssid],['Canal',s.canal,s.canalOk?'':'mal'],['Dispositivos conectados',String(s.disp)]];
+    if(s.olt)f.push(['La OLT dice',s.olt,'mal']);
+    $('#g1c-ficha').innerHTML=f.map(([c,v,m])=>'<div><span>'+c+'</span><b class="'+(m||'')+'">'+v+'</b></div>').join('');
+    $('#g1c-eqbox').setAttribute('class','nodo'+(s.llama?'':' caido'));
+  }
+  function anotar(lineas,t){
+    const ol=$('#g1c-log');
+    lineas.forEach(([txt,cls])=>{const li=document.createElement('li');if(cls)li.className=cls;li.innerHTML='<i>'+t.toFixed(1).replace('.',',')+' s</i><span>'+txt+'</span>';ol.appendChild(li);});
+    ol.scrollTop=ol.scrollHeight;
+  }
+  function etiqueta(v){$('#g1c-lbl').textContent=v?(X[v.a]<X[v.de]?'← '+v.txt:v.txt+' →'):'';}
+  function fin(v){return v.falla?X[v.a]-66:X[v.a];}
+
+  // Dibuja el estado al terminar el paso n (0 = antes de empezar), sin animación.
+  function dibujar(n){
+    k=n; s=Object.assign({},base);
+    const pk=$('#g1c-pkt'); let t=0, ult=null, x=false;
+    $('#g1c-log').innerHTML='';
+    for(let i=0;i<n;i++){
+      const p=P[i];
+      anotar(p.antes,t);
+      if(p.v)ult=p.v;
+      if(p.equis)x=true;
+      t+=p.dt; anotar(p.despues,t);
+    }
+    etiqueta(ult);
+    if(ult){pk.setAttribute('class','pkt'+(ult.cr?' cr':''));pk.setAttribute('cx',fin(ult));pk.setAttribute('opacity',ult.falla?'.25':'0');}
+    else{pk.setAttribute('opacity','0');pk.setAttribute('cx',X.ag);}
+    $('#g1c-x').setAttribute('opacity',x?'1':'0');
+    $('#g1c-reloj').textContent='tiempo simulado: '+seg(t);
+    const ultimo=n===P.length&&P.length>0;
+    if(ultimo&&P[n-1].fin==='ok'&&RPC[a].fx)RPC[a].fx();
+    ficha();
+    if(!a)$('#g1c-out').innerHTML='<span>'+s.nota+'</span><span>Elige una acción.</span>';
+    else if(!ultimo)$('#g1c-out').innerHTML='<span>'+(n===0?'Listo para empezar: aprieta «Siguiente» o elige otra acción.':'En curso…')+'</span>';
+    else if(P[n-1].fin==='caido')$('#g1c-out').innerHTML='<span class="warn">El ACS no puede hacer nada: solo habla con equipos que lo llaman.</span><span>'+s.nota+'</span><span>'+
+      (s.olt.startsWith('LOS')?'Veredicto: <b>visita</b>. El problema es la fibra, y ninguna orden la arregla.':'Veredicto: <b>llamar al cliente</b>. Lo más probable es que se haya ido la luz o que desenchufaran el equipo.')+'</span>';
+    else $('#g1c-out').innerHTML='<span class="ok">'+RPC[a].fin()+'</span><span>Tiempo total: '+(t<120?t.toFixed(1).replace('.',',')+' segundos':(t/60).toFixed(1).replace('.',',')+' minutos')+'. Una visita habría tardado días.</span>';
+    botones();
+  }
+  function botones(){
+    const hay=P.length>0;
+    $('#g1c-n').textContent=hay?('Paso '+k+' de '+P.length):'Elige una acción';
+    $('#g1c-ini').disabled=!hay||k===0;
+    $('#g1c-ant').disabled=!hay||k===0;
+    $('#g1c-sig').disabled=!hay||k===P.length;
+  }
+
+  // Anima el paso n+1 y deja dibujado su final. Devuelve false si otra acción lo interrumpió.
+  async function avanzar(mio){
+    const p=P[k], n=k+1;
+    anim=n;
+    let t=0; for(let i=0;i<k;i++)t+=P[i].dt;
+    anotar(p.antes,t);
+    if(p.v){
+      const v=p.v, pk=$('#g1c-pkt');
+      pk.setAttribute('class','pkt'+(v.cr?' cr':''));etiqueta(v);
+      const x0=X[v.de],x1=fin(v),dur=quieto?0:900,ini=performance.now();
+      pk.setAttribute('opacity','1');
+      // setTimeout y no requestAnimationFrame: así la animación termina aunque la pestaña quede en segundo plano
+      await new Promise(res=>{(function paso(){
+        if(mio!==turno)return res();
+        const q=dur?Math.min(1,(performance.now()-ini)/dur):1;
+        pk.setAttribute('cx',x0+(x1-x0)*q);
+        if(q<1)setTimeout(paso,25);else res();
+      })();});
+    }else await espera(p.ms);
+    if(mio!==turno)return false;
+    anim=null; dibujar(n); return true;
+  }
+  async function reproducir(){
+    const mio=++turno;
+    while(k<P.length){if(!await avanzar(mio))return;}
+  }
+  function parar(){turno++; if(anim!==null){const n=anim;anim=null;return n;} return null;}
+
+  function accion(nueva){
+    parar();
+    if(a&&k===P.length)base=Object.assign({},s);   // lo que hizo la acción anterior queda hecho
+    a=nueva; P=pasos(a); dibujar(0);
+    if(!$('#g1c-modo').checked)reproducir();
   }
   function escenario(){
-    turno++;corriendo=false;
-    s=Object.assign({},ESC[$('#g1c-esc').value]);
-    $('#g1c-log').innerHTML='';t=0;reloj();$('#g1c-lbl').textContent='';$('#g1c-pkt').setAttribute('opacity','0');$('#g1c-x').setAttribute('opacity','0');
-    document.querySelectorAll('#g1c-acc button').forEach(b=>b.disabled=false);
-    ficha();
-    $('#g1c-out').innerHTML='<span>'+s.nota+'</span><span>Elige una acción.</span>';
+    parar(); a=null; P=[];
+    base=Object.assign({},ESC[$('#g1c-esc').value]);
+    dibujar(0);
   }
   $('#g1c-acc').addEventListener('click',ev=>{const b=ev.target.closest('button');if(b)accion(b.dataset.a);});
   $('#g1c-esc').addEventListener('change',escenario);
+  $('#g1c-sig').addEventListener('click',()=>{const n=parar(); if(n!==null)dibujar(n); else if(k<P.length)avanzar(++turno);});
+  $('#g1c-ant').addEventListener('click',()=>{const n=parar(); dibujar(n!==null?k:Math.max(0,k-1));});
+  $('#g1c-ini').addEventListener('click',()=>{parar(); dibujar(0);});
   escenario();
 })();
 </script>
